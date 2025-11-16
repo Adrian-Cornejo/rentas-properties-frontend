@@ -1,0 +1,46 @@
+/* src/app/shared/components/auth-layout/auth-layout.component.css */
+@import "tailwindcss" layer(reference);
+
+.auth-layout {
+  min-height: 100vh;
+  background-color: var(--bg-base);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-content {
+  flex: 1;
+  padding-top: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .auth-content {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .auth-content {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.auth-footer {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+}
+
+.auth-footer p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}

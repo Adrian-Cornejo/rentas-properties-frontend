@@ -1,0 +1,31 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo y nombre de la plataforma -->
+    @if (showLogo()) {
+      <div class="navbar-brand">
+        <img [src]="logoUrl()" [alt]="platformName()" class="navbar-logo" />
+        <span class="navbar-title">{{ platformName() }}</span>
+      </div>
+    }
+
+    <!-- Espaciador -->
+    <div class="navbar-spacer"></div>
+
+    <!-- Theme Toggle -->
+    @if (showThemeToggle()) {
+      <div class="navbar-actions">
+        <p-button
+          [icon]="isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
+          [rounded]="true"
+          [text]="true"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="toggleTheme()"
+          [pTooltip]="isDarkMode() ? 'Modo claro' : 'Modo oscuro'"
+          tooltipPosition="bottom"
+          class="theme-toggle"
+        />
+      </div>
+    }
+  </div>
+</nav>

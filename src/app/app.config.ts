@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { providePrimeNG } from 'primeng/config';
+import {MessageService} from 'primeng/api';
 
 
 export const appConfig: ApplicationConfig = {
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
           }
         }
       }
-    })
+    }),
+    MessageService
   ]
 };

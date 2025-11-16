@@ -1,0 +1,184 @@
+/* src/app/features/auth/login/login.component.css */
+@import "tailwindcss" layer(reference);
+
+.login-container {
+  width: 100%;
+  min-width: 30rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-card-wrapper {
+  animation: fade-in 0.3s ease-out;
+}
+
+.login-card {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.login-header {
+  text-align: center;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.login-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.login-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.login-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.login-form {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.login-form > * + * {
+  margin-top: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.required-asterisk {
+  color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.forgot-password-link {
+  color: var(--text-primary);
+  transition: color 0.2s;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.forgot-password-link:hover {
+  color: var(--text-primary);
+}
+
+.divider {
+  position: relative;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.divider-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--bg-surface);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.register-link {
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.register-link > * + * {
+  margin-left: 0.5rem;
+}
+
+.link-primary {
+  color: var(--text-primary);
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.link-primary:hover {
+  color: var(--text-primary);
+}
+
+/* Animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* PrimeNG Overrides */
+:host ::ng-deep {
+  .p-card {
+    border: 0;
+  }
+
+  .p-card .p-card-content {
+    padding-top: 0;
+  }
+
+  .p-password input {
+    width: 100%;
+  }
+
+  .p-inputtext:enabled:focus {
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+    border-color: var(--bg-base);
+  }
+
+  .p-button {
+    font-weight: 600;
+  }
+
+  .p-checkbox .p-checkbox-box {
+    border-width: 2px;
+  }
+
+  .p-checkbox .p-checkbox-box.p-highlight {
+    background: var(--bg-base);
+    border-color: var(--bg-base);
+  }
+}
