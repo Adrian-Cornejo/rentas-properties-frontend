@@ -1,0 +1,120 @@
+<div class="login-container">
+  <div class="login-card-wrapper">
+    <p-card class="login-card">
+      <!-- Header -->
+      <ng-template pTemplate="header">
+        <div class="login-header">
+          <i class="pi pi-lock login-icon"></i>
+          <h1 class="login-title">Iniciar Sesión</h1>
+          <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+        </div>
+      </ng-template>
+
+      <!-- Content -->
+      <ng-template pTemplate="content">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <!-- Email Field -->
+          <div class="form-field">
+            <label for="email" class="form-label">
+              Correo Electrónico
+              <span class="required-asterisk">*</span>
+              <i class="pi pi-envelope m-3"></i>
+            </label>
+            <span class="p-input-icon-left w-full">
+              <input
+                pInputText
+                id="email"
+                formControlName="email"
+                type="email"
+                placeholder="correo@ejemplo.com"
+                class="w-full"
+                [class.ng-invalid]="isEmailInvalid"
+                [class.ng-dirty]="email?.touched"
+              />
+            </span>
+            @if (isEmailInvalid) {
+              <small class="error-message">
+                @if (email?.errors?.['required']) {
+                  El correo electrónico es obligatorio
+                }
+                @if (email?.errors?.['email']) {
+                  Ingresa un correo válido
+                }
+              </small>
+            }
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-field">
+            <label for="password" class="form-label">
+              Contraseña
+              <span class="required-asterisk">*</span>
+            </label>
+            <p-password
+              id="password"
+              formControlName="password"
+              [toggleMask]="true"
+              [feedback]="false"
+              placeholder="Ingresa tu contraseña"
+              [class.ng-invalid]="isPasswordInvalid"
+              [class.ng-dirty]="password?.touched"
+            >
+              <ng-template pTemplate="header">
+                <div class="font-semibold text-sm mb-2">Ingresa tu contraseña</div>
+              </ng-template>
+            </p-password>
+            @if (isPasswordInvalid) {
+              <small class="error-message">
+                @if (password?.errors?.['required']) {
+                  La contraseña es obligatoria
+                }
+                @if (password?.errors?.['minlength']) {
+                  La contraseña debe tener al menos 8 caracteres
+                }
+              </small>
+            }
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="form-options">
+            <div class="remember-me">
+              <p-checkbox
+                formControlName="rememberMe"
+                [binary]="true"
+                inputId="rememberMe"
+                label="Recordarme"
+              />
+            </div>
+            <a routerLink="/auth/forgot-password" class="forgot-password-link">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Submit Button -->
+          <p-button
+            type="submit"
+            label="Iniciar Sesión"
+            icon="pi pi-sign-in"
+            [loading]="isLoading()"
+            [disabled]="loginForm.invalid"
+            styleClass="w-full"
+            severity="primary"
+          />
+
+          <!-- Divider -->
+          <div class="divider">
+            <span class="divider-text">o</span>
+          </div>
+
+          <!-- Register Link -->
+          <div class="register-link">
+            <span class="text-secondary">¿No tienes una cuenta?</span>
+            <a routerLink="/auth/register" class="link-primary">
+              Regístrate aquí
+            </a>
+          </div>
+        </form>
+      </ng-template>
+    </p-card>
+  </div>
+</div>
