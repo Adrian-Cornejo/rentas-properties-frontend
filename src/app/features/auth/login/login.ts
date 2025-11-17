@@ -1,8 +1,7 @@
-// src/app/features/auth/login/login.component.ts
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoginRequest } from '../../../core/models/auth/login-request.model';
@@ -10,23 +9,21 @@ import { LoginRequest } from '../../../core/models/auth/login-request.model';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private notification = inject(NotificationService);
 
   loginForm: FormGroup;
   isLoading = signal<boolean>(false);
   showPassword = signal<boolean>(false);
+  returnUrl = signal<string>('/dashboard/home');
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -36,13 +33,17 @@ export class LoginComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.returnUrl.set(
+      this.route.snapshot.queryParams['returnUrl'] || '/dashboard/home'
+    );
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
-
-      // ⚠️ WARNING - Formulario inválido
       this.notification.warning(
-        'Por favor completa todos los campos requeridos correctamente',
+        'Por favor completa todos los campos correctamente',
         'Formulario incompleto'
       );
       return;
@@ -58,34 +59,16 @@ export class LoginComponent {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         this.notification.success(
-          `¡Bienvenido de nuevo, ${response.user.fullName}!`,
-          'Inicio de sesión exitoso',
-          5000
+          `¡Bienvenido, ${response.user.fullName}!`,
+          'Inicio de sesión exitoso'
         );
-        this.router.navigate(['/dashboard']);
+        // Redirigir a la URL de retorno o al dashboard
+        this.router.navigateByUrl(this.returnUrl());
       },
       error: (error) => {
         this.isLoading.set(false);
-
-        if (error.status === 401) {
-          this.notification.error(
-            'Las credenciales proporcionadas son incorrectas. Por favor verifica tu email y contraseña.',
-            'Credenciales inválidas'
-          );
-        } else if (error.status === 403) {
-          this.notification.error(
-            'Tu cuenta ha sido desactivada. Contacta al administrador.',
-            'Cuenta desactivada'
-          );
-        } else if (error.status === 0) {
-          this.notification.error(
-            'No se pudo conectar con el servidor. Verifica tu conexión a internet.',
-            'Error de conexión'
-          );
-        } else {
-          const errorMessage = error?.error?.message || 'Ha ocurrido un error inesperado';
-          this.notification.error(errorMessage, 'Error de autenticación');
-        }
+        const errorMessage = error?.error?.message || 'Error al iniciar sesión';
+        this.notification.error(errorMessage, 'Error de autenticación');
       },
       complete: () => {
         this.isLoading.set(false);
@@ -97,7 +80,6 @@ export class LoginComponent {
     this.showPassword.set(!this.showPassword());
   }
 
-  // Getters para validaciones
   get email() {
     return this.loginForm.get('email');
   }

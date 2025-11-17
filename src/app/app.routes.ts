@@ -2,16 +2,20 @@
 import { Routes } from '@angular/router';
 import { AuthLayoutComponent } from './shared/components/auth-layout/auth-layout';
 import { DashboardLayoutComponent } from './shared/components/dashboard-layout/dashboard-layout';
+import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/auth/login',
+    redirectTo: '/dashboard/home',
     pathMatch: 'full'
   },
   {
     path: 'auth',
     component: AuthLayoutComponent,
+    canActivate: [guestGuard], // ✅ Solo usuarios NO autenticados
     children: [
       {
         path: 'login',
@@ -31,6 +35,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
+    canActivate: [authGuard], // ✅ Solo usuarios autenticados
     children: [
       {
         path: 'home',
@@ -58,6 +63,7 @@ export const routes: Routes = [
       },
       {
         path: 'organization',
+        canActivate: [adminGuard],
         loadComponent: () => import('./features/dashboard/organization/organization').then(m => m.OrganizationComponent)
       },
       {
@@ -69,6 +75,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '/auth/login'
+    redirectTo: '/dashboard/home'
   }
 ];

@@ -1,5 +1,5 @@
 // src/app/core/services/auth.service.ts
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
@@ -23,7 +23,9 @@ export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/auth`;
 
   currentUser = signal<UserDto | null>(null);
-  isAuthenticated = signal<boolean>(false);
+  isAuthenticated = computed(() => {
+    return !!this.currentUser() && !!this.storage.getToken();
+  });
 
   constructor() {
     this.initializeAuth();
@@ -31,9 +33,10 @@ export class AuthService {
 
   private initializeAuth(): void {
     const user = this.storage.getUser();
-    if (user && this.storage.isAuthenticated()) {
+    const token = this.storage.getToken();
+
+    if (user && token) {
       this.currentUser.set(user);
-      this.isAuthenticated.set(true);
     }
   }
 
@@ -64,7 +67,7 @@ export class AuthService {
         this.storage.setRefreshToken(response.refreshToken);
       }),
       catchError(error => {
-        this.logout();
+        this.handleLogout();
         return throwError(() => error);
       })
     );
@@ -78,55 +81,27 @@ export class AuthService {
     }).pipe(
       tap(() => this.handleLogout()),
       catchError(() => {
-        // Incluso si falla, limpiar localmente
         this.handleLogout();
         return throwError(() => new Error('Logout failed'));
       })
     );
   }
 
-  validateToken(): Observable<boolean> {
-    const token = this.storage.getToken();
-    return this.http.get<boolean>(`${this.API_URL}/validate`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  }
-
   private handleAuthSuccess(response: AuthResponse): void {
-    // Guardar tokens
     this.storage.setToken(response.token);
     this.storage.setRefreshToken(response.refreshToken);
-
-    // Guardar usuario
     this.storage.setUser(response.user);
     this.currentUser.set(response.user);
-    this.isAuthenticated.set(true);
-
-  }
-
-  private handleAuthError(error: any): Observable<never> {
-    console.error('Auth error:', error);
-    return throwError(() => error);
   }
 
   private handleLogout(): void {
     this.storage.clear();
     this.currentUser.set(null);
-    this.isAuthenticated.set(false);
-    this.themeService.clearOrganizationTheme();
-    this.router.navigate(['/auth/login']);
+    //this.themeService.resetTheme();
   }
 
-  // Helpers
-  isAdmin(): boolean {
-    return this.currentUser()?.role === 'ADMIN';
-  }
-
-  getUserId(): string | null {
-    return this.currentUser()?.id || null;
-  }
-
-  getUserEmail(): string | null {
-    return this.currentUser()?.email || null;
+  private handleAuthError(error: any): Observable<never> {
+    console.error('Auth error:', error);
+    return throwError(() => error);
   }
 }
