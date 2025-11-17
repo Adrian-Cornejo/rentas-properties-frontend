@@ -1,0 +1,19 @@
+@import '../home/dashboard-common.css';
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dark .admin-badge {
+  background-color: var(--color-primary-900);
+  color: var(--color-primary-400);
+}

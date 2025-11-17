@@ -1,0 +1,108 @@
+<!-- src/app/shared/components/dashboard-layout/dashboard-layout.html -->
+<div class="dashboard-layout">
+  <!-- NAVBAR SUPERIOR -->
+  <nav class="dashboard-navbar">
+    <div class="navbar-container">
+      <!-- Sidebar Toggle (Desktop) -->
+      <button
+        class="sidebar-toggle"
+        (click)="toggleSidebar()"
+        aria-label="Toggle Sidebar"
+      >
+        <i class="pi pi-bars"></i>
+      </button>
+
+      <!-- Logo y Nombre -->
+      <div class="navbar-brand">
+        <img
+          [src]="platformLogo()"
+          [alt]="platformName()"
+          class="navbar-logo"
+        />
+        <span class="navbar-title">{{ platformName() }}</span>
+      </div>
+
+      <div class="navbar-spacer"></div>
+
+      <!-- Navbar Actions -->
+      <div class="navbar-actions">
+        <!-- Theme Toggle -->
+        <p-button
+          [icon]="isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'"
+          [rounded]="true"
+          [text]="true"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="toggleTheme()"
+          [pTooltip]="isDarkMode() ? 'Modo claro' : 'Modo oscuro'"
+          tooltipPosition="bottom"
+        />
+
+        <!-- User Menu -->
+        <div class="user-menu">
+          <button class="user-button">
+            <i class="pi pi-user"></i>
+            <span class="user-name">{{ currentUser()?.fullName }}</span>
+          </button>
+        </div>
+
+        <!-- Logout Button -->
+        <p-button
+          icon="pi pi-sign-out"
+          [rounded]="true"
+          [text]="true"
+          [outlined]="true"
+          severity="danger"
+          (onClick)="logout()"
+          pTooltip="Cerrar sesión"
+          tooltipPosition="bottom"
+        />
+      </div>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR (Desktop only) -->
+  <aside
+    class="dashboard-sidebar"
+    [class.collapsed]="!isSidebarOpen()"
+  >
+    <nav class="sidebar-nav">
+      @for (item of visibleMenuItems(); track item.route) {
+
+        <a [routerLink]="item.route"
+          routerLinkActive="active"
+          class="sidebar-item"
+          [pTooltip]="!isSidebarOpen() ? item.label : ''"
+          tooltipPosition="right"
+          >
+        <i [class]="item.icon"></i>
+        @if (isSidebarOpen()) {
+          <span class="sidebar-label">{{ item.label }}</span>
+        }
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main
+    class="dashboard-content"
+    [class.sidebar-collapsed]="!isSidebarOpen()"
+  >
+    <router-outlet />
+  </main>
+
+  <!-- BOTTOM NAVIGATION (Mobile only) -->
+  <nav class="bottom-nav">
+    @for (item of visibleMenuItems(); track item.route) {
+
+      <a [routerLink]="item.route"
+        routerLinkActive="active"
+        class="bottom-nav-item"
+        >
+      <i [class]="item.icon"></i>
+      <span class="bottom-nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+</div>

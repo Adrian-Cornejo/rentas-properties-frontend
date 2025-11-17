@@ -13,5 +13,6 @@ export interface UserDto {
   phone?: string;
   role: 'USER' | 'ADMIN';
   isActive: boolean;
-  lastLogin?: string; // ISO Date string
+  lastLogin?: string;
+  organizationId?: string;
 }
