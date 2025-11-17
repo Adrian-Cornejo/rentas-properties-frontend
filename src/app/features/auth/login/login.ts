@@ -1,3 +1,4 @@
+// src/app/features/auth/login/login.component.ts
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -6,27 +7,13 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoginRequest } from '../../../core/models/auth/login-request.model';
 
-// PrimeNG
-import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { MessageModule } from 'primeng/message';
-
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
-    CardModule,
-    InputTextModule,
-    PasswordModule,
-    ButtonModule,
-    CheckboxModule,
-    MessageModule
+    RouterLink
   ],
   templateUrl: './login.html',
   styleUrl: './login.css'
@@ -69,7 +56,8 @@ export class LoginComponent {
       },
       error: (error) => {
         this.isLoading.set(false);
-        console.error('Login error:', error);
+        const errorMessage = error?.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+        this.notification.error('Error de autenticación', errorMessage);
       },
       complete: () => {
         this.isLoading.set(false);
@@ -96,5 +84,25 @@ export class LoginComponent {
 
   get isPasswordInvalid(): boolean {
     return !!(this.password?.invalid && this.password?.touched);
+  }
+
+  getEmailErrorMessage(): string {
+    if (this.email?.errors?.['required']) {
+      return 'El correo electrónico es obligatorio';
+    }
+    if (this.email?.errors?.['email']) {
+      return 'Ingresa un correo válido';
+    }
+    return '';
+  }
+
+  getPasswordErrorMessage(): string {
+    if (this.password?.errors?.['required']) {
+      return 'La contraseña es obligatoria';
+    }
+    if (this.password?.errors?.['minlength']) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    return '';
   }
 }

@@ -1,15 +1,17 @@
-.login-container {
+/* src/app/features/auth/register/register.component.css */
+
+.register-container {
   width: 100%;
-  max-width: 56rem;
+  max-width: 56rem; /* Aumentado de 42rem a 56rem para 2 columnas */
   margin: 0 auto;
   padding: 1rem;
 }
 
-.login-card {
+.register-card {
   background-color: var(--bg-surface);
   border-radius: 0.75rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  padding: 2rem;
+  padding: 2.5rem;
   animation: slideUp 0.3s ease-out;
 }
 
@@ -25,46 +27,58 @@
 }
 
 /* Header */
-.login-header {
+.register-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
-.login-icon {
+.register-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 4rem;
   height: 4rem;
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  background: linear-gradient(135deg, var(--color-secondary-500), var(--color-secondary-600));
   border-radius: 1rem;
   margin-bottom: 1rem;
   color: white;
 }
 
-.login-title {
-  font-size: 1.875rem;
+.register-title {
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
-.login-subtitle {
+.register-subtitle {
   font-size: 0.875rem;
   color: var(--text-secondary);
 }
 
-/* Form */
-.login-form {
-  display: flex;
-  flex-direction: column;
+/* Form - Grid de 2 columnas en desktop */
+.register-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+  column-gap: 2rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+/* Campos que ocupan ambas columnas */
+.form-group:nth-child(5), /* Password */
+.form-group:nth-child(6), /* Confirm Password */
+.form-group:nth-child(7), /* Invitation Code */
+.terms-group,
+.btn-primary,
+.divider,
+.btn-secondary {
+  grid-column: 1 / -1; /* Ocupa ambas columnas */
 }
 
 .form-label {
@@ -75,6 +89,13 @@
 
 .required {
   color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+.optional {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
   margin-left: 0.25rem;
 }
 
@@ -90,6 +111,7 @@
   left: 0.875rem;
   color: var(--text-muted);
   pointer-events: none;
+  z-index: 1;
 }
 
 .form-input {
@@ -105,8 +127,8 @@
 
 .form-input:focus {
   outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-secondary-500);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .form-input::placeholder {
@@ -138,6 +160,7 @@
   align-items: center;
   justify-content: center;
   transition: color 0.2s ease;
+  z-index: 1;
 }
 
 .toggle-password:hover {
@@ -146,7 +169,19 @@
 
 .toggle-password:focus {
   outline: none;
-  color: var(--color-primary-500);
+  color: var(--color-secondary-500);
+}
+
+/* Code Input */
+.code-input {
+  text-transform: uppercase;
+}
+
+/* Helper Text */
+.helper-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
 }
 
 /* Error Message */
@@ -156,56 +191,106 @@
   margin-top: 0.25rem;
 }
 
-/* Form Options */
-.form-options {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.875rem;
+.error-terms {
+  margin-top: -0.75rem;
 }
 
-.checkbox-label {
+/* Password Strength */
+.password-strength-wrapper {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  user-select: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.password-strength-bars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.strength-bar {
+  height: 0.25rem;
+  flex: 1;
+  border-radius: 9999px;
+  background-color: var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.strength-bar.bar-active.bar-weak {
+  background-color: #ef4444;
+}
+
+.strength-bar.bar-active.bar-medium {
+  background-color: #f59e0b;
+}
+
+.strength-bar.bar-active.bar-strong {
+  background-color: #10b981;
+}
+
+.strength-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.strength-text.text-weak {
+  color: #ef4444;
+}
+
+.strength-text.text-medium {
+  color: #f59e0b;
+}
+
+.strength-text.text-strong {
+  color: #10b981;
+}
+
+/* Terms */
+.terms-group {
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .checkbox-input {
   width: 1rem;
   height: 1rem;
+  margin-top: 0.125rem;
   border: 2px solid var(--border-color);
   border-radius: 0.25rem;
   cursor: pointer;
-  accent-color: var(--color-primary-500);
+  accent-color: var(--color-secondary-500);
+  flex-shrink: 0;
 }
 
-.checkbox-text {
+.terms-label {
+  font-size: 0.875rem;
   color: var(--text-primary);
-  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  flex: 1;
 }
 
-.link-primary {
-  color: var(--color-primary-600);
+.link-secondary {
+  color: var(--color-secondary-600);
   font-weight: 600;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.link-primary:hover {
-  color: var(--color-primary-700);
+.link-secondary:hover {
+  color: var(--color-secondary-700);
   text-decoration: underline;
 }
 
 /* Buttons */
 .btn-primary {
   width: 100%;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -214,31 +299,36 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+.btn-register {
+  background: linear-gradient(135deg, var(--color-secondary-500), var(--color-secondary-600));
+}
+
+.btn-register:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-secondary-600), var(--color-secondary-700));
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.btn-primary:active:not(:disabled) {
+.btn-register:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.btn-primary:disabled {
+.btn-register:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 .btn-secondary {
   width: 100%;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-primary-600);
+  color: var(--color-secondary-600);
   background-color: transparent;
-  border: 2px solid var(--color-primary-500);
+  border: 2px solid var(--color-secondary-500);
   border-radius: 0.5rem;
   cursor: pointer;
   text-decoration: none;
@@ -248,7 +338,7 @@
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-primary-50);
+  background-color: rgba(16, 185, 129, 0.05);
   transform: translateY(-1px);
 }
 
@@ -292,36 +382,85 @@
   font-size: 0.875rem;
 }
 
-/* Register Section */
-.register-section {
-  text-align: center;
-}
-
 /* Dark Mode Adjustments */
 @media (prefers-color-scheme: dark) {
-  .login-card {
+  .register-card {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
   }
 
   .form-input {
     background-color: var(--bg-hover);
   }
+
+  .btn-secondary:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+  }
 }
 
-/* Responsive */
-@media (max-width: 640px) {
-  .login-container {
-    padding: 0.5rem;
-    width: 22rem;
+/* Responsive - Tablet */
+@media (max-width: 968px) {
+  .register-container {
+    max-width: 48rem;
   }
 
-  .login-card {
+  .register-card {
+    padding: 2rem;
+  }
+}
+
+/* Responsive - Mobile (1 columna) */
+@media (max-width: 768px) {
+  .register-container {
+    max-width: 42rem;
+  }
+
+  .register-form {
+    grid-template-columns: 1fr; /* 1 columna en móvil */
+    gap: 1.25rem;
+  }
+
+  /* Todos los campos ocupan 1 columna completa */
+  .form-group:nth-child(5),
+  .form-group:nth-child(6),
+  .form-group:nth-child(7) {
+    grid-column: 1;
+  }
+
+  .register-card {
     padding: 1.5rem;
   }
 
-  .login-title {
+  .register-title {
     font-size: 1.5rem;
   }
 
+  .register-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
 
+  .register-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .register-container {
+    padding: 0.5rem;
+    max-width: 100%;
+  }
+
+  .register-card {
+    padding: 1.25rem;
+  }
+
+  .register-header {
+    margin-bottom: 2rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.75rem 1.25rem;
+  }
 }

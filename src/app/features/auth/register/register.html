@@ -1,0 +1,292 @@
+<!-- src/app/features/auth/register/register.component.html -->
+<div class="register-container">
+  <div class="register-card">
+
+    <!-- Header -->
+    <div class="register-header">
+      <div class="register-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <line x1="19" y1="8" x2="19" y2="14"></line>
+          <line x1="22" y1="11" x2="16" y2="11"></line>
+        </svg>
+      </div>
+      <h1 class="register-title">Crear Cuenta</h1>
+      <p class="register-subtitle">Completa el formulario para registrarte</p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="fullName" class="form-label">
+          Nombre Completo
+          <span class="required">*</span>
+        </label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <input
+            type="text"
+            id="fullName"
+            formControlName="fullName"
+            placeholder="Juan Pérez González"
+            class="form-input"
+            [class.input-error]="isFullNameInvalid"
+            autocomplete="name"
+          />
+        </div>
+        @if (isFullNameInvalid) {
+          <span class="error-message">{{ getFullNameErrorMessage() }}</span>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email" class="form-label">
+          Correo Electrónico
+          <span class="required">*</span>
+        </label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="correo@ejemplo.com"
+            class="form-input"
+            [class.input-error]="isEmailInvalid"
+            autocomplete="email"
+          />
+        </div>
+        @if (isEmailInvalid) {
+          <span class="error-message">{{ getEmailErrorMessage() }}</span>
+        }
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group">
+        <label for="phone" class="form-label">
+          Teléfono
+          <span class="optional">(opcional)</span>
+        </label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          <input
+            type="tel"
+            id="phone"
+            formControlName="phone"
+            placeholder="5512345678"
+            class="form-input"
+            [class.input-error]="isPhoneInvalid"
+            autocomplete="tel"
+            maxlength="10"
+          />
+        </div>
+        @if (isPhoneInvalid) {
+          <span class="error-message">{{ getPhoneErrorMessage() }}</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password" class="form-label">
+          Contraseña
+          <span class="required">*</span>
+        </label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="Mínimo 8 caracteres"
+            class="form-input password-input"
+            [class.input-error]="isPasswordInvalid"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            @if (showPassword()) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            }
+          </button>
+        </div>
+
+        <!-- Password Strength Indicator -->
+        @if (password?.value) {
+          <div class="password-strength-wrapper">
+            <div class="password-strength-bars">
+              @for (item of [1,2,3,4,5]; track item) {
+                <div class="strength-bar"
+                     [class.bar-active]="item <= getPasswordStrength().level"
+                     [class.bar-weak]="item <= getPasswordStrength().level && getPasswordStrength().color === 'weak'"
+                     [class.bar-medium]="item <= getPasswordStrength().level && getPasswordStrength().color === 'medium'"
+                     [class.bar-strong]="item <= getPasswordStrength().level && getPasswordStrength().color === 'strong'">
+                </div>
+              }
+            </div>
+            <p class="strength-text"
+               [class.text-weak]="getPasswordStrength().color === 'weak'"
+               [class.text-medium]="getPasswordStrength().color === 'medium'"
+               [class.text-strong]="getPasswordStrength().color === 'strong'">
+              Fortaleza: {{ getPasswordStrength().text }}
+            </p>
+          </div>
+        }
+
+        @if (isPasswordInvalid) {
+          <span class="error-message">{{ getPasswordErrorMessage() }}</span>
+        }
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">
+          Confirmar Contraseña
+          <span class="required">*</span>
+        </label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <input
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            placeholder="Repite tu contraseña"
+            class="form-input password-input"
+            [class.input-error]="isConfirmPasswordInvalid"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="showConfirmPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            @if (showConfirmPassword()) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            }
+          </button>
+        </div>
+        @if (isConfirmPasswordInvalid) {
+          <span class="error-message">{{ getConfirmPasswordErrorMessage() }}</span>
+        }
+      </div>
+
+      <!-- Invitation Code -->
+      <div class="form-group">
+        <label for="invitationCode" class="form-label">
+          Código de Invitación
+          <span class="optional">(opcional)</span>
+        </label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+          </svg>
+          <input
+            type="text"
+            id="invitationCode"
+            formControlName="invitationCode"
+            placeholder="ABC-12D3"
+            class="form-input code-input"
+            [class.input-error]="isInvitationCodeInvalid"
+            maxlength="8"
+          />
+        </div>
+        @if (isInvitationCodeInvalid) {
+          <span class="error-message">{{ getInvitationCodeErrorMessage() }}</span>
+        }
+        <p class="helper-text">Si tienes un código, podrás unirte a una organización existente</p>
+      </div>
+
+      <!-- Accept Terms -->
+      <div class="terms-group">
+        <input
+          type="checkbox"
+          id="acceptTerms"
+          formControlName="acceptTerms"
+          class="checkbox-input"
+        />
+        <label for="acceptTerms" class="terms-label">
+          Acepto los
+          <a href="/terms" target="_blank" class="link-secondary">Términos y Condiciones</a>
+          y la
+          <a href="/privacy" target="_blank" class="link-secondary">Política de Privacidad</a>
+          <span class="required">*</span>
+        </label>
+      </div>
+      @if (acceptTerms?.invalid ) {
+        <span class="error-message error-terms">Debes aceptar los términos y condiciones</span>
+      }
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-primary btn-register"
+        [disabled]="isLoading() || registerForm.invalid"
+      >
+        @if (isLoading()) {
+          <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="2" x2="12" y2="6"></line>
+            <line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+            <line x1="2" y1="12" x2="6" y2="12"></line>
+            <line x1="18" y1="12" x2="22" y2="12"></line>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+          </svg>
+          <span>Creando cuenta...</span>
+        } @else {
+          <span>Crear Cuenta</span>
+        }
+      </button>
+
+    </form>
+
+    <!-- Divider -->
+    <div class="divider">
+      <span class="divider-text">¿Ya tienes cuenta?</span>
+    </div>
+
+    <!-- Login Link -->
+    <a routerLink="/auth/login" class="btn-secondary">
+      Iniciar Sesión
+    </a>
+
+  </div>
+</div>
