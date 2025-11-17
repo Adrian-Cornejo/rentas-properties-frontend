@@ -8,6 +8,7 @@
    ============================================ */
 @import "primeicons/primeicons.css";
 @import "primeflex/primeflex.css";
+@import './app/core/services/notification.service.css';
 
 /* ============================================
    CAPAS CSS PARA COMPATIBILIDAD

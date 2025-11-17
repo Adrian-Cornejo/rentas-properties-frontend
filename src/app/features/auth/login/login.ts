@@ -39,6 +39,12 @@ export class LoginComponent {
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
+
+      // ⚠️ WARNING - Formulario inválido
+      this.notification.warning(
+        'Por favor completa todos los campos requeridos correctamente',
+        'Formulario incompleto'
+      );
       return;
     }
 
@@ -51,13 +57,35 @@ export class LoginComponent {
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        this.notification.success('Inicio de sesión exitoso', '¡Bienvenido!');
+        this.notification.success(
+          `¡Bienvenido de nuevo, ${response.user.fullName}!`,
+          'Inicio de sesión exitoso',
+          5000
+        );
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.isLoading.set(false);
-        const errorMessage = error?.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
-        this.notification.error('Error de autenticación', errorMessage);
+
+        if (error.status === 401) {
+          this.notification.error(
+            'Las credenciales proporcionadas son incorrectas. Por favor verifica tu email y contraseña.',
+            'Credenciales inválidas'
+          );
+        } else if (error.status === 403) {
+          this.notification.error(
+            'Tu cuenta ha sido desactivada. Contacta al administrador.',
+            'Cuenta desactivada'
+          );
+        } else if (error.status === 0) {
+          this.notification.error(
+            'No se pudo conectar con el servidor. Verifica tu conexión a internet.',
+            'Error de conexión'
+          );
+        } else {
+          const errorMessage = error?.error?.message || 'Ha ocurrido un error inesperado';
+          this.notification.error(errorMessage, 'Error de autenticación');
+        }
       },
       complete: () => {
         this.isLoading.set(false);
