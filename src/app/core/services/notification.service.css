@@ -1,0 +1,275 @@
+/* src/app/core/services/notification.service.css */
+
+/* ============================================
+   NOTIFICATION BASE STYLES
+   ============================================ */
+:root {
+  /* Success Colors (Green) */
+  --notification-success-bg: oklch(96% 0.02 145);
+  --notification-success-border: oklch(65% 0.15 145);
+  --notification-success-text: oklch(30% 0.08 145);
+  --notification-success-icon: oklch(55% 0.15 145);
+
+  /* Error Colors (Red) */
+  --notification-error-bg: oklch(96% 0.02 25);
+  --notification-error-border: oklch(60% 0.20 25);
+  --notification-error-text: oklch(30% 0.08 25);
+  --notification-error-icon: oklch(55% 0.20 25);
+
+  /* Warning Colors (Amber/Orange) */
+  --notification-warning-bg: oklch(96% 0.03 75);
+  --notification-warning-border: oklch(70% 0.15 75);
+  --notification-warning-text: oklch(30% 0.05 75);
+  --notification-warning-icon: oklch(60% 0.15 75);
+
+  /* Info Colors (Blue) */
+  --notification-info-bg: oklch(96% 0.02 240);
+  --notification-info-border: oklch(60% 0.15 240);
+  --notification-info-text: oklch(30% 0.08 240);
+  --notification-info-icon: oklch(55% 0.15 240);
+
+  /* Dark Mode Override */
+  --notification-dark-bg: oklch(20% 0.01 240);
+  --notification-dark-border: oklch(35% 0.05 240);
+  --notification-dark-text: oklch(90% 0.02 240);
+}
+
+/* ============================================
+   DARK MODE VARIABLES
+   ============================================ */
+.dark {
+  /* Success Dark */
+  --notification-success-bg: oklch(25% 0.03 145);
+  --notification-success-border: oklch(45% 0.12 145);
+  --notification-success-text: oklch(85% 0.05 145);
+  --notification-success-icon: oklch(65% 0.12 145);
+
+  /* Error Dark */
+  --notification-error-bg: oklch(25% 0.03 25);
+  --notification-error-border: oklch(45% 0.15 25);
+  --notification-error-text: oklch(85% 0.05 25);
+  --notification-error-icon: oklch(65% 0.15 25);
+
+  /* Warning Dark */
+  --notification-warning-bg: oklch(25% 0.03 75);
+  --notification-warning-border: oklch(50% 0.12 75);
+  --notification-warning-text: oklch(85% 0.05 75);
+  --notification-warning-icon: oklch(70% 0.12 75);
+
+  /* Info Dark */
+  --notification-info-bg: oklch(25% 0.03 240);
+  --notification-info-border: oklch(45% 0.12 240);
+  --notification-info-text: oklch(85% 0.05 240);
+  --notification-info-icon: oklch(65% 0.12 240);
+}
+
+/* ============================================
+   CUSTOM NOTIFICATION CONTAINER
+   ============================================ */
+.custom-notification {
+  border-radius: 8px;
+  padding: 1rem;
+  border-left-width: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.custom-notification:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateX(-4px);
+}
+
+/* ============================================
+   SUCCESS NOTIFICATION
+   ============================================ */
+.notification-success {
+  background-color: var(--notification-success-bg);
+  border-left-color: var(--notification-success-border);
+  color: var(--notification-success-text);
+}
+
+.notification-success .p-toast-message-icon,
+.notification-success .p-toast-summary {
+  color: var(--notification-success-icon) !important;
+}
+
+.notification-success .p-toast-detail {
+  color: var(--notification-success-text);
+}
+
+.notification-success .p-toast-icon-close {
+  color: var(--notification-success-icon);
+}
+
+.notification-success .p-toast-icon-close:hover {
+  background-color: var(--notification-success-border);
+  color: white;
+}
+
+/* ============================================
+   ERROR NOTIFICATION
+   ============================================ */
+.notification-error {
+  background-color: var(--notification-error-bg);
+  border-left-color: var(--notification-error-border);
+  color: var(--notification-error-text);
+}
+
+.notification-error .p-toast-message-icon,
+.notification-error .p-toast-summary {
+  color: var(--notification-error-icon) !important;
+}
+
+.notification-error .p-toast-detail {
+  color: var(--notification-error-text);
+}
+
+.notification-error .p-toast-icon-close {
+  color: var(--notification-error-icon);
+}
+
+.notification-error .p-toast-icon-close:hover {
+  background-color: var(--notification-error-border);
+  color: white;
+}
+
+/* ============================================
+   WARNING NOTIFICATION
+   ============================================ */
+.notification-warning {
+  background-color: var(--notification-warning-bg);
+  border-left-color: var(--notification-warning-border);
+  color: var(--notification-warning-text);
+}
+
+.notification-warning .p-toast-message-icon,
+.notification-warning .p-toast-summary {
+  color: var(--notification-warning-icon) !important;
+}
+
+.notification-warning .p-toast-detail {
+  color: var(--notification-warning-text);
+}
+
+.notification-warning .p-toast-icon-close {
+  color: var(--notification-warning-icon);
+}
+
+.notification-warning .p-toast-icon-close:hover {
+  background-color: var(--notification-warning-border);
+  color: white;
+}
+
+/* ============================================
+   INFO NOTIFICATION
+   ============================================ */
+.notification-info {
+  background-color: var(--notification-info-bg);
+  border-left-color: var(--notification-info-border);
+  color: var(--notification-info-text);
+}
+
+.notification-info .p-toast-message-icon,
+.notification-info .p-toast-summary {
+  color: var(--notification-info-icon) !important;
+}
+
+.notification-info .p-toast-detail {
+  color: var(--notification-info-text);
+}
+
+.notification-info .p-toast-icon-close {
+  color: var(--notification-info-icon);
+}
+
+.notification-info .p-toast-icon-close:hover {
+  background-color: var(--notification-info-border);
+  color: white;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   TYPOGRAPHY ADJUSTMENTS
+   ============================================ */
+.custom-notification .p-toast-summary {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.custom-notification .p-toast-detail {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* ============================================
+   CLOSE BUTTON IMPROVEMENTS
+   ============================================ */
+.custom-notification .p-toast-icon-close {
+  border-radius: 4px;
+  padding: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.custom-notification .p-toast-icon-close:hover {
+  transform: scale(1.1);
+}
+
+.custom-notification .p-toast-icon-close:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 640px) {
+  .custom-notification {
+    padding: 0.75rem;
+    border-left-width: 3px;
+  }
+
+  .custom-notification .p-toast-summary {
+    font-size: 0.875rem;
+  }
+
+  .custom-notification .p-toast-detail {
+    font-size: 0.8125rem;
+  }
+}
+
+/* ============================================
+   STACKING CONTEXT FIX
+   ============================================ */
+.p-toast {
+  z-index: 9999;
+}
+
+.p-toast .p-toast-message {
+  margin: 0 0 1rem 0;
+  min-width: 20rem;
+  max-width: 30rem;
+}
+
+@media (max-width: 640px) {
+  .p-toast .p-toast-message {
+    min-width: auto;
+    max-width: calc(100vw - 2rem);
+  }
+}

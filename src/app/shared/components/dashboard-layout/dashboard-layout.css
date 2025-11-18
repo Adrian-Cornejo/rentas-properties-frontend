@@ -1,0 +1,359 @@
+/* src/app/shared/components/dashboard-layout/dashboard-layout.css */
+
+/* ============================================
+   LAYOUT BASE
+   ============================================ */
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--bg-base);
+}
+
+/* ============================================
+   NAVBAR SUPERIOR
+   ============================================ */
+.dashboard-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  height: 64px;
+}
+
+.navbar-container {
+  height: 100%;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sidebar-toggle {
+  display: none;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+@media (min-width: 768px) {
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-logo {
+  height: 2.5rem;
+  width: 2.5rem;
+  object-fit: contain;
+  border-radius: 0.375rem;
+}
+
+.navbar-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-primary-500);
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .navbar-title {
+    display: block;
+  }
+}
+
+.navbar-spacer {
+  flex: 1;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-menu {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .user-menu {
+    display: block;
+  }
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.user-button:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================
+   SIDEBAR (Desktop only)
+   ============================================ */
+.dashboard-sidebar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dashboard-sidebar {
+    display: block;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    transition: width 0.3s ease, transform 0.3s ease;
+    z-index: 50;
+  }
+
+  .dashboard-sidebar.collapsed {
+    width: 72px;
+  }
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin: 0 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.sidebar-item i {
+  font-size: 1.25rem;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.sidebar-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.sidebar-item.active {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.dark .sidebar-item.active {
+  background-color: var(--color-primary-900);
+  color: var(--color-primary-400);
+}
+
+.sidebar-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-sidebar.collapsed .sidebar-label {
+  display: none;
+}
+
+.dashboard-sidebar.collapsed .sidebar-item {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.dashboard-content {
+  flex: 1;
+  padding: 1rem;
+  margin-top: 64px;
+  margin-bottom: 72px; /* Espacio para bottom nav en mobile */
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .dashboard-content {
+    margin-left: 240px;
+    margin-bottom: 0;
+  }
+
+  .dashboard-content.sidebar-collapsed {
+    margin-left: 72px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-content {
+    padding: 2rem;
+  }
+}
+
+/* ============================================
+   BOTTOM NAVIGATION (Mobile only)
+   ============================================ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -1px 3px 0 rgb(0 0 0 / 0.1);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem;
+  overflow-x: auto;
+}
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 60px;
+  flex: 1;
+  max-width: 80px;
+}
+
+.bottom-nav-item i {
+  font-size: 1.25rem;
+}
+
+.bottom-nav-item:active {
+  background-color: var(--bg-hover);
+}
+
+.bottom-nav-item.active {
+  color: var(--color-primary-600);
+  background-color: var(--color-primary-50);
+}
+
+.dark .bottom-nav-item.active {
+  color: var(--color-primary-400);
+  background-color: var(--color-primary-900);
+}
+
+.bottom-nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+.dashboard-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.dashboard-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+.bottom-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.bottom-nav {
+  animation: slideUp 0.3s ease-out;
+}

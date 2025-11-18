@@ -1,0 +1,87 @@
+
+.page-container {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.page-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Placeholder Card */
+.placeholder-card {
+  background-color: var(--bg-surface);
+  border: 2px dashed var(--border-color);
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.placeholder-card:hover {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  color: var(--color-primary-500);
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.placeholder-card h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.placeholder-card p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .placeholder-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .placeholder-icon {
+    font-size: 3rem;
+  }
+
+  .placeholder-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .placeholder-card p {
+    font-size: 0.875rem;
+  }
+}

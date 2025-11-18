@@ -1,8 +1,7 @@
-// src/app/features/auth/login/login.component.ts
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoginRequest } from '../../../core/models/auth/login-request.model';
@@ -10,23 +9,21 @@ import { LoginRequest } from '../../../core/models/auth/login-request.model';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private notification = inject(NotificationService);
 
   loginForm: FormGroup;
   isLoading = signal<boolean>(false);
   showPassword = signal<boolean>(false);
+  returnUrl = signal<string>('/dashboard/home');
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -36,9 +33,19 @@ export class LoginComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.returnUrl.set(
+      this.route.snapshot.queryParams['returnUrl'] || '/dashboard/home'
+    );
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
+      this.notification.warning(
+        'Por favor completa todos los campos correctamente',
+        'Formulario incompleto'
+      );
       return;
     }
 
@@ -51,13 +58,17 @@ export class LoginComponent {
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        this.notification.success('Inicio de sesión exitoso', '¡Bienvenido!');
-        this.router.navigate(['/dashboard']);
+        this.notification.success(
+          `¡Bienvenido, ${response.user.fullName}!`,
+          'Inicio de sesión exitoso'
+        );
+        // Redirigir a la URL de retorno o al dashboard
+        this.router.navigateByUrl(this.returnUrl());
       },
       error: (error) => {
         this.isLoading.set(false);
-        const errorMessage = error?.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
-        this.notification.error('Error de autenticación', errorMessage);
+        const errorMessage = error?.error?.message || 'Error al iniciar sesión';
+        this.notification.error(errorMessage, 'Error de autenticación');
       },
       complete: () => {
         this.isLoading.set(false);
@@ -69,7 +80,6 @@ export class LoginComponent {
     this.showPassword.set(!this.showPassword());
   }
 
-  // Getters para validaciones
   get email() {
     return this.loginForm.get('email');
   }

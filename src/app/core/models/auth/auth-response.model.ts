@@ -3,15 +3,19 @@ export interface AuthResponse {
   refreshToken: string;
   tokenType: string;
   expiresIn: number;
-  user: UserDto;
+  user: UserResponse;
 }
 
-export interface UserDto {
+export interface UserResponse {
   id: string;
-  email: string;
   fullName: string;
+  email: string;
   phone?: string;
-  role: 'USER' | 'ADMIN';
-  isActive: boolean;
-  lastLogin?: string; // ISO Date string
+  role: 'ADMIN' | 'OWNER' | 'USER';
+  accountStatus: 'PENDING' | 'ACTIVE' | 'SUSPENDED';
+  organizationId?: string;
+  organizationName?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
