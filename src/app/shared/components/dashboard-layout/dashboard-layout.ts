@@ -1,7 +1,7 @@
 // src/app/shared/components/dashboard-layout/dashboard-layout.ts
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { AuthService } from '../../../core/services/auth.service';
@@ -23,7 +23,8 @@ interface MenuItem {
     RouterOutlet,
     RouterLink,
     ButtonModule,
-    TooltipModule
+    TooltipModule,
+    RouterLinkActive
   ],
   templateUrl: './dashboard-layout.html',
   styleUrl: './dashboard-layout.css'
@@ -104,7 +105,7 @@ export class DashboardLayoutComponent implements OnInit {
   private loadOrganizationData(): void {
     const user = this.currentUser();
     if (user?.organizationId) {
-      this.organizationService.loadOrganization(user.organizationId);
+      this.organizationService.getOrganizationById(user.organizationId);
     }
   }
 
