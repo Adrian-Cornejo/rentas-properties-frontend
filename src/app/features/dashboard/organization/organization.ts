@@ -10,6 +10,10 @@ import { OrganizationDetailResponse } from '../../../core/models/organization/or
 import { UpdateOrganizationRequest } from '../../../core/models/organization/update-organization-request';
 import { OrganizationStatsResponse } from '../../../core/models/organization/organization-stats-response';
 import {CreateOrganizationRequest} from '../../../core/models/organization/organization-request';
+import { CloudinaryService } from '../../../core/services/cloudinary.service';
+import {ImageUploadComponent} from '../../../shared/components/image-upload/image-upload';
+
+
 
 @Component({
   selector: 'app-organization',
@@ -17,7 +21,8 @@ import {CreateOrganizationRequest} from '../../../core/models/organization/organ
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    SkeletonModule
+    SkeletonModule,
+    ImageUploadComponent
   ],
   templateUrl: './organization.html',
   styleUrl: './organization.css',
@@ -28,6 +33,7 @@ export class OrganizationComponent implements OnInit {
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private themeService = inject(ThemeService);
+  private cloudinaryService = inject(CloudinaryService);
 
   // Signals
   isLoading = signal<boolean>(false);
@@ -37,6 +43,7 @@ export class OrganizationComponent implements OnInit {
   organization = signal<OrganizationDetailResponse | null>(null);
   stats = signal<OrganizationStatsResponse | null>(null);
   showConfirmDialog = signal<boolean>(false);
+  logoUrl = signal<string>('');
 
   // Form
   organizationForm!: FormGroup;
@@ -78,6 +85,7 @@ export class OrganizationComponent implements OnInit {
       next: (data) => {
         this.organization.set(data);
         this.patchFormValues(data);
+        this.logoUrl.set(data.logoUrl || '');
         this.loadStats();
       },
       error: (error) => {
@@ -115,6 +123,10 @@ export class OrganizationComponent implements OnInit {
       codeIsReusable: data.codeIsReusable
     });
   }
+  onLogoUrlChange(url: string): void {
+    this.logoUrl.set(url);
+    this.organizationForm.patchValue({ logoUrl: url });
+  }
 
   startCreating(): void {
     this.isCreatingMode.set(true);
@@ -128,12 +140,14 @@ export class OrganizationComponent implements OnInit {
       logoPublicId: '',
       codeIsReusable: true
     });
+    this.logoUrl.set('');
   }
 
   cancelCreating(): void {
     this.isCreatingMode.set(false);
     this.organizationForm.disable();
     this.organizationForm.reset();
+    this.logoUrl.set('');
   }
 
   createOrganization(): void {
@@ -148,13 +162,15 @@ export class OrganizationComponent implements OnInit {
       name: this.organizationForm.value.name,
       description: this.organizationForm.value.description,
       primaryColor: this.organizationForm.value.primaryColor,
-      secondaryColor: this.organizationForm.value.secondaryColor
+      secondaryColor: this.organizationForm.value.secondaryColor,
+      logoUrl: this.organizationForm.value.logoUrl
     };
 
     this.organizationService.createOrganization(request).subscribe({
       next: (data) => {
         this.organization.set(data);
         this.patchFormValues(data);
+        this.logoUrl.set(data.logoUrl || '');
         this.isCreatingMode.set(false);
         this.organizationForm.disable();
         this.isSaving.set(false);

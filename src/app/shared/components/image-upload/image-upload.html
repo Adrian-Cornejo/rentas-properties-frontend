@@ -1,0 +1,46 @@
+<div class="image-upload-container">
+  <div class="image-preview" [class.has-image]="currentImageUrl()">
+    @if (currentImageUrl()) {
+      <img [src]="currentImageUrl()" [alt]="altText()" class="preview-image" />
+      <div class="image-overlay">
+        <button
+          type="button"
+          class="btn-change"
+          (click)="fileInput.click()"
+          [disabled]="isUploading()">
+          <i class="pi pi-camera"></i>
+          <span>Cambiar</span>
+        </button>
+        <button
+          type="button"
+          class="btn-remove"
+          (click)="removeImage()"
+          [disabled]="isUploading()">
+          <i class="pi pi-trash"></i>
+          <span>Eliminar</span>
+        </button>
+      </div>
+    } @else {
+      <div class="empty-state" (click)="fileInput.click()">
+        <i class="pi pi-cloud-upload"></i>
+        <p>Haz clic para subir una imagen</p>
+        <span class="hint">JPG, PNG, GIF, WEBP (máx. 5MB)</span>
+      </div>
+    }
+
+    @if (isUploading()) {
+      <div class="upload-progress">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Subiendo imagen...</span>
+      </div>
+    }
+  </div>
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+    (change)="onFileSelected($event)"
+    hidden
+  />
+</div>
