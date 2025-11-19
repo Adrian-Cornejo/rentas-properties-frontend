@@ -468,7 +468,7 @@
                 <div class="stat-card">
                   <i class="pi pi-users stat-icon primary"></i>
                   <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.activeUsers }} / {{ stats()?.totalUsers }}</p>
+                    <p class="stat-value">{{ stats()?.currentUsersCount }} / {{ stats()?.maxUsers }}</p>
                     <p class="stat-label">Usuarios Activos</p>
                   </div>
                 </div>
@@ -476,7 +476,7 @@
                 <div class="stat-card">
                   <i class="pi pi-building stat-icon secondary"></i>
                   <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.totalProperties }}</p>
+                    <p class="stat-value">{{ stats()?.currentPropertiesCount }}</p>
                     <p class="stat-label">Propiedades</p>
                   </div>
                 </div>

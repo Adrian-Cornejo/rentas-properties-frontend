@@ -15,7 +15,7 @@ export const routes: Routes = [
   {
     path: 'auth',
     component: AuthLayoutComponent,
-    canActivate: [guestGuard], // ✅ Solo usuarios NO autenticados
+    canActivate: [guestGuard],
     children: [
       {
         path: 'login',
@@ -35,11 +35,15 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
-    canActivate: [authGuard], // ✅ Solo usuarios autenticados
+    canActivate: [authGuard],
     children: [
       {
         path: 'home',
         loadComponent: () => import('./features/dashboard/home/home').then(m => m.HomeComponent)
+      },
+      {
+        path: 'locations',
+        loadComponent: () => import('./features/dashboard/locations/locations').then(m => m.LocationsComponent)
       },
       {
         path: 'properties',

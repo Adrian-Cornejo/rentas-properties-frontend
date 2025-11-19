@@ -1,9 +1,9 @@
 export interface OrganizationStatsResponse {
   organizationId: string;
   organizationName: string;
-  totalUsers: number;
-  activeUsers: number;
-  totalProperties: number;
+  maxUsers: number;
+  currentUsersCount: number;
+  currentPropertiesCount: number;
   availableProperties: number;
   rentedProperties: number;
   maintenanceProperties: number;
