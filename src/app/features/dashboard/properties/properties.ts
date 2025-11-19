@@ -42,6 +42,7 @@ export class PropertiesComponent implements OnInit {
   propertyToDelete = signal<string | null>(null);
   filterStatus = signal<string>('ALL');
   searchTerm = signal<string>('');
+  activeTab = signal<string>('basic');
 
   // Forms
   propertyForm!: FormGroup;
@@ -52,12 +53,10 @@ export class PropertiesComponent implements OnInit {
   filteredProperties = computed(() => {
     let props = this.properties();
 
-    // Filtrar por estado
     if (this.filterStatus() !== 'ALL') {
       props = props.filter(p => p.status === this.filterStatus());
     }
 
-    // Filtrar por búsqueda
     const term = this.searchTerm().toLowerCase();
     if (term) {
       props = props.filter(p =>
@@ -81,6 +80,11 @@ export class PropertiesComponent implements OnInit {
   maintenanceCount = computed(() =>
     this.properties().filter(p => p.status === 'MANTENIMIENTO').length
   );
+
+  notesLength = computed(() => {
+    const notes = this.propertyForm?.get('notes')?.value || '';
+    return notes.length;
+  });
 
   ngOnInit(): void {
     this.initForm();
@@ -145,6 +149,7 @@ export class PropertiesComponent implements OnInit {
     this.isCreating.set(true);
     this.isEditing.set(false);
     this.selectedProperty.set(null);
+    this.activeTab.set('basic');
     this.propertyForm.reset({
       locationId: '',
       propertyCode: '',
@@ -179,6 +184,7 @@ export class PropertiesComponent implements OnInit {
         this.selectedProperty.set(data);
         this.isCreating.set(true);
         this.isEditing.set(true);
+        this.activeTab.set('basic');
 
         this.propertyForm.patchValue({
           locationId: data.locationId || '',
@@ -218,6 +224,7 @@ export class PropertiesComponent implements OnInit {
     this.isCreating.set(false);
     this.isEditing.set(false);
     this.selectedProperty.set(null);
+    this.activeTab.set('basic');
     this.propertyForm.reset();
   }
 
@@ -342,6 +349,29 @@ export class PropertiesComponent implements OnInit {
   onSearchChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm.set(target.value);
+  }
+
+  setActiveTab(tab: string): void {
+    this.activeTab.set(tab);
+  }
+
+  incrementValue(fieldName: string, step: number = 1): void {
+    const control = this.propertyForm.get(fieldName);
+    if (control) {
+      const currentValue = control.value || 0;
+      control.setValue(currentValue + step);
+    }
+  }
+
+  decrementValue(fieldName: string, step: number = 1): void {
+    const control = this.propertyForm.get(fieldName);
+    if (control) {
+      const currentValue = control.value || 0;
+      const minValue = fieldName === 'floors' ? 1 : 0;
+      if (currentValue > minValue) {
+        control.setValue(currentValue - step);
+      }
+    }
   }
 
   getPropertyTypeLabel(type: string): string {
