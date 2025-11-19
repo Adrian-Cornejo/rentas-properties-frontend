@@ -27,22 +27,24 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             break;
           case 403:
             errorMessage = 'No tienes permisos para realizar esta acción.';
+            notification.error(errorMessage);
             break;
           case 404:
             errorMessage = 'Recurso no encontrado.';
+            notification.warning(errorMessage);
             break;
           case 409:
             errorMessage = error.error?.message || 'Conflicto con los datos existentes.';
+            notification.error(errorMessage);
             break;
           case 500:
             errorMessage = 'Error del servidor. Intenta nuevamente más tarde.';
+            notification.error(errorMessage);
             break;
-          default:
-            errorMessage = error.error?.message || `Error ${error.status}: ${error.statusText}`;
         }
       }
 
-      notification.error(errorMessage);
+
       return throwError(() => error);
     })
   );

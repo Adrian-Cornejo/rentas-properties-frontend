@@ -29,6 +29,12 @@ export class OrganizationService {
     );
   }
 
+  getMyOrganization(): Observable<OrganizationDetailResponse> {
+    return this.http.get<OrganizationDetailResponse>(`${this.apiUrl}/me`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getOrganizationById(id: string): Observable<OrganizationDetailResponse> {
     return this.http.get<OrganizationDetailResponse>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)
@@ -68,6 +74,12 @@ export class OrganizationService {
     );
   }
 
+  getMyOrganizationStats(): Observable<OrganizationStatsResponse> {
+    return this.http.get<OrganizationStatsResponse>(`${this.apiUrl}/me/stats`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getActiveOrganizations(): Observable<OrganizationResponse[]> {
     return this.http.get<OrganizationResponse[]>(`${this.apiUrl}/active`).pipe(
       catchError(this.handleError)
@@ -75,15 +87,7 @@ export class OrganizationService {
   }
 
   private handleError(error: any): Observable<never> {
-    let errorMessage = 'An error occurred';
 
-    if (error.error?.message) {
-      errorMessage = error.error.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    console.error('Organization Service Error:', errorMessage);
-    return throwError(() => new Error(errorMessage));
+    return throwError(() => new Error());
   }
 }

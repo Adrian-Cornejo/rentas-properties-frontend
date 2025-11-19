@@ -77,11 +77,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return localStorage.getItem('rentmaster_token');
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem('refresh_token');
+    return localStorage.getItem('rentmaster_refresh_token');
   }
 
   hasRole(role: 'ADMIN' | 'OWNER' | 'USER'): boolean {
@@ -94,18 +94,18 @@ export class AuthService {
   }
 
   private handleAuthResponse(response: AuthResponse): void {
-    localStorage.setItem('access_token', response.token);
-    localStorage.setItem('refresh_token', response.refreshToken);
-    localStorage.setItem('current_user', JSON.stringify(response.user));
+    localStorage.setItem('rentmaster_token', response.token);
+    localStorage.setItem('rentmaster_refresh_token', response.refreshToken);
+    localStorage.setItem('rentmaster_user', JSON.stringify(response.user));
 
     this._currentUser.set(response.user);
     this._isAuthenticated.set(true);
   }
 
   private clearAuthData(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('current_user');
+    localStorage.removeItem('rentmaster_token');
+    localStorage.removeItem('rentmaster_refresh_token');
+    localStorage.removeItem('rentmaster_user');
 
     this._currentUser.set(null);
     this._isAuthenticated.set(false);
@@ -115,7 +115,7 @@ export class AuthService {
 
   private loadUserFromStorage(): void {
     const token = this.getToken();
-    const userJson = localStorage.getItem('current_user');
+    const userJson = localStorage.getItem('rentmaster_user');
 
     if (token && userJson) {
       try {

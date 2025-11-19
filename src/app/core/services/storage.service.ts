@@ -10,7 +10,6 @@ export class StorageService {
   private readonly THEME_KEY = 'rentmaster_theme';
   private readonly ORG_THEME_KEY = 'rentmaster_org_theme';
 
-  // Token management
   setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }

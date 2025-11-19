@@ -1,18 +1,570 @@
+<!-- src/app/features/dashboard/organization/organization.html -->
 <div class="page-container">
+  <!-- Header -->
   <div class="page-header">
-    <h1 class="page-title">Organización</h1>
-    <p class="page-description">Configuración de tu organización</p>
+    <div>
+      <h1 class="page-title">Organización</h1>
+      <p class="page-description">
+        @if (isCreatingMode()) {
+          Crea tu organización
+        } @else {
+          Administra la configuración de tu organización
+        }
+      </p>
+    </div>
+
+    <!-- Botones para cuando NO hay organización y es ADMIN -->
+    @if (!isLoading() && !organization() && isAdmin() && !isCreatingMode()) {
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="startCreating()"
+        >
+          <i class="pi pi-plus"></i>
+          Crear Organización
+        </button>
+      </div>
+    }
+
+    <!-- Botones para modo creación -->
+    @if (isCreatingMode()) {
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelCreating()"
+          [disabled]="isSaving()"
+        >
+          <i class="pi pi-times"></i>
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="createOrganization()"
+          [disabled]="isSaving()"
+        >
+          @if (isSaving()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <i class="pi pi-check"></i>
+          }
+          Crear Organización
+        </button>
+      </div>
+    }
   </div>
 
   <div class="page-content">
-    <div class="placeholder-card">
-      <i class="pi pi-cog placeholder-icon"></i>
-      <h2>Módulo de Organización</h2>
-      <p>Configura los datos de tu organización</p>
-      <div class="admin-badge">
-        <i class="pi pi-shield"></i>
-        <span>Solo ADMIN</span>
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="grid-layout">
+        <div class="card">
+          <p-skeleton height="300px" />
+        </div>
+        <div class="card">
+          <p-skeleton height="300px" />
+        </div>
+      </div>
+    }
+
+    <!-- MODO CREACIÓN: Formulario para crear organización -->
+    @if (!isLoading() && isCreatingMode()) {
+      <div class="grid-layout">
+        <div class="card full-width">
+          <div class="card-header">
+            <h2 class="card-title">Nueva Organización</h2>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="organizationForm" class="form-grid">
+              <!-- Nombre -->
+              <div class="form-field">
+                <label for="name" class="form-label required">Nombre de la Organización</label>
+                <input
+                  type="text"
+                  id="name"
+                  formControlName="name"
+                  placeholder="Mi Empresa"
+                  class="form-control"
+                />
+                @if (organizationForm.get('name')?.invalid && organizationForm.get('name')?.touched) {
+                  <small class="form-error">El nombre es requerido (mínimo 3 caracteres)</small>
+                }
+              </div>
+
+              <!-- Descripción -->
+              <div class="form-field">
+                <label for="description" class="form-label">Descripción</label>
+                <textarea
+                  id="description"
+                  formControlName="description"
+                  placeholder="Descripción de tu organización"
+                  rows="3"
+                  class="form-control"
+                ></textarea>
+              </div>
+
+              <!-- Colores -->
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="primaryColor" class="form-label required">Color Primario</label>
+                  <div class="color-input-group">
+                    <input
+                      type="color"
+                      id="primaryColor"
+                      formControlName="primaryColor"
+                      class="color-picker"
+                    />
+                    <input
+                      type="text"
+                      formControlName="primaryColor"
+                      placeholder="#3B82F6"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="secondaryColor" class="form-label required">Color Secundario</label>
+                  <div class="color-input-group">
+                    <input
+                      type="color"
+                      id="secondaryColor"
+                      formControlName="secondaryColor"
+                      class="color-picker"
+                    />
+                    <input
+                      type="text"
+                      formControlName="secondaryColor"
+                      placeholder="#10B981"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- CONTENIDO NORMAL: Cuando ya tiene organización -->
+    @if (!isLoading() && organization() && !isCreatingMode()) {
+      <div class="grid-layout">
+        <!-- Información General -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Información General</h2>
+            <!-- Botones de edición dentro del card -->
+            @if (isOwner()) {
+              <div class="card-actions">
+                @if (isEditMode()) {
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    (click)="cancelEdit()"
+                    [disabled]="isSaving()"
+                  >
+                    <i class="pi pi-times"></i>
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="saveChanges()"
+                    [disabled]="isSaving()"
+                  >
+                    @if (isSaving()) {
+                      <i class="pi pi-spin pi-spinner"></i>
+                    } @else {
+                      <i class="pi pi-check"></i>
+                    }
+                    Guardar
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="toggleEditMode()"
+                  >
+                    <i class="pi pi-pencil"></i>
+                    Editar
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <div class="card-body">
+            <form [formGroup]="organizationForm" class="form-grid">
+              <!-- Nombre -->
+              <div class="form-field">
+                <label for="name" class="form-label required">Nombre de la Organización</label>
+                <input
+                  type="text"
+                  id="name"
+                  formControlName="name"
+                  placeholder="Mi Empresa"
+                  class="form-control"
+                />
+                @if (organizationForm.get('name')?.invalid && organizationForm.get('name')?.touched) {
+                  <small class="form-error">El nombre es requerido (mínimo 3 caracteres)</small>
+                }
+              </div>
+
+              <!-- Descripción -->
+              <div class="form-field">
+                <label for="description" class="form-label">Descripción</label>
+                <textarea
+                  id="description"
+                  formControlName="description"
+                  placeholder="Descripción de tu organización"
+                  rows="3"
+                  class="form-control"
+                ></textarea>
+              </div>
+
+              <!-- Colores -->
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="primaryColor" class="form-label required">Color Primario</label>
+                  <div class="color-input-group">
+                    <input
+                      type="color"
+                      id="primaryColor"
+                      formControlName="primaryColor"
+                      class="color-picker"
+                    />
+                    <input
+                      type="text"
+                      formControlName="primaryColor"
+                      placeholder="#3B82F6"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="secondaryColor" class="form-label required">Color Secundario</label>
+                  <div class="color-input-group">
+                    <input
+                      type="color"
+                      id="secondaryColor"
+                      formControlName="secondaryColor"
+                      class="color-picker"
+                    />
+                    <input
+                      type="text"
+                      formControlName="secondaryColor"
+                      placeholder="#10B981"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Logo URL (futuro) -->
+              <div class="form-field">
+                <label for="logoUrl" class="form-label">URL del Logo</label>
+                <input
+                  type="text"
+                  id="logoUrl"
+                  formControlName="logoUrl"
+                  placeholder="https://ejemplo.com/logo.png"
+                  class="form-control"
+                />
+                <small class="form-help">Funcionalidad de carga de imágenes disponible próximamente</small>
+              </div>
+
+              <!-- Código Reutilizable -->
+              <div class="form-field">
+                <div class="checkbox-wrapper">
+                  <input
+                    type="checkbox"
+                    id="codeIsReusable"
+                    formControlName="codeIsReusable"
+                    class="form-checkbox"
+                  />
+                  <label for="codeIsReusable" class="checkbox-label">
+                    Permitir que el código de invitación sea reutilizable
+                  </label>
+                </div>
+                <small class="form-help">Si está desactivado, el código solo se podrá usar una vez</small>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Código de Invitación -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Código de Invitación</h2>
+          </div>
+          <div class="card-body">
+            <div class="invitation-section">
+              <div class="invitation-code-display">
+                <div class="code-box">
+                  <span class="code-text">{{ organization()?.invitationCode }}</span>
+                  <button
+                    type="button"
+                    class="btn-icon"
+                    (click)="copyInvitationCode()"
+                    title="Copiar código"
+                  >
+                    <i class="pi pi-copy"></i>
+                  </button>
+                </div>
+              </div>
+
+              <p class="invitation-description">
+                Comparte este código con nuevos miembros para que puedan unirse a tu organización
+              </p>
+
+              @if (isOwner()) {
+                <button
+                  type="button"
+                  class="btn btn-warning btn-block"
+                  (click)="openRegenerateDialog()"
+                >
+                  <i class="pi pi-refresh"></i>
+                  Regenerar Código
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Propietario -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Propietario</h2>
+          </div>
+          <div class="card-body">
+            @if (organization()?.owner) {
+              <div class="owner-info">
+                <div class="info-item">
+                  <i class="pi pi-user info-icon"></i>
+                  <div>
+                    <p class="info-label">Nombre</p>
+                    <p class="info-value">{{ organization()?.owner?.fullName }}</p>
+                  </div>
+                </div>
+
+                <div class="info-item">
+                  <i class="pi pi-envelope info-icon"></i>
+                  <div>
+                    <p class="info-label">Email</p>
+                    <p class="info-value">{{ organization()?.owner?.email }}</p>
+                  </div>
+                </div>
+
+                @if (organization()?.owner?.phone) {
+                  <div class="info-item">
+                    <i class="pi pi-phone info-icon"></i>
+                    <div>
+                      <p class="info-label">Teléfono</p>
+                      <p class="info-value">{{ organization()?.owner?.phone }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Suscripción -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Suscripción</h2>
+          </div>
+          <div class="card-body">
+            <div class="subscription-info">
+              <div class="info-row">
+                <span class="info-label">Estado:</span>
+                <span class="status-badge" [class]="getSubscriptionStatusClass(organization()?.subscriptionStatus || '')">
+                  {{ getSubscriptionStatusLabel(organization()?.subscriptionStatus || '') }}
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Plan:</span>
+                <span class="info-value">{{ organization()?.subscriptionPlan }}</span>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="limits-grid">
+                <div class="limit-item">
+                  <p class="limit-label">Usuarios</p>
+                  <p class="limit-value">
+                    {{ organization()?.currentUsersCount }} / {{ organization()?.maxUsers }}
+                  </p>
+                </div>
+
+                <div class="limit-item">
+                  <p class="limit-label">Propiedades</p>
+                  <p class="limit-value">
+                    {{ organization()?.currentPropertiesCount }} / {{ organization()?.maxProperties }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              @if (organization()?.trialEndsAt) {
+                <div class="info-row">
+                  <span class="info-label">Periodo de prueba termina:</span>
+                  <span class="info-value">{{ formatDate(organization()?.trialEndsAt) }}</span>
+                </div>
+              }
+
+              @if (organization()?.subscriptionStartedAt) {
+                <div class="info-row">
+                  <span class="info-label">Suscripción iniciada:</span>
+                  <span class="info-value">{{ formatDate(organization()?.subscriptionStartedAt) }}</span>
+                </div>
+              }
+
+              @if (organization()?.subscriptionEndsAt) {
+                <div class="info-row">
+                  <span class="info-label">Suscripción termina:</span>
+                  <span class="info-value">{{ formatDate(organization()?.subscriptionEndsAt) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Estadísticas -->
+        @if (stats()) {
+          <div class="card full-width">
+            <div class="card-header">
+              <h2 class="card-title">Estadísticas</h2>
+            </div>
+            <div class="card-body">
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <i class="pi pi-users stat-icon primary"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ stats()?.activeUsers }} / {{ stats()?.totalUsers }}</p>
+                    <p class="stat-label">Usuarios Activos</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <i class="pi pi-building stat-icon secondary"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ stats()?.totalProperties }}</p>
+                    <p class="stat-label">Propiedades</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <i class="pi pi-check-circle stat-icon success"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ stats()?.availableProperties }}</p>
+                    <p class="stat-label">Disponibles</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <i class="pi pi-home stat-icon info"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ stats()?.rentedProperties }}</p>
+                    <p class="stat-label">Rentadas</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <i class="pi pi-file stat-icon warning"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ stats()?.activeContracts }}</p>
+                    <p class="stat-label">Contratos Activos</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <i class="pi pi-dollar stat-icon success"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ formatCurrency(stats()?.totalRevenue) }}</p>
+                    <p class="stat-label">Ingresos Totales</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <i class="pi pi-clock stat-icon warning"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ formatCurrency(stats()?.pendingRevenue) }}</p>
+                    <p class="stat-label">Pagos Pendientes</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <i class="pi pi-calendar-times stat-icon danger"></i>
+                  <div class="stat-content">
+                    <p class="stat-value">{{ stats()?.expiredContracts }}</p>
+                    <p class="stat-label">Contratos Vencidos</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ESTADO VACÍO: Sin organización y NO es ADMIN -->
+    @if (!isLoading() && !organization() && !isAdmin() && !isCreatingMode()) {
+      <div class="empty-state">
+        <i class="pi pi-building empty-icon"></i>
+        <h2>No tienes una organización asignada</h2>
+        <p>Solicita a un administrador que te asigne a una organización o te proporcione un código de invitación</p>
+      </div>
+    }
+
+    <!-- ESTADO VACÍO: Sin organización pero ES ADMIN -->
+    @if (!isLoading() && !organization() && isAdmin() && !isCreatingMode()) {
+      <div class="empty-state">
+        <i class="pi pi-building empty-icon"></i>
+        <h2>Aún no tienes una organización</h2>
+        <p>Como administrador, puedes crear tu propia organización para comenzar a gestionar propiedades</p>
+        <button
+          type="button"
+          class="btn btn-primary btn-large"
+          (click)="startCreating()"
+        >
+          <i class="pi pi-plus"></i>
+          Crear Mi Organización
+        </button>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+@if (showConfirmDialog()) {
+  <div class="modal-overlay" (click)="closeConfirmDialog()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="pi pi-exclamation-triangle"></i>
+          Confirmar Regeneración
+        </h3>
+        <button type="button" class="btn-close" (click)="closeConfirmDialog()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de regenerar el código de invitación? El código actual dejará de funcionar.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmDialog()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmRegenerate()">
+          Sí, regenerar
+        </button>
       </div>
     </div>
   </div>
-</div>
+}
