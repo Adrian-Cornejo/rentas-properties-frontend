@@ -5,4 +5,5 @@ export interface CreateOrganizationRequest {
   secondaryColor?: string;
   maxUsers?: number;
   maxProperties?: number;
+  logoUrl?: string;
 }

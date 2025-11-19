@@ -78,6 +78,17 @@
           </div>
           <div class="card-body">
             <form [formGroup]="organizationForm" class="form-grid">
+
+              <div class="form-section">
+                <h3 class="section-title">Logo de la Organización</h3>
+                <app-image-upload
+                  [imageUrl]="logoUrl()"
+                  [folder]="'rentmaster/organizations'"
+                  [altText]="'Logo de la organización'"
+                  (imageUrlChange)="onLogoUrlChange($event)"
+                />
+              </div>
+
               <!-- Nombre -->
               <div class="form-field">
                 <label for="name" class="form-label required">Nombre de la Organización</label>
@@ -197,6 +208,30 @@
           </div>
           <div class="card-body">
             <form [formGroup]="organizationForm" class="form-grid">
+
+              <!-- Logo Section - Solo en modo edición -->
+              @if (isEditMode()) {
+                <div class="form-section">
+                  <h3 class="section-title">Logo de la Organización</h3>
+                  <app-image-upload
+                    [imageUrl]="logoUrl()"
+                    [folder]="'rentmaster/organizations'"
+                    [altText]="'Logo de la organización'"
+                    (imageUrlChange)="onLogoUrlChange($event)"
+                  />
+                </div>
+              }
+
+              <!-- Logo Display - Solo en modo visualización -->
+              @if (!isEditMode() && organization()?.logoUrl) {
+                <div class="form-section">
+                  <h3 class="section-title">Logo de la Organización</h3>
+                  <div class="logo-display">
+                    <img [src]="organization()!.logoUrl" alt="Logo de la organización" class="organization-logo" />
+                  </div>
+                </div>
+              }
+
               <!-- Nombre -->
               <div class="form-field">
                 <label for="name" class="form-label required">Nombre de la Organización</label>
@@ -261,19 +296,6 @@
                     />
                   </div>
                 </div>
-              </div>
-
-              <!-- Logo URL (futuro) -->
-              <div class="form-field">
-                <label for="logoUrl" class="form-label">URL del Logo</label>
-                <input
-                  type="text"
-                  id="logoUrl"
-                  formControlName="logoUrl"
-                  placeholder="https://ejemplo.com/logo.png"
-                  class="form-control"
-                />
-                <small class="form-help">Funcionalidad de carga de imágenes disponible próximamente</small>
               </div>
 
               <!-- Código Reutilizable -->
