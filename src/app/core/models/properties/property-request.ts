@@ -20,4 +20,5 @@ export interface CreatePropertyRequest {
   includesGas?: boolean;
   includesInternet?: boolean;
   notes?: string;
+  imageUrls?: string[];
 }

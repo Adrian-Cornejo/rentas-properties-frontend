@@ -26,6 +26,11 @@ export class CloudinaryService {
     return this.http.post<CloudinaryUploadResponse>(`${this.apiUrl}/upload`, formData);
   }
 
+  uploadPropertyImage(file: FormData, folder: string = 'rentmaster/properties'): Observable<CloudinaryUploadResponse> {
+    return this.http.post<CloudinaryUploadResponse>(`${this.apiUrl}/upload?folder=${folder}`, file);
+  }
+
+
   deleteImage(publicId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/delete/${publicId}`);
   }

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { PropertyService } from '../../../../core/services/property.service';
 import { LocationService } from '../../../../core/services/location.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { PropertyDetailResponse } from '../../../../core/models/properties/property-detail-response';
 import { LocationResponse } from '../../../../core/models/location/location-response';
@@ -18,12 +19,13 @@ import { UpdatePropertyRequest } from '../../../../core/models/properties/update
     ReactiveFormsModule
   ],
   templateUrl: './property-form.html',
-  styleUrl: '../properties.css',
+  styleUrl: './property-form.css',
 })
 export class PropertyFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private propertyService = inject(PropertyService);
   private locationService = inject(LocationService);
+  private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -31,17 +33,39 @@ export class PropertyFormComponent implements OnInit {
   // Signals
   isSaving = signal<boolean>(false);
   isEditing = signal<boolean>(false);
+  isUploadingImage = signal<boolean>(false);
   locations = signal<LocationResponse[]>([]);
   selectedProperty = signal<PropertyDetailResponse | null>(null);
   activeTab = signal<string>('basic');
+  propertyImages = signal<string[]>([]);
 
   // Forms
   propertyForm!: FormGroup;
 
   // Computed
+  currentUser = this.authService.currentUser;
+
   notesLength = computed(() => {
     const notes = this.propertyForm?.get('notes')?.value || '';
     return notes.length;
+  });
+
+  maxImagesAllowed = computed(() => {
+    const plan = this.authService.organizationInfo()?.subscriptionPlan;
+    switch (plan) {
+      case 'BASICO':
+        return 3;
+      case 'INTERMEDIO':
+        return 5;
+      case 'SUPERIOR':
+        return 10;
+      default:
+        return 3; // Por defecto BASICO
+    }
+  });
+
+  canAddMoreImages = computed(() => {
+    return this.propertyImages().length < this.maxImagesAllowed();
   });
 
   ngOnInit(): void {
@@ -97,6 +121,11 @@ export class PropertyFormComponent implements OnInit {
     this.propertyService.getPropertyById(id).subscribe({
       next: (data) => {
         this.selectedProperty.set(data);
+
+        // Cargar imágenes existentes si las hay
+        if (data.imageUrls && data.imageUrls.length > 0) {
+          this.propertyImages.set([...data.imageUrls]);
+        }
 
         this.propertyForm.patchValue({
           locationId: data.locationId || '',
@@ -166,7 +195,8 @@ export class PropertyFormComponent implements OnInit {
         includesElectricity: formValue.includesElectricity,
         includesGas: formValue.includesGas,
         includesInternet: formValue.includesInternet,
-        notes: formValue.notes
+        notes: formValue.notes,
+        imageUrls: this.propertyImages()
       };
 
       this.propertyService.updateProperty(this.selectedProperty()!.id, request).subscribe({
@@ -202,7 +232,8 @@ export class PropertyFormComponent implements OnInit {
         includesElectricity: formValue.includesElectricity,
         includesGas: formValue.includesGas,
         includesInternet: formValue.includesInternet,
-        notes: formValue.notes
+        notes: formValue.notes,
+        imageUrls: this.propertyImages()
       };
 
       this.propertyService.createProperty(request).subscribe({
@@ -239,6 +270,81 @@ export class PropertyFormComponent implements OnInit {
       if (currentValue > minValue) {
         control.setValue(currentValue - step);
       }
+    }
+  }
+
+  // Métodos para manejo de imágenes
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    // Validar que sea una imagen
+    if (!file.type.startsWith('image/')) {
+      this.notification.error('Por favor selecciona un archivo de imagen válido');
+      return;
+    }
+
+    // Validar tamaño máximo (5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      this.notification.error('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    // Validar límite de imágenes según plan
+    if (!this.canAddMoreImages()) {
+      this.notification.error(`Has alcanzado el límite de ${this.maxImagesAllowed()} imágenes para tu plan`);
+      return;
+    }
+
+    this.uploadImage(file);
+
+    // Limpiar input
+    input.value = '';
+  }
+
+  private uploadImage(file: File): void {
+    this.isUploadingImage.set(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Aquí usa tu servicio de Cloudinary existente
+    // Ejemplo: this.cloudinaryService.uploadImage(formData)
+    this.propertyService.uploadPropertyImage(formData).subscribe({
+      next: (response: { url: string }) => {
+        const currentImages = this.propertyImages();
+        this.propertyImages.set([...currentImages, response.url]);
+        this.notification.success('Imagen subida exitosamente');
+        this.isUploadingImage.set(false);
+      },
+      error: (error) => {
+        this.notification.error(error.message || 'Error al subir imagen');
+        this.isUploadingImage.set(false);
+      }
+    });
+  }
+
+  removeImage(index: number): void {
+    const currentImages = this.propertyImages();
+    const updatedImages = currentImages.filter((_, i) => i !== index);
+    this.propertyImages.set(updatedImages);
+    this.notification.success('Imagen eliminada');
+  }
+
+  getPlanName(): string {
+    const plan = this.authService.organizationInfo()?.subscriptionPlan;
+    switch (plan) {
+      case 'BASICO':
+        return 'Básico';
+      case 'INTERMEDIO':
+        return 'Intermedio';
+      case 'SUPERIOR':
+        return 'Superior';
+      default:
+        return 'Básico';
     }
   }
 }

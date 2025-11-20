@@ -17,4 +17,6 @@ export interface PropertyResponse {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+  mainImageUrl?: string;
+  imageUrls?: string[];
 }

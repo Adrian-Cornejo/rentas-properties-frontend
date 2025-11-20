@@ -6,6 +6,7 @@ import {CreatePropertyRequest} from '../models/properties/property-request';
 import {PropertyDetailResponse} from '../models/properties/property-detail-response';
 import {PropertyResponse} from '../models/properties/property-response';
 import {UpdatePropertyRequest} from '../models/properties/update-property-request';
+import {CloudinaryService} from './cloudinary.service';
 
 
 @Injectable({
@@ -13,6 +14,7 @@ import {UpdatePropertyRequest} from '../models/properties/update-property-reques
 })
 export class PropertyService {
   private readonly http = inject(HttpClient);
+  private readonly cloudinaryService = inject(CloudinaryService);
   private readonly apiUrl = `${environment.apiUrl}/properties`;
 
   createProperty(request: CreatePropertyRequest): Observable<PropertyDetailResponse> {
@@ -83,6 +85,10 @@ export class PropertyService {
     return this.http.get<PropertyResponse[]>(`${this.apiUrl}/rented`).pipe(
       catchError(this.handleError)
     );
+  }
+
+  uploadPropertyImage(formData: FormData): Observable<{ url: string }> {
+    return this.cloudinaryService.uploadPropertyImage(formData, 'rentmaster/properties');
   }
 
 
