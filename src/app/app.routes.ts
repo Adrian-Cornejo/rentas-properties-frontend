@@ -60,7 +60,21 @@ export const routes: Routes = [
       },
       {
         path: 'properties',
-        loadComponent: () => import('./features/dashboard/properties/properties').then(m => m.PropertiesComponent)
+        loadComponent: () => import('./features/dashboard/properties/properties').then(m => m.PropertiesComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/dashboard/properties/property-list/property-list').then(m => m.PropertyListComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/dashboard/properties/property-form/property-form').then(m => m.PropertyFormComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./features/dashboard/properties/property-form/property-form').then(m => m.PropertyFormComponent)
+          }
+        ]
       },
       {
         path: 'tenants',
