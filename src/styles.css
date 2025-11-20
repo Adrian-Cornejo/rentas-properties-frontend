@@ -114,6 +114,7 @@
   /* Borders dark */
   --border-color: oklch(0.30 0.00 0);
   --border-hover: oklch(0.35 0.00 0);
+  --input-bg: oklch(0.20 0.00 0);
 }
 
 /* ============================================

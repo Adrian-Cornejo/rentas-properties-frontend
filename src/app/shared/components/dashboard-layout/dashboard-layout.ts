@@ -59,6 +59,11 @@ export class DashboardLayoutComponent implements OnInit {
       route: '/dashboard/home'
     },
     {
+      label: 'Locaciones',
+      icon: 'pi pi-map-marker',
+      route: '/dashboard/locations'
+    },
+    {
       label: 'Propiedades',
       icon: 'pi pi-building',
       route: '/dashboard/properties'
