@@ -1,0 +1,108 @@
+<div class="location-form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>{{ isEditMode() ? 'Editar Ubicación' : 'Nueva Ubicación' }}</h2>
+      <button class="btn-close" (click)="onCancel()" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando ubicación...</p>
+      </div>
+    } @else {
+      <form [formGroup]="locationForm" (ngSubmit)="onSubmit()">
+        <!-- Basic Information -->
+        <div class="form-section-group">
+          <h3 class="section-title">Información Básica</h3>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="name">Nombre de la Ubicación *</label>
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                placeholder="Ej: Colonia El Calvario">
+              @if (locationForm.get('name')?.invalid && locationForm.get('name')?.touched) {
+                <span class="error-message">El nombre es requerido</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="address">Dirección</label>
+              <input
+                id="address"
+                type="text"
+                formControlName="address"
+                placeholder="Dirección general del área">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">Ciudad</label>
+              <input
+                id="city"
+                type="text"
+                formControlName="city"
+                placeholder="Ej: Querétaro">
+            </div>
+
+            <div class="form-group">
+              <label for="state">Estado</label>
+              <input
+                id="state"
+                type="text"
+                formControlName="state"
+                placeholder="Ej: Querétaro">
+            </div>
+
+            <div class="form-group">
+              <label for="postalCode">Código Postal</label>
+              <input
+                id="postalCode"
+                type="text"
+                formControlName="postalCode"
+                placeholder="00000"
+                maxlength="5">
+              @if (locationForm.get('postalCode')?.invalid && locationForm.get('postalCode')?.touched) {
+                <span class="error-message">Código postal inválido (5 dígitos)</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="description">Descripción</label>
+              <textarea
+                id="description"
+                formControlName="description"
+                rows="4"
+                placeholder="Información adicional sobre la ubicación..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="onCancel()">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="locationForm.invalid || isSaving()">
+            {{ isSaving() ? 'Guardando...' : (isEditMode() ? 'Actualizar' : 'Crear') }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

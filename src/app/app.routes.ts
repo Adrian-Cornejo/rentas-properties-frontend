@@ -1,4 +1,3 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { AuthLayoutComponent } from './shared/components/auth-layout/auth-layout';
 import { DashboardLayoutComponent } from './shared/components/dashboard-layout/dashboard-layout';
@@ -43,7 +42,21 @@ export const routes: Routes = [
       },
       {
         path: 'locations',
-        loadComponent: () => import('./features/dashboard/locations/locations').then(m => m.LocationsComponent)
+        loadComponent: () => import('./features/dashboard/locations/locations').then(m => m.LocationsComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/dashboard/locations/location-list/location-list').then(m => m.LocationListComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/dashboard/locations/location-form/location-form').then(m => m.LocationFormComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./features/dashboard/locations/location-form/location-form').then(m => m.LocationFormComponent)
+          }
+        ]
       },
       {
         path: 'properties',
