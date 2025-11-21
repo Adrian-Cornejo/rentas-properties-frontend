@@ -93,10 +93,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Carga la información de la organización del usuario actual
-   * Se llama automáticamente después de login/register/refresh
-   */
   loadOrganizationInfo(): void {
     this.organizationService.getMyOrganizationInfo().subscribe({
       next: (info) => {
@@ -110,10 +106,6 @@ export class AuthService {
     });
   }
 
-  /**
-   * Recarga manualmente la información de la organización
-   * Útil cuando se actualiza la organización desde otro componente
-   */
   reloadOrganizationInfo(): void {
     this.loadOrganizationInfo();
   }
@@ -161,6 +153,14 @@ export class AuthService {
 
   getMaxUsers(): number {
     return this.organizationInfo()?.maxUsers || 0;
+  }
+
+  updateCurrentUser(user: UserResponse): void {
+    this._currentUser.set(user);
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      localStorage.setItem('current_user', JSON.stringify(user));
+    }
   }
 
   private handleAuthResponse(response: AuthResponse): void {

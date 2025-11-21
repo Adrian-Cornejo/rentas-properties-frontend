@@ -4,4 +4,5 @@ export interface RegisterRequest {
   fullName: string;
   phone?: string;
   role?: 'USER' | 'ADMIN';
+  invitationCode?: string | null;
 }

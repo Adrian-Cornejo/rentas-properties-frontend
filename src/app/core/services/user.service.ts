@@ -44,7 +44,7 @@ export class UserService {
   }
 
   joinOrganization(request: JoinOrganizationRequest): Observable<UserDetailResponse> {
-    return this.http.post<UserDetailResponse>(`${this.apiUrl}/me/join-organization`, request).pipe(
+    return this.http.post<UserDetailResponse>(`${this.apiUrl}/join-organization`, request).pipe(
       catchError(this.handleError)
     );
   }
