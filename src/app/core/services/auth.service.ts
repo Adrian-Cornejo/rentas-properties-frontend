@@ -2,24 +2,30 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError } from 'rxjs';
-import {environment} from '../../../enviroment/environment';
-import {AuthResponse, UserResponse} from '../models/auth/auth-response.model';
-import {RegisterRequest} from '../models/auth/register-request.model';
-import {LoginRequest} from '../models/auth/login-request.model';
-import {RefreshTokenRequest} from '../models/auth/refresh-token-request.model';
+import { Observable, tap, catchError, throwError, finalize } from 'rxjs';
+import { environment } from '../../../enviroment/environment';
+import { AuthResponse, UserResponse } from '../models/auth/auth-response.model';
+import { RegisterRequest } from '../models/auth/register-request.model';
+import { LoginRequest } from '../models/auth/login-request.model';
+import { RefreshTokenRequest } from '../models/auth/refresh-token-request.model';
+import { OrganizationInfoResponse } from '../models/organization/organization-info-response';
+import { OrganizationService } from './organization.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly organizationService = inject(OrganizationService);
   private readonly router = inject(Router);
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
+  // Signals
   private readonly _currentUser = signal<UserResponse | null>(null);
   private readonly _isAuthenticated = signal<boolean>(false);
+  organizationInfo = signal<OrganizationInfoResponse | null>(null);
 
+  // Read-only accessors
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = this._isAuthenticated.asReadonly();
 
@@ -29,14 +35,20 @@ export class AuthService {
 
   register(request: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request).pipe(
-      tap(response => this.handleAuthResponse(response)),
+      tap(response => {
+        this.handleAuthResponse(response);
+        this.loadOrganizationInfo();
+      }),
       catchError(this.handleError)
     );
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap(response => this.handleAuthResponse(response)),
+      tap(response => {
+        this.handleAuthResponse(response);
+        this.loadOrganizationInfo();
+      }),
       catchError(this.handleError)
     );
   }
@@ -49,7 +61,10 @@ export class AuthService {
 
     const request: RefreshTokenRequest = { refreshToken };
     return this.http.post<AuthResponse>(`${this.apiUrl}/refresh`, request).pipe(
-      tap(response => this.handleAuthResponse(response)),
+      tap(response => {
+        this.handleAuthResponse(response);
+        this.loadOrganizationInfo();
+      }),
       catchError(error => {
         this.logout();
         return throwError(() => error);
@@ -59,7 +74,9 @@ export class AuthService {
 
   logout(): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/logout`, {}).pipe(
-      tap(() => this.clearAuthData()),
+      finalize(() => {
+        this.clearAuthData();
+      }),
       catchError(error => {
         this.clearAuthData();
         return throwError(() => error);
@@ -74,6 +91,31 @@ export class AuthService {
         return throwError(() => new Error('Invalid token'));
       })
     );
+  }
+
+  /**
+   * Carga la información de la organización del usuario actual
+   * Se llama automáticamente después de login/register/refresh
+   */
+  loadOrganizationInfo(): void {
+    this.organizationService.getMyOrganizationInfo().subscribe({
+      next: (info) => {
+        this.organizationInfo.set(info);
+        console.log('Información de organización cargada:', info.name);
+      },
+      error: (error) => {
+        console.log('Usuario sin organización o error al cargar:', error.message);
+        this.organizationInfo.set(null);
+      }
+    });
+  }
+
+  /**
+   * Recarga manualmente la información de la organización
+   * Útil cuando se actualiza la organización desde otro componente
+   */
+  reloadOrganizationInfo(): void {
+    this.loadOrganizationInfo();
   }
 
   getToken(): string | null {
@@ -93,6 +135,34 @@ export class AuthService {
     return userRole ? roles.includes(userRole) : false;
   }
 
+  hasOrganization(): boolean {
+    return this.organizationInfo() !== null;
+  }
+
+  getSubscriptionPlan(): 'BASICO' | 'INTERMEDIO' | 'SUPERIOR' | null {
+    return this.organizationInfo()?.subscriptionPlan || null;
+  }
+
+  canAddMoreProperties(): boolean {
+    const info = this.organizationInfo();
+    if (!info) return false;
+    return info.currentPropertiesCount < info.maxProperties;
+  }
+
+  canAddMoreUsers(): boolean {
+    const info = this.organizationInfo();
+    if (!info) return false;
+    return info.currentUsersCount < info.maxUsers;
+  }
+
+  getMaxProperties(): number {
+    return this.organizationInfo()?.maxProperties || 0;
+  }
+
+  getMaxUsers(): number {
+    return this.organizationInfo()?.maxUsers || 0;
+  }
+
   private handleAuthResponse(response: AuthResponse): void {
     localStorage.setItem('rentmaster_token', response.token);
     localStorage.setItem('rentmaster_refresh_token', response.refreshToken);
@@ -103,12 +173,15 @@ export class AuthService {
   }
 
   private clearAuthData(): void {
+
     localStorage.removeItem('rentmaster_token');
     localStorage.removeItem('rentmaster_refresh_token');
     localStorage.removeItem('rentmaster_user');
 
     this._currentUser.set(null);
     this._isAuthenticated.set(false);
+    this.organizationInfo.set(null);
+
 
     this.router.navigate(['/auth/login']);
   }
@@ -122,7 +195,10 @@ export class AuthService {
         const user = JSON.parse(userJson) as UserResponse;
         this._currentUser.set(user);
         this._isAuthenticated.set(true);
+
+        this.loadOrganizationInfo();
       } catch (error) {
+        console.error('Error loading user from storage:', error);
         this.clearAuthData();
       }
     }

@@ -14,6 +14,7 @@ export interface PropertyDetailResponse extends PropertyResponse {
   notes?: string;
   activeContractId?: string;
   currentTenants?: TenantBasicInfo[];
+  imageUrls?: string[];
 }
 export interface TenantBasicInfo {
   id: string;

@@ -8,6 +8,7 @@ import {OrganizationDetailResponse} from '../models/organization/organization-de
 import {OrganizationResponse} from '../models/organization/organization-response';
 import {UpdateOrganizationRequest} from '../models/organization/update-organization-request';
 import {OrganizationStatsResponse} from '../models/organization/organization-stats-response';
+import {OrganizationInfoResponse} from '../models/organization/organization-info-response';
 
 @Injectable({
   providedIn: 'root'
@@ -82,6 +83,12 @@ export class OrganizationService {
 
   getActiveOrganizations(): Observable<OrganizationResponse[]> {
     return this.http.get<OrganizationResponse[]>(`${this.apiUrl}/active`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getMyOrganizationInfo(): Observable<OrganizationInfoResponse> {
+    return this.http.get<OrganizationInfoResponse>(`${this.apiUrl}/me/info`).pipe(
       catchError(this.handleError)
     );
   }
