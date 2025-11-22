@@ -78,7 +78,21 @@ export const routes: Routes = [
       },
       {
         path: 'tenants',
-        loadComponent: () => import('./features/dashboard/tenants/tenants').then(m => m.TenantsComponent)
+        loadComponent: () => import('./features/dashboard/tenants/tenants').then(m => m.TenantsComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/dashboard/tenants/tenant-list/tenant-list').then(m => m.TenantListComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/dashboard/tenants/tenant-form/tenant-form').then(m => m.TenantFormComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./features/dashboard/tenants/tenant-form/tenant-form').then(m => m.TenantFormComponent)
+          }
+        ]
       },
       {
         path: 'contracts',

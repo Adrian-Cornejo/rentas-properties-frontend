@@ -47,6 +47,12 @@ export class TenantService {
     );
   }
 
+  deleteTenantIneImage(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/ine-image`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   searchTenantsByName(name: string): Observable<TenantResponse[]> {
     const params = new HttpParams().set('name', name);
     return this.http.get<TenantResponse[]>(`${this.apiUrl}/search`, { params }).pipe(

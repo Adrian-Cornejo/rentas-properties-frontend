@@ -3,12 +3,9 @@ export interface TenantResponse {
   fullName: string;
   phone: string;
   email?: string;
-  ineNumber?: string;
-  ineImageUrl?: string;
   numberOfOccupants: number;
-  organizationId: string;
-  organizationName: string;
-  active: boolean;
+  hasINE: boolean;
+  isActive: boolean;
+  activeContractsCount: number;
   createdAt: string;
-  updatedAt: string;
 }
