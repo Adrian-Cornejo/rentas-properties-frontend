@@ -80,39 +80,43 @@ export class RegisterComponent {
   onSubmit(): void {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
+      this.notification.warning(
+        'Por favor completa todos los campos correctamente',
+        'Formulario incompleto'
+      );
       return;
     }
 
     this.isLoading.set(true);
 
     const registerData: RegisterRequest = {
+      fullName: this.registerForm.value.fullName,
       email: this.registerForm.value.email,
       password: this.registerForm.value.password,
-      fullName: this.registerForm.value.fullName,
-      phone: this.registerForm.value.phone || undefined,
-      role: 'USER'
+      phone: this.registerForm.value.phone || null,
+      invitationCode: this.registerForm.value.invitationCode?.toUpperCase() || null
     };
 
     this.authService.register(registerData).subscribe({
       next: (response) => {
-        this.notification.success('Registro exitoso', '¡Bienvenido a RentMaster!');
+        this.notification.success(
+          'Cuenta creada exitosamente. Ahora puedes iniciar sesión.',
+          'Registro exitoso'
+        );
 
-        // Si tiene código de invitación, unirse a la organización
-        const invitationCode = this.registerForm.value.invitationCode;
-        if (invitationCode && invitationCode.trim()) {
-          // TODO: Implementar joinOrganization después del registro
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.router.navigate(['/dashboard']);
+        if (registerData.invitationCode) {
+          this.notification.info(
+            'Has sido agregado a la organización exitosamente',
+            'Organización asignada'
+          );
         }
+
+        this.router.navigate(['/auth/login']);
       },
       error: (error) => {
         this.isLoading.set(false);
-        const errorMessage = error?.error?.message || 'Error al registrar usuario. Intenta nuevamente.';
-        this.notification.error('Error de registro', errorMessage);
-      },
-      complete: () => {
-        this.isLoading.set(false);
+        const errorMessage = error?.error?.message || error?.message || 'Error al crear la cuenta';
+        this.notification.error(errorMessage, 'Error en el registro');
       }
     });
   }

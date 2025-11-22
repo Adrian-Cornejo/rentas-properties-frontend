@@ -11,4 +11,48 @@
       <p>Aquí verás las estadísticas principales del sistema</p>
     </div>
   </div>
+
+  <div class="page-container">
+
+    @if (shouldShowJoinButton()) {
+      <!-- Alert para usuarios sin organización -->
+      <div class="alert alert-info">
+        <div class="alert-icon">
+          <i class="pi pi-info-circle"></i>
+        </div>
+        <div class="alert-content">
+          <h3 class="alert-title">No estás en una organización</h3>
+          <p class="alert-message">
+            Para acceder a las propiedades y locaciones, necesitas unirte a una organización usando un código de invitación.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="openJoinModal()"
+        >
+          <i class="pi pi-users"></i>
+          <span>Unirse a Organización</span>
+        </button>
+      </div>
+    }
+
+    @if (hasOrganization()) {
+      <div class="page-content">
+        <div class="placeholder-card">
+          <i class="pi pi-home placeholder-icon"></i>
+          <h2>Bienvenido al Dashboard</h2>
+          <p>Aquí verás las estadísticas principales del sistema</p>
+        </div>
+      </div>
+    }
+
+    <!-- Modal -->
+    @if (showJoinModal()) {
+      <app-join-organization-modal
+        (closeModal)="closeJoinModal()"
+        (organizationJoined)="onOrganizationJoined()"
+      />
+    }
+  </div>
 </div>

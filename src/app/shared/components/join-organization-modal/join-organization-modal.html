@@ -1,0 +1,80 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="pi pi-users"></i>
+        Unirse a una Organización
+      </h2>
+      <button
+        type="button"
+        class="btn-close"
+        (click)="close()"
+        [disabled]="isLoading()"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <p class="modal-description">
+        Ingresa el código de invitación que te proporcionó el administrador de la organización para unirte y acceder a las propiedades.
+      </p>
+
+      <form [formGroup]="joinForm" (ngSubmit)="onSubmit()">
+        <!-- Invitation Code -->
+        <div class="form-field">
+          <label for="invitationCode" class="form-label required">
+            Código de Invitación
+          </label>
+          <div class="input-wrapper">
+            <i class="pi pi-key input-icon"></i>
+            <input
+              type="text"
+              id="invitationCode"
+              formControlName="invitationCode"
+              placeholder="ABC-12D3"
+              class="form-input code-input"
+              [class.input-error]="isInvitationCodeInvalid"
+              maxlength="8"
+
+              [disabled]="isLoading()"
+            />
+          </div>
+          @if (isInvitationCodeInvalid) {
+            <span class="error-message">{{ getInvitationCodeErrorMessage() }}</span>
+          }
+          <small class="form-help">
+            El código tiene el formato ABC-12D3 (3 letras, guión, 2 números, 1 letra, 1 número)
+          </small>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="close()"
+            [disabled]="isLoading()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isLoading() || joinForm.invalid"
+          >
+            @if (isLoading()) {
+              <i class="pi pi-spin pi-spinner"></i>
+              <span>Uniéndose...</span>
+            } @else {
+              <i class="pi pi-check"></i>
+              <span>Unirse a Organización</span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
