@@ -1,0 +1,289 @@
+<div class="public-property-container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando información de la propiedad...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-container">
+      <i class="pi pi-exclamation-triangle"></i>
+      <h2>{{ error() }}</h2>
+      <p>La propiedad no está disponible o no existe.</p>
+    </div>
+  }
+
+  <!-- Property Content -->
+  @if (property() && !isLoading() && !error()) {
+    <div class="property-content">
+
+      <!-- Header con logo y nombre de organización -->
+      <header class="property-header">
+        <div class="header-content">
+          @if (property()?.organizationLogo) {
+            <img
+              [src]="property()!.organizationLogo"
+              [alt]="property()!.organizationName"
+              class="org-logo">
+          }
+          <div class="header-text">
+            <h1>{{ property()?.organizationName }}</h1>
+            <p>Vista de Propiedad</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- Galería de imágenes -->
+      <section class="image-gallery">
+        @if (property()?.imageUrls && property()!.imageUrls!.length > 0) {
+          <div class="gallery-container">
+            <button
+              class="gallery-nav prev"
+              (click)="previousImage()"
+              [disabled]="property()!.imageUrls!.length <= 1"
+              aria-label="Imagen anterior">
+              <i class="pi pi-chevron-left"></i>
+            </button>
+
+            <div class="main-image">
+              <img
+                [src]="property()!.imageUrls![currentImageIndex()]"
+                [alt]="'Imagen ' + (currentImageIndex() + 1) + ' de ' + property()!.propertyCode">
+              <div class="image-counter">
+                {{ currentImageIndex() + 1 }} / {{ property()!.imageUrls!.length }}
+              </div>
+            </div>
+
+            <button
+              class="gallery-nav next"
+              (click)="nextImage()"
+              [disabled]="property()!.imageUrls!.length <= 1"
+              aria-label="Imagen siguiente">
+              <i class="pi pi-chevron-right"></i>
+            </button>
+
+            <!-- Thumbnails -->
+            @if (property()!.imageUrls!.length > 1) {
+              <div class="thumbnails">
+                @for (image of property()!.imageUrls!; track $index) {
+                  <button
+                    class="thumbnail-button"
+                    [class.active]="currentImageIndex() === $index"
+                    (click)="goToImage($index)"
+                    [attr.aria-label]="'Ver imagen ' + ($index + 1)">
+                    <img
+                      [src]="image"
+                      [alt]="'Miniatura ' + ($index + 1)">
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="no-image">
+            <i class="pi pi-image"></i>
+            <p>Sin imágenes disponibles</p>
+          </div>
+        }
+      </section>
+
+      <!-- Contenedor principal con grid -->
+      <div class="content-wrapper">
+
+        <!-- Hero Section - Información principal destacada -->
+        <section class="hero-section">
+          <div class="property-badge">
+            <i class="pi pi-home"></i>
+            <span>{{ property()?.propertyType }}</span>
+          </div>
+
+          <h2 class="property-title">{{ property()?.propertyCode }}</h2>
+
+          <div class="price-showcase">
+            <span class="price-label">Renta mensual</span>
+            <span class="price-amount">{{ formatCurrency(property()?.monthlyRent) }}</span>
+            <span class="price-period">/ mes</span>
+          </div>
+
+          <div class="location-info">
+            <i class="pi pi-map-marker"></i>
+            <div class="location-text">
+              <p class="address">{{ property()?.address }}</p>
+              <p class="city">{{ property()?.locationName }} - {{ property()?.city }}, {{ property()?.state }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Características Principales -->
+        <section class="section-card">
+          <div class="section-header">
+            <i class="pi pi-th-large"></i>
+            <h3>Características Principales</h3>
+          </div>
+
+          <div class="features-grid">
+            @if (property()?.bedrooms) {
+              <div class="feature-box">
+                <div class="feature-icon bedrooms">
+                  <i class="pi pi-moon"></i>
+                </div>
+                <div class="feature-content">
+                  <span class="feature-value">{{ property()!.bedrooms }}</span>
+                  <span class="feature-label">Recámaras</span>
+                </div>
+              </div>
+            }
+
+            @if (property()?.bathrooms) {
+              <div class="feature-box">
+                <div class="feature-icon bathrooms">
+                  <i class="pi pi-circle"></i>
+                </div>
+                <div class="feature-content">
+                  <span class="feature-value">{{ property()!.bathrooms }}</span>
+                  <span class="feature-label">Baños</span>
+                </div>
+              </div>
+            }
+
+            @if (property()?.halfBathrooms) {
+              <div class="feature-box">
+                <div class="feature-icon half-bath">
+                  <i class="pi pi-circle-fill"></i>
+                </div>
+                <div class="feature-content">
+                  <span class="feature-value">{{ property()!.halfBathrooms }}</span>
+                  <span class="feature-label">Medios Baños</span>
+                </div>
+              </div>
+            }
+
+            @if (property()?.parkingSpaces) {
+              <div class="feature-box">
+                <div class="feature-icon parking">
+                  <i class="pi pi-car"></i>
+                </div>
+                <div class="feature-content">
+                  <span class="feature-value">{{ property()!.parkingSpaces }}</span>
+                  <span class="feature-label">Estacionamientos</span>
+                </div>
+              </div>
+            }
+
+            @if (property()?.totalAreaM2) {
+              <div class="feature-box">
+                <div class="feature-icon area">
+                  <i class="pi pi-arrows-alt"></i>
+                </div>
+                <div class="feature-content">
+                  <span class="feature-value">{{ property()!.totalAreaM2 }}</span>
+                  <span class="feature-label">m² totales</span>
+                </div>
+              </div>
+            }
+
+            @if (property()?.floors) {
+              <div class="feature-box">
+                <div class="feature-icon floors">
+                  <i class="pi pi-building"></i>
+                </div>
+                <div class="feature-content">
+                  <span class="feature-value">{{ property()!.floors }}</span>
+                  <span class="feature-label">{{ property()!.floors === 1 ? 'Piso' : 'Pisos' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Espacios de la Propiedad -->
+        @if (getFeaturesList().length > 0) {
+          <section class="section-card">
+            <div class="section-header">
+              <i class="pi pi-list"></i>
+              <h3>Espacios Disponibles</h3>
+            </div>
+
+            <div class="spaces-grid">
+              @for (feature of getFeaturesList(); track feature) {
+                <div class="space-tag">
+                  <i class="pi pi-check-circle"></i>
+                  <span>{{ feature }}</span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Servicios Incluidos -->
+        @if (getServicesList().length > 0) {
+          <section class="section-card services-card">
+            <div class="section-header">
+              <i class="pi pi-wrench"></i>
+              <h3>Servicios Incluidos</h3>
+            </div>
+
+            <div class="services-grid">
+              @for (service of getServicesList(); track service) {
+                <div class="service-tag">
+                  <i class="pi pi-bolt"></i>
+                  <span>{{ service }}</span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Cuota de Agua -->
+        @if (property()?.waterFee && property()!.waterFee! > 0 && !property()?.includesWater) {
+          <section class="alert-card water-alert">
+            <div class="alert-icon">
+              <i class="pi pi-info-circle"></i>
+            </div>
+            <div class="alert-content">
+              <h4>Cuota de agua adicional</h4>
+              <p class="alert-amount">{{ formatCurrency(property()!.waterFee) }}</p>
+              <p class="alert-description">Se agrega a la renta mensual</p>
+            </div>
+          </section>
+        }
+
+        <!-- Notas Adicionales -->
+        @if (property()?.notes) {
+          <section class="section-card notes-card">
+            <div class="section-header">
+              <i class="pi pi-file-edit"></i>
+              <h3>Información Adicional</h3>
+            </div>
+
+            <div class="notes-content">
+              <p>{{ property()!.notes }}</p>
+            </div>
+          </section>
+        }
+
+        <!-- Call to Action -->
+        <section class="cta-card">
+          <div class="cta-content">
+            <i class="pi pi-phone"></i>
+            <div class="cta-text">
+              <h3>¿Te interesa esta propiedad?</h3>
+              <p>Contacta a <strong>{{ property()?.organizationName }}</strong> para más información y agendar una visita</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="property-footer">
+        <p>Propiedad gestionada por <strong>{{ property()?.organizationName }}</strong></p>
+        <p class="footer-powered">Powered by RentMaster</p>
+      </footer>
+
+    </div>
+  }
+</div>

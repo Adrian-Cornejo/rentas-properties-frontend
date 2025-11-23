@@ -12,6 +12,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'public/property',
+    loadComponent: () => import('./features/public/public-property-view/public-property-view').then(m => m.PublicPropertyViewComponent),
+    title: 'Propiedad en Renta'
+  },
+  {
     path: 'auth',
     component: AuthLayoutComponent,
     canActivate: [guestGuard],

@@ -1,0 +1,29 @@
+export interface PublicPropertyResponse {
+  id: string;
+  propertyCode: string;
+  propertyType: string;
+  address: string;
+  monthlyRent: number;
+  waterFee?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  halfBathrooms?: number;
+  hasLivingRoom: boolean;
+  hasDiningRoom: boolean;
+  hasKitchen: boolean;
+  hasServiceArea: boolean;
+  parkingSpaces?: number;
+  totalAreaM2?: number;
+  includesWater: boolean;
+  includesElectricity: boolean;
+  includesGas: boolean;
+  includesInternet: boolean;
+  notes?: string;
+  imageUrls?: string[];
+  locationName?: string;
+  city?: string;
+  state?: string;
+  organizationName?: string;
+  organizationLogo?: string;
+  organizationPrimaryColor?: string;
+}
