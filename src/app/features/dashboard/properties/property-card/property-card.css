@@ -5,7 +5,7 @@
   height: 200px;
   overflow: hidden;
   border-radius: 0.5rem 0.5rem 0 0;
-  background: var(--surface);
+  background: var(--bg-base);
 }
 
 .property-image img {
@@ -23,11 +23,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-tertiary);
-  background: oklch(from var(--surface) l c h / 0.5);
+  color: var(--text-secondary);
+  background: oklch(from var(--bg-base) l c h / 0.5);
 }
 
 .property-card {
   /* Agregar overflow hidden si no existe */
   overflow: hidden;
+}
+
+.action-button.share {
+  background: var(--color-info-500);
+  color: white;
+}
+
+.action-button.share:hover {
+  background: var(--color-info-500);
+  transform: translateY(-2px);
+}
+
+.action-button.share:active {
+  transform: translateY(0);
+}
+
+/* También puedes agregar un efecto de pulso cuando se copia */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.action-button.share.copied {
+  animation: pulse 0.3s ease;
 }

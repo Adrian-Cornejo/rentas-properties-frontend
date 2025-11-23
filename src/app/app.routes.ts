@@ -12,6 +12,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'public/property',
+    loadComponent: () => import('./features/public/public-property-view/public-property-view').then(m => m.PublicPropertyViewComponent),
+    title: 'Propiedad en Renta'
+  },
+  {
     path: 'auth',
     component: AuthLayoutComponent,
     canActivate: [guestGuard],
@@ -78,7 +83,21 @@ export const routes: Routes = [
       },
       {
         path: 'tenants',
-        loadComponent: () => import('./features/dashboard/tenants/tenants').then(m => m.TenantsComponent)
+        loadComponent: () => import('./features/dashboard/tenants/tenants').then(m => m.TenantsComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/dashboard/tenants/tenant-list/tenant-list').then(m => m.TenantListComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/dashboard/tenants/tenant-form/tenant-form').then(m => m.TenantFormComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./features/dashboard/tenants/tenant-form/tenant-form').then(m => m.TenantFormComponent)
+          }
+        ]
       },
       {
         path: 'contracts',

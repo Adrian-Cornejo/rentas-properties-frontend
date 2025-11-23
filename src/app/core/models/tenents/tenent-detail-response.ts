@@ -1,18 +1,18 @@
-import {TenantResponse} from './tenant-response';
-
-export interface TenantDetailResponse extends TenantResponse {
-  inePublicId?: string;
-  notes?: string;
-  activeContracts: ContractBasicInfo[];
-  contractHistory: ContractBasicInfo[];
-}
-
-export interface ContractBasicInfo {
+export interface TenantDetailResponse {
   id: string;
-  contractNumber: string;
-  propertyCode: string;
-  propertyAddress: string;
-  startDate: string;
-  endDate: string;
-  status: string;
+  organizationId: string;
+  organizationName: string;
+  fullName: string;
+  phone: string;
+  email?: string;
+  ineNumber?: string;
+  ineImageUrl?: string;
+  inePublicId?: string;
+  numberOfOccupants: number;
+  notes?: string;
+  isActive: boolean;
+  activeContractsCount: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }

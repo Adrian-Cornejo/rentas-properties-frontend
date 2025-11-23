@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {Component, Input, Output, EventEmitter, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PropertyResponse } from '../../../../core/models/properties/property-response';
+import { PublicPropertyService } from '../../../../core/services/public-property.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+
 
 @Component({
   selector: 'app-property-card',
@@ -10,6 +13,10 @@ import { PropertyResponse } from '../../../../core/models/properties/property-re
   styleUrl: '../properties.css',
 })
 export class PropertyCardComponent {
+
+  private publicPropertyService = inject(PublicPropertyService);
+  private notification = inject(NotificationService);
+
   @Input({ required: true }) property!: PropertyResponse;
   @Output() edit = new EventEmitter<string>();
   @Output() delete = new EventEmitter<string>();
@@ -47,5 +54,23 @@ export class PropertyCardComponent {
       'MANTENIMIENTO': 'status-maintenance'
     };
     return classes[status] || '';
+  }
+
+  async copyPublicLink(event: Event, propertyId: string): Promise<void> {
+    event.stopPropagation();
+
+    const success = await this.publicPropertyService.copyPublicLink(propertyId);
+
+    if (success) {
+      this.notification.success(
+        'Enlace copiado',
+        'El enlace público se copió al portapapeles'
+      );
+    } else {
+      this.notification.error(
+        'Error',
+        'No se pudo copiar el enlace'
+      );
+    }
   }
 }
