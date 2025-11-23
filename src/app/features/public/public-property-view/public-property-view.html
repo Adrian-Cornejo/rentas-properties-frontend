@@ -19,21 +19,15 @@
   <!-- Property Content -->
   @if (property() && !isLoading() && !error()) {
     <div class="property-content">
-
-      <!-- Header con logo y nombre de organización -->
+      <!-- Header con logo de organización -->
       <header class="property-header">
-        <div class="header-content">
-          @if (property()?.organizationLogo) {
-            <img
-              [src]="property()!.organizationLogo"
-              [alt]="property()!.organizationName"
-              class="org-logo">
-          }
-          <div class="header-text">
-            <h1>{{ property()?.organizationName }}</h1>
-            <p>Vista de Propiedad</p>
-          </div>
-        </div>
+        @if (property()?.organizationLogo) {
+          <img
+            [src]="property()!.organizationLogo"
+            [alt]="property()!.organizationName"
+            class="org-logo">
+        }
+        <h1>{{ property()?.organizationName }}</h1>
       </header>
 
       <!-- Galería de imágenes -->
@@ -43,8 +37,7 @@
             <button
               class="gallery-nav prev"
               (click)="previousImage()"
-              [disabled]="property()!.imageUrls!.length <= 1"
-              aria-label="Imagen anterior">
+              [disabled]="property()!.imageUrls!.length <= 1">
               <i class="pi pi-chevron-left"></i>
             </button>
 
@@ -52,16 +45,12 @@
               <img
                 [src]="property()!.imageUrls![currentImageIndex()]"
                 [alt]="'Imagen ' + (currentImageIndex() + 1) + ' de ' + property()!.propertyCode">
-              <div class="image-counter">
-                {{ currentImageIndex() + 1 }} / {{ property()!.imageUrls!.length }}
-              </div>
             </div>
 
             <button
               class="gallery-nav next"
               (click)="nextImage()"
-              [disabled]="property()!.imageUrls!.length <= 1"
-              aria-label="Imagen siguiente">
+              [disabled]="property()!.imageUrls!.length <= 1">
               <i class="pi pi-chevron-right"></i>
             </button>
 
@@ -69,15 +58,11 @@
             @if (property()!.imageUrls!.length > 1) {
               <div class="thumbnails">
                 @for (image of property()!.imageUrls!; track $index) {
-                  <button
-                    class="thumbnail-button"
+                  <img
+                    [src]="image"
+                    [alt]="'Miniatura ' + ($index + 1)"
                     [class.active]="currentImageIndex() === $index"
-                    (click)="goToImage($index)"
-                    [attr.aria-label]="'Ver imagen ' + ($index + 1)">
-                    <img
-                      [src]="image"
-                      [alt]="'Miniatura ' + ($index + 1)">
-                  </button>
+                    (click)="goToImage($index)">
                 }
               </div>
             }
@@ -90,200 +75,135 @@
         }
       </section>
 
-      <!-- Contenedor principal con grid -->
-      <div class="content-wrapper">
-
-        <!-- Hero Section - Información principal destacada -->
-        <section class="hero-section">
-          <div class="property-badge">
-            <i class="pi pi-home"></i>
-            <span>{{ property()?.propertyType }}</span>
+      <!-- Información principal -->
+      <section class="main-info">
+        <div class="info-header">
+          <div>
+            <span class="property-type">{{ property()?.propertyType }}</span>
+            <h2 class="property-code">{{ property()?.propertyCode }}</h2>
           </div>
-
-          <h2 class="property-title">{{ property()?.propertyCode }}</h2>
-
-          <div class="price-showcase">
+          <div class="price-tag">
             <span class="price-label">Renta mensual</span>
-            <span class="price-amount">{{ formatCurrency(property()?.monthlyRent) }}</span>
-            <span class="price-period">/ mes</span>
+            <span class="price">{{ formatCurrency(property()?.monthlyRent) }}</span>
           </div>
+        </div>
 
-          <div class="location-info">
-            <i class="pi pi-map-marker"></i>
-            <div class="location-text">
-              <p class="address">{{ property()?.address }}</p>
-              <p class="city">{{ property()?.locationName }} - {{ property()?.city }}, {{ property()?.state }}</p>
+        <div class="address">
+          <i class="pi pi-map-marker"></i>
+          <div>
+            <p class="address-text">{{ property()?.address }}</p>
+            <p class="location">{{ property()?.locationName }} - {{ property()?.city }}, {{ property()?.state }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Características -->
+      <section class="features-section">
+        <h3>Características</h3>
+        <div class="features-grid">
+
+          @if (property()?.floors) {
+            <div class="feature-item">
+              <i class="pi pi-flag"></i>
+              <span>{{ property()!.floors }} Pisos</span>
             </div>
-          </div>
-        </section>
+          }
 
-        <!-- Características Principales -->
-        <section class="section-card">
-          <div class="section-header">
-            <i class="pi pi-th-large"></i>
-            <h3>Características Principales</h3>
-          </div>
+          @if (property()?.bedrooms) {
+            <div class="feature-item">
+              <i class="pi pi-home"></i>
+              <span>{{ property()!.bedrooms }} Recámaras</span>
+            </div>
+          }
 
-          <div class="features-grid">
-            @if (property()?.bedrooms) {
-              <div class="feature-box">
-                <div class="feature-icon bedrooms">
-                  <i class="pi pi-moon"></i>
-                </div>
-                <div class="feature-content">
-                  <span class="feature-value">{{ property()!.bedrooms }}</span>
-                  <span class="feature-label">Recámaras</span>
-                </div>
-              </div>
-            }
+          @if (property()?.bathrooms) {
+            <div class="feature-item">
+              <i class="pi pi-building"></i>
+              <span>{{ property()!.bathrooms }} Baños completos</span>
+            </div>
+          }
 
-            @if (property()?.bathrooms) {
-              <div class="feature-box">
-                <div class="feature-icon bathrooms">
-                  <i class="pi pi-circle"></i>
-                </div>
-                <div class="feature-content">
-                  <span class="feature-value">{{ property()!.bathrooms }}</span>
-                  <span class="feature-label">Baños</span>
-                </div>
-              </div>
-            }
+          @if (property()?.halfBathrooms) {
+            <div class="feature-item">
+              <i class="pi pi-building"></i>
+              <span>{{ property()!.halfBathrooms }} Medios baños</span>
+            </div>
+          }
 
-            @if (property()?.halfBathrooms) {
-              <div class="feature-box">
-                <div class="feature-icon half-bath">
-                  <i class="pi pi-circle-fill"></i>
-                </div>
-                <div class="feature-content">
-                  <span class="feature-value">{{ property()!.halfBathrooms }}</span>
-                  <span class="feature-label">Medios Baños</span>
-                </div>
-              </div>
-            }
+          @if (property()?.parkingSpaces) {
+            <div class="feature-item">
+              <i class="pi pi-car"></i>
+              <span>{{ property()!.parkingSpaces }} Estacionamientos</span>
+            </div>
+          }
 
-            @if (property()?.parkingSpaces) {
-              <div class="feature-box">
-                <div class="feature-icon parking">
-                  <i class="pi pi-car"></i>
-                </div>
-                <div class="feature-content">
-                  <span class="feature-value">{{ property()!.parkingSpaces }}</span>
-                  <span class="feature-label">Estacionamientos</span>
-                </div>
-              </div>
-            }
+          @if (property()?.totalAreaM2) {
+            <div class="feature-item">
+              <i class="pi pi-chart-line"></i>
+              <span>{{ property()!.totalAreaM2 }} m²</span>
+            </div>
+          }
+        </div>
+      </section>
 
-            @if (property()?.totalAreaM2) {
-              <div class="feature-box">
-                <div class="feature-icon area">
-                  <i class="pi pi-arrows-alt"></i>
-                </div>
-                <div class="feature-content">
-                  <span class="feature-value">{{ property()!.totalAreaM2 }}</span>
-                  <span class="feature-label">m² totales</span>
-                </div>
-              </div>
-            }
-
-            @if (property()?.floors) {
-              <div class="feature-box">
-                <div class="feature-icon floors">
-                  <i class="pi pi-building"></i>
-                </div>
-                <div class="feature-content">
-                  <span class="feature-value">{{ property()!.floors }}</span>
-                  <span class="feature-label">{{ property()!.floors === 1 ? 'Piso' : 'Pisos' }}</span>
-                </div>
+      <!-- Espacios -->
+      @if (getFeaturesList().length > 0) {
+        <section class="spaces-section">
+          <h3>Espacios</h3>
+          <div class="spaces-list">
+            @for (feature of getFeaturesList(); track feature) {
+              <div class="space-item">
+                <i class="pi pi-check-circle"></i>
+                <span>{{ feature }}</span>
               </div>
             }
           </div>
         </section>
+      }
 
-        <!-- Espacios de la Propiedad -->
-        @if (getFeaturesList().length > 0) {
-          <section class="section-card">
-            <div class="section-header">
-              <i class="pi pi-list"></i>
-              <h3>Espacios Disponibles</h3>
-            </div>
+      <!-- Servicios incluidos -->
+      @if (getServicesList().length > 0) {
+        <section class="services-section">
+          <h3>Servicios</h3>
+          <div class="services-list">
+            @for (service of getServicesList(); track service) {
+              <div class="service-item">
+                <i class="pi pi-check"></i>
+                <span>{{ service }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
 
-            <div class="spaces-grid">
-              @for (feature of getFeaturesList(); track feature) {
-                <div class="space-tag">
-                  <i class="pi pi-check-circle"></i>
-                  <span>{{ feature }}</span>
-                </div>
-              }
-            </div>
-          </section>
-        }
-
-        <!-- Servicios Incluidos -->
-        @if (getServicesList().length > 0) {
-          <section class="section-card services-card">
-            <div class="section-header">
-              <i class="pi pi-wrench"></i>
-              <h3>Servicios Incluidos</h3>
-            </div>
-
-            <div class="services-grid">
-              @for (service of getServicesList(); track service) {
-                <div class="service-tag">
-                  <i class="pi pi-bolt"></i>
-                  <span>{{ service }}</span>
-                </div>
-              }
-            </div>
-          </section>
-        }
-
-        <!-- Cuota de Agua -->
-        @if (property()?.waterFee && property()!.waterFee! > 0 && !property()?.includesWater) {
-          <section class="alert-card water-alert">
-            <div class="alert-icon">
-              <i class="pi pi-info-circle"></i>
-            </div>
-            <div class="alert-content">
-              <h4>Cuota de agua adicional</h4>
-              <p class="alert-amount">{{ formatCurrency(property()!.waterFee) }}</p>
-              <p class="alert-description">Se agrega a la renta mensual</p>
-            </div>
-          </section>
-        }
-
-        <!-- Notas Adicionales -->
-        @if (property()?.notes) {
-          <section class="section-card notes-card">
-            <div class="section-header">
-              <i class="pi pi-file-edit"></i>
-              <h3>Información Adicional</h3>
-            </div>
-
-            <div class="notes-content">
-              <p>{{ property()!.notes }}</p>
-            </div>
-          </section>
-        }
-
-        <!-- Call to Action -->
-        <section class="cta-card">
-          <div class="cta-content">
-            <i class="pi pi-phone"></i>
-            <div class="cta-text">
-              <h3>¿Te interesa esta propiedad?</h3>
-              <p>Contacta a <strong>{{ property()?.organizationName }}</strong> para más información y agendar una visita</p>
+      <!-- Cuota de agua -->
+      @if (property()?.waterFee && property()!.waterFee! > 0 && !property()?.includesWater) {
+        <section class="water-fee-section">
+          <div class="water-fee-card">
+            <i class="pi pi-info-circle"></i>
+            <div>
+              <p class="fee-label">Cuota de agua adicional</p>
+              <p class="fee-amount">{{ formatCurrency(property()!.waterFee) }}</p>
             </div>
           </div>
         </section>
+      }
 
-      </div>
+      <!-- Notas adicionales -->
+      @if (property()?.notes) {
+        <section class="notes-section">
+          <h3>Información adicional</h3>
+          <p class="notes-text">{{ property()!.notes }}</p>
+        </section>
+      }
 
-      <!-- Footer -->
+      <!-- Footer con información de contacto -->
       <footer class="property-footer">
-        <p>Propiedad gestionada por <strong>{{ property()?.organizationName }}</strong></p>
-        <p class="footer-powered">Powered by RentMaster</p>
+        <div class="contact-info">
+          <p>¿Interesado en esta propiedad?</p>
+          <p class="contact-text">Contacta a <strong>{{ property()?.organizationName }}</strong> para más información</p>
+        </div>
       </footer>
-
     </div>
   }
 </div>

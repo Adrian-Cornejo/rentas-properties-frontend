@@ -4,6 +4,7 @@ export interface PublicPropertyResponse {
   propertyType: string;
   address: string;
   monthlyRent: number;
+  floors?: number;
   waterFee?: number;
   bedrooms?: number;
   bathrooms?: number;
