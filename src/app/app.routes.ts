@@ -137,7 +137,25 @@ export const routes: Routes = [
       },
       {
         path: 'maintenance',
-        loadComponent: () => import('./features/dashboard/maintenance/maintenance').then(m => m.MaintenanceComponent)
+        loadComponent: () => import('./features/dashboard/maintenance/maintenance').then(m => m.MaintenanceComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/dashboard/maintenance/maintenance-list/maintenance-list').then(m => m.MaintenanceListComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/dashboard/maintenance/maintenance-form/maintenance-form').then(m => m.MaintenanceFormComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./features/dashboard/maintenance/maintenance-form/maintenance-form').then(m => m.MaintenanceFormComponent)
+          },
+          {
+            path: 'complete/:id',
+            loadComponent: () => import('./features/dashboard/maintenance/maintenance-complete/maintenance-complete').then(m => m.MaintenanceCompleteComponent)
+          }
+        ]
       },
       {
         path: 'organization',

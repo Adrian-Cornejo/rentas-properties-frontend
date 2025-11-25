@@ -1,0 +1,175 @@
+<div class="form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="onCancel()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="header-title-section">
+        <h1 class="form-title">Completar Mantenimiento</h1>
+        <p class="form-subtitle">Registra el costo final y marca el trabajo como completado</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Cargando información del mantenimiento...</p>
+  </div>
+
+  <!-- Form Content -->
+  <div class="form-content" *ngIf="!isLoading() && record()">
+    <!-- Record Summary -->
+    <div class="record-summary">
+      <h3>Resumen del Trabajo</h3>
+
+      <div class="summary-grid">
+        <div class="summary-item full-width">
+          <span class="summary-label">Título:</span>
+          <span class="summary-value">{{ record()!.title }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Propiedad:</span>
+          <span class="summary-value">{{ record()!.property.propertyCode }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Dirección:</span>
+          <span class="summary-value">{{ record()!.property.address }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Tipo:</span>
+          <span class="summary-value">{{ getTypeLabel() }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Categoría:</span>
+          <span class="summary-value">{{ getCategoryLabel() }}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Fecha Programada:</span>
+          <span class="summary-value">{{ formatDate(record()!.maintenanceDate) }}</span>
+        </div>
+
+        <div class="summary-item" *ngIf="record()!.assignedTo">
+          <span class="summary-label">Asignado a:</span>
+          <span class="summary-value">{{ record()!.assignedTo }}</span>
+        </div>
+
+        <div class="summary-item full-width" *ngIf="record()!.description">
+          <span class="summary-label">Descripción:</span>
+          <span class="summary-value description">{{ record()!.description }}</span>
+        </div>
+
+        <div class="summary-item" *ngIf="record()!.estimatedCost">
+          <span class="summary-label">Costo Estimado:</span>
+          <span class="summary-value cost">{{ formatCurrency(record()!.estimatedCost) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Complete Form -->
+    <form [formGroup]="completeForm" (ngSubmit)="onSubmit()">
+      <div class="complete-section">
+        <h3>Información de Finalización</h3>
+
+        <div class="form-group">
+          <label for="actualCost">Costo Real del Trabajo *</label>
+          <input
+            id="actualCost"
+            type="number"
+            formControlName="actualCost"
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+          />
+          <span class="error-message" *ngIf="completeForm.get('actualCost')?.invalid && completeForm.get('actualCost')?.touched">
+            El costo real es requerido y debe ser mayor o igual a 0
+          </span>
+        </div>
+
+        <!-- Cost Comparison -->
+        <div class="cost-comparison" *ngIf="record()!.estimatedCost && completeForm.get('actualCost')?.value">
+          <div class="comparison-card">
+            <div class="comparison-item">
+              <span class="comparison-label">Costo Estimado:</span>
+              <span class="comparison-value">{{ formatCurrency(record()!.estimatedCost) }}</span>
+            </div>
+            <div class="comparison-item">
+              <span class="comparison-label">Costo Real:</span>
+              <span class="comparison-value">{{ formatCurrency(completeForm.get('actualCost')?.value) }}</span>
+            </div>
+            <div class="comparison-divider"></div>
+            <div class="comparison-item difference" [class.over-budget]="getCostDifference() > 0" [class.under-budget]="getCostDifference() < 0">
+              <span class="comparison-label">Diferencia:</span>
+              <span class="comparison-value">
+                {{ getCostDifference() > 0 ? '+' : '' }}{{ formatCurrency(getCostDifference()) }}
+                <span class="percentage" *ngIf="getCostDifferencePercentage() !== 0">
+                  ({{ getCostDifferencePercentage() > 0 ? '+' : '' }}{{ getCostDifferencePercentage().toFixed(1) }}%)
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Warning Messages -->
+        <div class="warning-message" *ngIf="getCostDifference() > (record()!.estimatedCost * 0.2)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <path d="M12 9v4"/>
+            <path d="M12 17h.01"/>
+          </svg>
+          <div class="warning-content">
+            <strong>El costo real supera significativamente el estimado</strong>
+            <p>El costo real es más del 20% mayor que el costo estimado. Verifica que los montos sean correctos.</p>
+          </div>
+        </div>
+
+        <div class="success-message" *ngIf="getCostDifference() < -(record()!.estimatedCost * 0.1)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <div class="success-content">
+            <strong>¡Buen trabajo!</strong>
+            <p>El costo real es menor que el estimado, resultando en ahorro.</p>
+          </div>
+        </div>
+
+        <div class="info-message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" x2="12" y1="16" y2="12"/>
+            <line x1="12" x2="12.01" y1="8" y2="8"/>
+          </svg>
+          <div class="info-content">
+            <p>Al confirmar, el registro de mantenimiento se marcará como <strong>COMPLETADO</strong> y se registrará la fecha de finalización. Esta acción no se puede deshacer desde esta pantalla, pero puedes editar el registro posteriormente si es necesario.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="onCancel()" [disabled]="isSaving()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="isSaving() || completeForm.invalid">
+          <span *ngIf="!isSaving()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Marcar como Completado
+          </span>
+          <span *ngIf="isSaving()">
+            <span class="spinner"></span>
+            Completando...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
