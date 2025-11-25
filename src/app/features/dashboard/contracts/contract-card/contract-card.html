@@ -1,0 +1,74 @@
+<div class="card contract-card">
+  <!-- Header with Contract Number -->
+  <div class="card-header">
+    <div class="contract-number">{{ contract.contractNumber }}</div>
+    <div class="status-badges">
+      <span class="badge" [ngClass]="getStatusClass()">
+        {{ getStatusLabel() }}
+      </span>
+      @if (isExpiringSoon()) {
+        <span class="badge status-expiring-soon">
+          Próximo a vencer
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- Property Info -->
+  <div class="card-section">
+    <div class="property-info">
+      <div class="property-code">{{ contract.propertyCode }}</div>
+      <div class="property-address">{{ contract.propertyAddress }}</div>
+    </div>
+  </div>
+
+  <!-- Contract Dates -->
+  <div class="card-section">
+    <div class="date-range">
+      <div class="date-item">
+        <span class="date-label">Inicio:</span>
+        <span class="date-value">{{ formatDate(contract.startDate) }}</span>
+      </div>
+      <span class="date-separator">→</span>
+      <div class="date-item">
+        <span class="date-label">Fin:</span>
+        <span class="date-value">{{ formatDate(contract.endDate) }}</span>
+      </div>
+    </div>
+    @if (daysUntilExpiration() > 0 && contract.status === 'ACTIVO') {
+      <div class="days-remaining">
+        <span class="days-label">Faltan {{ daysUntilExpiration() }} días</span>
+      </div>
+    }
+  </div>
+
+  <!-- Financial Info -->
+  <div class="card-section">
+    <div class="financial-grid">
+      <div class="financial-item">
+        <span class="financial-label">Renta Mensual:</span>
+        <span class="financial-value">{{ formatCurrency(contract.monthlyRent) }}</span>
+      </div>
+      <div class="financial-item">
+        <span class="financial-label">Depósito:</span>
+        <span class="financial-value">{{ formatCurrency(contract.depositAmount) }}</span>
+      </div>
+    </div>
+    <div class="deposit-status">
+      <span class="deposit-label">Estado del depósito:</span>
+      <span class="badge" [ngClass]="getDepositStatusClass()">
+        {{ getDepositStatusLabel() }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="card-actions">
+    <button class="btn-secondary btn-sm" (click)="onEdit()">
+      Editar
+    </button>
+    <button class="btn-danger btn-sm" (click)="onDelete()">
+      Eliminar
+    </button>
+  </div>
+</div>

@@ -1,0 +1,162 @@
+<div class="list-container">
+  <!-- Header -->
+  <div class="list-header">
+    <div class="header-left">
+      <h1 class="page-title">Contratos</h1>
+      <p class="page-subtitle">Gestiona los contratos de arrendamiento</p>
+    </div>
+    <div class="header-right">
+      <button class="btn-primary" (click)="startCreating()">
+        <span class="btn-icon">+</span>
+        Nuevo Contrato
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon primary">
+        <span>📋</span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ totalContracts() }}</div>
+        <div class="stat-label">Total Contratos</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <span>✓</span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ activeCount() }}</div>
+        <div class="stat-label">Activos</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon warning">
+        <span>⚠</span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ expiringSoonCount() }}</div>
+        <div class="stat-label">Por Vencer (30 días)</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon error">
+        <span>⏱</span>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ expiredCount() }}</div>
+        <div class="stat-label">Vencidos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="filter-tabs">
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'ALL'"
+        (click)="setFilter('ALL')">
+        Todos ({{ totalContracts() }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'ACTIVO'"
+        (click)="setFilter('ACTIVO')">
+        Activos ({{ activeCount() }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'EXPIRING_SOON'"
+        (click)="setFilter('EXPIRING_SOON')">
+        Por Vencer ({{ expiringSoonCount() }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'VENCIDO'"
+        (click)="setFilter('VENCIDO')">
+        Vencidos ({{ expiredCount() }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'RENOVADO'"
+        (click)="setFilter('RENOVADO')">
+        Renovados
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'CANCELADO'"
+        (click)="setFilter('CANCELADO')">
+        Cancelados
+      </button>
+    </div>
+
+    <div class="search-box">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por número, código de propiedad o dirección..."
+        [value]="searchTerm()"
+        (input)="updateSearch($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Contracts Grid -->
+  <div class="cards-grid" *ngIf="!isLoading()">
+    @if (filteredContracts().length > 0) {
+      @for (contract of filteredContracts(); track contract.id) {
+        <app-contract-card
+          [contract]="contract"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)"
+        />
+      }
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>No se encontraron contratos</h3>
+        <p>No hay contratos que coincidan con los filtros seleccionados</p>
+      </div>
+    }
+  </div>
+
+  <!-- Skeleton Loaders -->
+  <div class="cards-grid" *ngIf="isLoading()">
+    @for (i of [1,2,3,4,5,6]; track i) {
+      <div class="card">
+        <p-skeleton width="100%" height="2rem" styleClass="mb-3"></p-skeleton>
+        <p-skeleton width="80%" height="1.5rem" styleClass="mb-2"></p-skeleton>
+        <p-skeleton width="60%" height="1.5rem" styleClass="mb-3"></p-skeleton>
+        <p-skeleton width="100%" height="4rem"></p-skeleton>
+      </div>
+    }
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  @if (showDeleteConfirm()) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Confirmar Eliminación</h3>
+        <p class="modal-message">
+          ¿Estás seguro de que deseas eliminar este contrato?
+          Esta acción no se puede deshacer.
+        </p>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cancelDelete()">
+            Cancelar
+          </button>
+          <button class="btn-danger" (click)="executeDelete()">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

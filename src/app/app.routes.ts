@@ -101,7 +101,21 @@ export const routes: Routes = [
       },
       {
         path: 'contracts',
-        loadComponent: () => import('./features/dashboard/contracts/contracts').then(m => m.ContractsComponent)
+        loadComponent: () => import('./features/dashboard/contracts/contracts').then(m => m.ContractsComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/dashboard/contracts/contract-list/contract-list').then(m => m.ContractListComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/dashboard/contracts/contract-form/contract-form').then(m => m.ContractFormComponent)
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./features/dashboard/contracts/contract-form/contract-form').then(m => m.ContractFormComponent)
+          }
+        ]
       },
       {
         path: 'payments',

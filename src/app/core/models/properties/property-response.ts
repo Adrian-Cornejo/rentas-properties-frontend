@@ -1,11 +1,11 @@
 export interface PropertyResponse {
   id: string;
   propertyCode: string;
-  propertyType: 'CASA' | 'DEPARTAMENTO' | 'LOCAL_COMERCIAL';
+  propertyType: string;
   address: string;
   monthlyRent: number;
   waterFee: number;
-  status: 'DISPONIBLE' | 'RENTADA' | 'MANTENIMIENTO';
+  status: string;
   locationId?: string;
   locationName?: string;
   organizationId: string;
