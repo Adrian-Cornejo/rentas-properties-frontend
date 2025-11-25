@@ -1,3 +1,4 @@
+import { PaymentResponse } from './payment-response';
 export interface ContractDto {
   id: string;
   contractNumber: string;

@@ -1,0 +1,208 @@
+<div class="list-container">
+  <!-- Header -->
+  <div class="list-header">
+    <div class="header-left">
+      <h1 class="page-title">Pagos</h1>
+      <p class="page-subtitle">Gestiona los pagos de renta y servicios agrupados por propiedad</p>
+    </div>
+    <div class="header-right">
+      <button class="btn-secondary btn-sm" (click)="expandAll()" *ngIf="groupedPayments().length > 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+        Expandir Todas
+      </button>
+      <button class="btn-secondary btn-sm" (click)="collapseAll()" *ngIf="groupedPayments().length > 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        Contraer Todas
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" x2="12" y1="2" y2="22"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ totalPayments() }}</div>
+        <div class="stat-label">Total Pagos</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ pendingCount() }}</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ paidCount() }}</div>
+        <div class="stat-label">Pagados</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon error">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" x2="12" y1="8" y2="12"/>
+          <line x1="12" x2="12.01" y1="16" y2="16"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ overdueCount() }}</div>
+        <div class="stat-label">Atrasados</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="filter-tabs">
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'ALL'"
+        (click)="setFilter('ALL')">
+        Todos ({{ totalPayments() }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'PENDIENTE'"
+        (click)="setFilter('PENDIENTE')">
+        Pendientes ({{ pendingCount() }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'PAGADO'"
+        (click)="setFilter('PAGADO')">
+        Pagados ({{ paidCount() }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterStatus() === 'ATRASADO'"
+        (click)="setFilter('ATRASADO')">
+        Atrasados ({{ overdueCount() }})
+      </button>
+    </div>
+
+    <div class="search-box">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar por contrato, código de propiedad o dirección..."
+        [value]="searchTerm()"
+        (input)="updateSearch($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Grouped Payments -->
+  <div class="property-groups" *ngIf="!isLoading()">
+    @if (groupedPayments().length > 0) {
+      @for (group of groupedPayments(); track group.propertyCode) {
+        <div class="property-group">
+          <!-- Property Header -->
+          <div class="property-header" (click)="toggleProperty(group.propertyCode)">
+            <div class="property-info">
+              <div class="property-title">
+                <div class="property-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <div class="property-details">
+                  <h3 class="property-code">{{ group.propertyCode }}</h3>
+                  <p class="property-address">{{ group.propertyAddress }}</p>
+                </div>
+              </div>
+              <button class="expand-button" [class.expanded]="isPropertyExpanded(group.propertyCode)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <div class="property-summary">
+              <div class="summary-stat">
+                <span class="summary-label">Total Pagos:</span>
+                <span class="summary-value">{{ group.payments.length }}</span>
+              </div>
+              <div class="summary-stat">
+                <span class="summary-label">Monto Total:</span>
+                <span class="summary-value">{{ formatCurrency(group.totalAmount) }}</span>
+              </div>
+              <div class="summary-stat" *ngIf="group.pendingAmount > 0">
+                <span class="summary-label">Pendiente:</span>
+                <span class="summary-value warning">{{ formatCurrency(group.pendingAmount) }}</span>
+              </div>
+              <div class="summary-stat" *ngIf="group.overdueAmount > 0">
+                <span class="summary-label">Atrasado:</span>
+                <span class="summary-value error">{{ formatCurrency(group.overdueAmount) }}</span>
+              </div>
+              <div class="summary-stat" *ngIf="group.paidAmount > 0">
+                <span class="summary-label">Pagado:</span>
+                <span class="summary-value success">{{ formatCurrency(group.paidAmount) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payments Grid (Collapsible) -->
+          <div class="payments-grid" *ngIf="isPropertyExpanded(group.propertyCode)">
+            @for (payment of group.payments; track payment.id) {
+              <app-payment-card
+                [payment]="payment"
+                (markAsPaid)="onMarkAsPaid($event)"
+                (addLateFee)="onAddLateFee($event)"
+              />
+            }
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+            <path d="M12 18V6"/>
+          </svg>
+        </div>
+        <h3>No se encontraron pagos</h3>
+        <p>No hay pagos que coincidan con los filtros seleccionados</p>
+      </div>
+    }
+  </div>
+
+  <!-- Skeleton Loaders -->
+  <div class="property-groups" *ngIf="isLoading()">
+    @for (i of [1,2,3]; track i) {
+      <div class="property-group">
+        <div class="property-header">
+          <p-skeleton width="60%" height="3rem"></p-skeleton>
+          <p-skeleton width="30%" height="2rem"></p-skeleton>
+        </div>
+      </div>
+    }
+  </div>
+</div>

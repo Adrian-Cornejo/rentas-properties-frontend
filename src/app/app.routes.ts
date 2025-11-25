@@ -119,7 +119,21 @@ export const routes: Routes = [
       },
       {
         path: 'payments',
-        loadComponent: () => import('./features/dashboard/payments/payments').then(m => m.PaymentsComponent)
+        loadComponent: () => import('./features/dashboard/payments/payments').then(m => m.PaymentsComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/dashboard/payments/payment-list/payment-list').then(m => m.PaymentListComponent)
+          },
+          {
+            path: 'mark-paid/:id',
+            loadComponent: () => import('./features/dashboard/payments/payment-form/payment-form').then(m => m.PaymentFormComponent)
+          },
+          {
+            path: 'add-late-fee/:id',
+            loadComponent: () => import('./features/dashboard/payments/payment-form/payment-form').then(m => m.PaymentFormComponent)
+          }
+        ]
       },
       {
         path: 'maintenance',

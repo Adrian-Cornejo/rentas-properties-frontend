@@ -1,0 +1,186 @@
+<div class="form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="onCancel()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="header-title-section">
+        <h1 class="form-title" *ngIf="formType() === 'mark-paid'">Marcar Pago como Pagado</h1>
+        <h1 class="form-title" *ngIf="formType() === 'add-late-fee'">Agregar Recargo por Mora</h1>
+        <p class="form-subtitle" *ngIf="payment()">
+          {{ getTypeLabel() }} - {{ getPeriodLabel() }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Cargando información del pago...</p>
+  </div>
+
+  <!-- Form Content -->
+  <div class="form-content" *ngIf="!isLoading() && payment()">
+    <!-- Payment Info Summary -->
+    <div class="payment-summary">
+      <h3>Información del Pago</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="summary-label">Contrato:</span>
+          <span class="summary-value">{{ payment()!.contract.contractNumber }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Propiedad:</span>
+          <span class="summary-value">{{ payment()!.contract.propertyCode }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Dirección:</span>
+          <span class="summary-value">{{ payment()!.contract.propertyAddress }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Monto Base:</span>
+          <span class="summary-value">{{ formatCurrency(payment()!.amount) }}</span>
+        </div>
+        <div class="summary-item" *ngIf="payment()!.lateFee > 0">
+          <span class="summary-label">Recargo Actual:</span>
+          <span class="summary-value text-error">{{ formatCurrency(payment()!.lateFee) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Total a Pagar:</span>
+          <span class="summary-value total">{{ formatCurrency(payment()!.totalAmount) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mark as Paid Form -->
+    <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" *ngIf="formType() === 'mark-paid'">
+      <div class="tab-content">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="paymentMethod">Método de Pago *</label>
+            <select id="paymentMethod" formControlName="paymentMethod">
+              <option value="">Selecciona un método</option>
+              <option value="EFECTIVO">Efectivo</option>
+              <option value="TRANSFERENCIA">Transferencia</option>
+              <option value="DEPOSITO">Depósito Bancario</option>
+              <option value="TARJETA">Tarjeta</option>
+              <option value="CHEQUE">Cheque</option>
+              <option value="OTRO">Otro</option>
+            </select>
+            <span class="error-message" *ngIf="paymentForm.get('paymentMethod')?.invalid && paymentForm.get('paymentMethod')?.touched">
+              El método de pago es requerido
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="referenceNumber">Número de Referencia</label>
+            <input
+              id="referenceNumber"
+              type="text"
+              formControlName="referenceNumber"
+              placeholder="Número de transacción o referencia"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="paidAt">Fecha de Pago *</label>
+            <input
+              id="paidAt"
+              type="date"
+              formControlName="paidAt"
+            />
+            <span class="error-message" *ngIf="paymentForm.get('paidAt')?.invalid && paymentForm.get('paidAt')?.touched">
+              La fecha de pago es requerida
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="notes">Notas</label>
+            <textarea
+              id="notes"
+              formControlName="notes"
+              rows="4"
+              placeholder="Notas adicionales sobre el pago..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class=" btn btn-secondary" (click)="onCancel()" [disabled]="isSaving()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+          <span *ngIf="!isSaving()">Marcar como Pagado</span>
+          <span *ngIf="isSaving()">
+            <span class="spinner"></span>
+            Guardando...
+          </span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Add Late Fee Form -->
+    <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" *ngIf="formType() === 'add-late-fee'">
+      <div class="tab-content">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="lateFeeAmount">Monto del Recargo *</label>
+            <input
+              id="lateFeeAmount"
+              type="number"
+              formControlName="lateFeeAmount"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+            <span class="error-message" *ngIf="paymentForm.get('lateFeeAmount')?.invalid && paymentForm.get('lateFeeAmount')?.touched">
+              El monto del recargo es requerido y debe ser mayor a 0
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="automatic" />
+              <span>Cálculo Automático</span>
+            </label>
+            <p class="help-text">Marca esta opción si el recargo fue calculado automáticamente por el sistema</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="reason">Motivo del Recargo</label>
+            <textarea
+              id="reason"
+              formControlName="reason"
+              rows="4"
+              placeholder="Describe el motivo del recargo..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="isSaving()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+          <span *ngIf="!isSaving()">Agregar Recargo</span>
+          <span *ngIf="isSaving()">
+            <span class="spinner"></span>
+            Guardando...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

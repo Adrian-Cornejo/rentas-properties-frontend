@@ -1,5 +1,5 @@
 export interface AddLateFeeRequest {
-  autoCalculate?: boolean;
-  lateFeeAmount?: number;
+  lateFeeAmount: number;
   reason?: string;
+  automatic: boolean;
 }

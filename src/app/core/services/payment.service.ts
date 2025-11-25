@@ -9,6 +9,7 @@ import {UpdatePaymentRequest} from '../models/payment/update-payment';
 import {MarkAsPaidRequest} from '../models/payment/make-asi-paid-request';
 import {AddLateFeeRequest} from '../models/payment/add-late-free-request';
 import {PaymentSummaryResponse} from '../models/payment/payment-sumary-response';
+import {PaymentResponse} from '../models/payment/payment-response';
 
 
 @Injectable({
