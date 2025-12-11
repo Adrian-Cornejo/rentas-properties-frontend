@@ -107,9 +107,7 @@
         (click)="setStatusFilter('COMPLETADO')">
         Completados ({{ completedCount() }})
       </button>
-    </div>
 
-    <div class="filter-tabs" style="margin-top: 0.5rem;">
       <button
         class="filter-tab"
         [class.active]="filterType() === 'ALL'"
@@ -134,6 +132,10 @@
         (click)="setTypeFilter('EMERGENCIA')">
         Emergencia
       </button>
+    </div>
+
+    <div class="filter-tabs" style="margin-top: 0.5rem;">
+
     </div>
 
     <div class="search-box">
