@@ -1,0 +1,92 @@
+<div class="maintenance-card">
+  <div class="card-header">
+    <div class="card-title-section">
+      <h3 class="card-title">{{ record.title }}</h3>
+      <div class="card-badges">
+        <span class="type-badge" [ngClass]="getTypeClass()">
+          {{ getTypeLabel() }}
+        </span>
+        <span class="status-badge" [ngClass]="getStatusClass()">
+          {{ getStatusLabel() }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="info-row" *ngIf="record.category">
+      <span class="info-label">Categoría:</span>
+      <span class="info-value">{{ getCategoryLabel() }}</span>
+    </div>
+
+    <div class="info-row" *ngIf="record.contractNumber">
+      <span class="info-label">Contrato:</span>
+      <span class="info-value">{{ record.contractNumber }}</span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-label">Fecha Programada:</span>
+      <span class="info-value">{{ formatDate(record.maintenanceDate) }}</span>
+    </div>
+
+    <div class="info-row" *ngIf="record.completedDate">
+      <span class="info-label">Fecha Completado:</span>
+      <span class="info-value">{{ formatDate(record.completedDate) }}</span>
+    </div>
+
+    <div class="info-row" *ngIf="record.assignedTo">
+      <span class="info-label">Asignado a:</span>
+      <span class="info-value">{{ record.assignedTo }}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="info-row" *ngIf="record.estimatedCost">
+      <span class="info-label">Costo Estimado:</span>
+      <span class="info-value">{{ formatCurrency(record.estimatedCost) }}</span>
+    </div>
+
+    <div class="info-row" *ngIf="record.actualCost">
+      <span class="info-label">Costo Real:</span>
+      <span class="info-value" [class.text-success]="record.actualCost <= record.estimatedCost" [class.text-error]="record.actualCost > record.estimatedCost">
+        {{ formatCurrency(record.actualCost) }}
+      </span>
+    </div>
+
+    <div class="info-row" *ngIf="record.imageCount > 0">
+      <span class="info-label">Imágenes:</span>
+      <span class="info-value">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle;">
+          <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+          <circle cx="9" cy="9" r="2"/>
+          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+        </svg>
+        {{ record.imageCount }}
+      </span>
+    </div>
+  </div>
+
+  <div class="card-actions">
+    <button class="btn-secondary btn-sm" (click)="onEdit()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+      </svg>
+      Editar
+    </button>
+    <button
+      class="btn-primary btn-sm"
+      (click)="onMarkCompleted()"
+      *ngIf="record.status === 'PENDIENTE' || record.status === 'EN_PROCESO'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      Completar
+    </button>
+    <button class="btn-danger btn-sm" (click)="onDelete()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+      </svg>
+      Eliminar
+    </button>
+  </div>
+</div>

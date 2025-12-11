@@ -1,0 +1,82 @@
+<div class="payment-card">
+  <div class="card-header">
+    <div class="card-title-section">
+      <h3 class="card-title">{{ getTypeLabel() }}</h3>
+      <p class="card-subtitle">{{ getPeriodLabel() }}</p>
+    </div>
+    <span class="status-badge" [ngClass]="getStatusClass()">
+      {{ getStatusLabel() }}
+    </span>
+  </div>
+
+  <div class="card-body">
+    <div class="info-row">
+      <span class="info-label">Contrato:</span>
+      <span class="info-value">{{ payment.contractNumber }}</span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-label">Propiedad:</span>
+      <span class="info-value">{{ payment.propertyCode }}</span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-label">Dirección:</span>
+      <span class="info-value">{{ payment.propertyAddress }}</span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-label">Fecha de Pago:</span>
+      <span class="info-value">{{ formatDate(payment.dueDate) }}</span>
+    </div>
+
+    <div class="info-row">
+      <span class="info-label">Fecha de Vencimiento:</span>
+      <span class="info-value">{{ formatDate(payment.dueDate) }}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="info-row">
+      <span class="info-label">Monto:</span>
+      <span class="info-value">{{ formatCurrency(payment.amount) }}</span>
+    </div>
+
+    <div class="info-row" *ngIf="payment.lateFee > 0">
+      <span class="info-label">Recargo por Mora:</span>
+      <span class="info-value text-error">{{ formatCurrency(payment.lateFee) }}</span>
+    </div>
+
+    <div class="info-row total-row">
+      <span class="info-label">Total:</span>
+      <span class="info-value total-value">{{ formatCurrency(payment.totalAmount) }}</span>
+    </div>
+
+    <div class="info-row" *ngIf="payment.paymentMethod">
+      <span class="info-label">Método de Pago:</span>
+      <span class="info-value">{{ payment.paymentMethod }}</span>
+    </div>
+
+    <div class="info-row" *ngIf="payment.paidAt">
+      <span class="info-label">Pagado el:</span>
+      <span class="info-value">{{ formatDate(payment.paidAt) }}</span>
+    </div>
+  </div>
+
+  <div class="card-actions" *ngIf="payment.status !== 'PAGADO'">
+    <button
+      class="btn-primary btn-sm"
+      (click)="onMarkAsPaid()"
+      *ngIf="payment.status === 'PENDIENTE' || payment.status === 'ATRASADO' || payment.status === 'PARCIAL'">
+      <span>✓</span>
+      Marcar como Pagado
+    </button>
+    <button
+      class="btn-secondary btn-sm"
+      (click)="onAddLateFee()"
+      *ngIf="payment.status === 'ATRASADO' && payment.lateFee === 0">
+      <span>+</span>
+      Agregar Recargo
+    </button>
+  </div>
+</div>

@@ -1,0 +1,332 @@
+<div class="form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="onCancel()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="header-title-section">
+        <h1 class="form-title">{{ isEditing() ? 'Editar Registro de Mantenimiento' : 'Nuevo Registro de Mantenimiento' }}</h1>
+        <p class="form-subtitle">{{ isEditing() ? 'Actualiza la información del mantenimiento' : 'Registra un nuevo trabajo de mantenimiento' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()">
+    <div class="form-content">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button
+          type="button"
+          class="tab-button"
+          [class.active]="activeTab() === 'basic'"
+          (click)="setTab('basic')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          Información Básica
+        </button>
+
+        <button
+          type="button"
+          class="tab-button"
+          [class.active]="activeTab() === 'costs'"
+          (click)="setTab('costs')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" x2="12" y1="2" y2="22"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Costos y Estado
+        </button>
+
+        <button
+          type="button"
+          class="tab-button"
+          [class.active]="activeTab() === 'images'"
+          (click)="setTab('images')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+          Imágenes
+        </button>
+      </div>
+
+      <!-- Tab 1: Basic Information -->
+      <div class="tab-content" *ngIf="activeTab() === 'basic'">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="propertyId">Propiedad *</label>
+            <select
+              id="propertyId"
+              formControlName="propertyId"
+              [disabled]="isEditing()">
+              <option value="">Selecciona una propiedad</option>
+              <option *ngFor="let property of availableProperties()" [value]="property.id">
+                {{ property.propertyCode }} - {{ property.address }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="maintenanceForm.get('propertyId')?.invalid && maintenanceForm.get('propertyId')?.touched">
+              La propiedad es requerida
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="contractId">Contrato (Opcional)</label>
+            <select
+              id="contractId"
+              formControlName="contractId"
+              [disabled]="isEditing() || !maintenanceForm.get('propertyId')?.value">
+              <option value="">Sin contrato asociado</option>
+              <option *ngFor="let contract of availableContracts()" [value]="contract.id">
+                {{ contract.contractNumber }}
+              </option>
+            </select>
+            <span class="help-text">Selecciona un contrato si el mantenimiento es responsabilidad del inquilino</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maintenanceType">Tipo de Mantenimiento *</label>
+            <select id="maintenanceType" formControlName="maintenanceType">
+              <option value="">Selecciona un tipo</option>
+              <option *ngFor="let type of maintenanceTypes" [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="maintenanceForm.get('maintenanceType')?.invalid && maintenanceForm.get('maintenanceType')?.touched">
+              El tipo es requerido
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Categoría</label>
+            <select id="category" formControlName="category">
+              <option value="">Selecciona una categoría</option>
+              <option *ngFor="let cat of categories" [value]="cat.value">
+                {{ cat.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="title">Título *</label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="Ej: Reparación de fuga en cocina"
+            />
+            <span class="error-message" *ngIf="maintenanceForm.get('title')?.invalid && maintenanceForm.get('title')?.touched">
+              El título es requerido (máximo 255 caracteres)
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="description">Descripción *</label>
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="4"
+              placeholder="Describe detalladamente el trabajo a realizar..."
+            ></textarea>
+            <span class="error-message" *ngIf="maintenanceForm.get('description')?.invalid && maintenanceForm.get('description')?.touched">
+              La descripción es requerida
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maintenanceDate">Fecha de Mantenimiento *</label>
+            <input
+              id="maintenanceDate"
+              type="date"
+              formControlName="maintenanceDate"
+            />
+            <span class="error-message" *ngIf="maintenanceForm.get('maintenanceDate')?.invalid && maintenanceForm.get('maintenanceDate')?.touched">
+              La fecha es requerida
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="assignedTo">Asignado a</label>
+            <input
+              id="assignedTo"
+              type="text"
+              formControlName="assignedTo"
+              placeholder="Nombre del técnico o responsable"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Costs and Status -->
+      <div class="tab-content" *ngIf="activeTab() === 'costs'">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="estimatedCost">Costo Estimado</label>
+            <input
+              id="estimatedCost"
+              type="number"
+              formControlName="estimatedCost"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+            <span class="error-message" *ngIf="maintenanceForm.get('estimatedCost')?.invalid && maintenanceForm.get('estimatedCost')?.touched">
+              El costo debe ser mayor o igual a 0
+            </span>
+          </div>
+
+          <div class="form-group" *ngIf="isEditing()">
+            <label for="actualCost">Costo Real</label>
+            <input
+              id="actualCost"
+              type="number"
+              formControlName="actualCost"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+            <span class="error-message" *ngIf="maintenanceForm.get('actualCost')?.invalid && maintenanceForm.get('actualCost')?.touched">
+              El costo debe ser mayor o igual a 0
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="isEditing()">
+          <div class="form-group">
+            <label for="status">Estado *</label>
+            <select id="status" formControlName="status">
+              <option *ngFor="let status of statusOptions" [value]="status.value">
+                {{ status.label }}
+              </option>
+            </select>
+            <span class="error-message" *ngIf="maintenanceForm.get('status')?.invalid && maintenanceForm.get('status')?.touched">
+              El estado es requerido
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="notes">Notas Adicionales</label>
+            <textarea
+              id="notes"
+              formControlName="notes"
+              rows="4"
+              placeholder="Notas, observaciones o comentarios adicionales..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="info-message" *ngIf="!isEditing()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" x2="12" y1="16" y2="12"/>
+            <line x1="12" x2="12.01" y1="8" y2="8"/>
+          </svg>
+          <div class="info-content">
+            <p>El registro se creará con estado <strong>PENDIENTE</strong>. Podrás actualizar el estado y costo real después de editar el registro.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Images -->
+      <div class="tab-content" *ngIf="activeTab() === 'images'">
+        <div class="section-info">
+          <p>Agrega imágenes del mantenimiento. Puedes subir fotos de antes, después o evidencias del trabajo realizado.</p>
+        </div>
+
+        <!-- Upload Buttons -->
+        <div class="image-upload-section">
+          <div class="upload-buttons">
+            <div class="upload-button-wrapper" *ngFor="let imageType of imageTypes">
+              <input
+                type="file"
+                [id]="'image-' + imageType.value"
+                accept="image/*"
+                (change)="onImageUpload($event, imageType.value)"
+                style="display: none"
+              />
+              <button
+                type="button"
+                class="btn-upload"
+                [disabled]="isUploadingImage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" x2="12" y1="3" y2="15"/>
+                </svg>
+                {{ imageType.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="loading-state" *ngIf="isUploadingImage()">
+            <div class="spinner"></div>
+            <p>Subiendo imagen...</p>
+          </div>
+        </div>
+
+        <!-- Uploaded Images Grid -->
+        <div class="images-grid" *ngIf="uploadedImages().length > 0">
+          <div class="image-card" *ngFor="let image of uploadedImages(); let i = index">
+            <div class="image-wrapper">
+              <img [src]="image.url" [alt]="'Imagen ' + image.type" />
+              <div class="image-overlay">
+                <button
+                  type="button"
+                  class="btn-remove-image"
+                  (click)="removeImage(i)"
+                  title="Eliminar imagen">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="image-info">
+              <span class="image-type-badge" [ngClass]="'type-' + image.type.toLowerCase()">
+                {{ image.type }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-images-state" *ngIf="uploadedImages().length === 0 && !isUploadingImage()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+          <p>No hay imágenes agregadas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="isSaving()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="isSaving() || maintenanceForm.invalid">
+        <span *ngIf="!isSaving()">{{ isEditing() ? 'Actualizar Registro' : 'Crear Registro' }}</span>
+        <span *ngIf="isSaving()">
+          <span class="spinner"></span>
+          Guardando...
+        </span>
+      </button>
+    </div>
+  </form>
+</div>
