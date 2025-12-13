@@ -30,6 +30,7 @@
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
     "@tailwindcss/postcss": "^4.1.17",
+    "chart.js": "^4.5.1",
     "date-fns": "^4.1.0",
     "lodash-es": "^4.17.21",
     "primeflex": "^4.0.0",

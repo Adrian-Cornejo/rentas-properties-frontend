@@ -16,7 +16,7 @@ import {OrganizationInfoResponse} from '../models/organization/organization-info
 export class OrganizationService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/organizations`;
-  currentOrganization = signal<OrganizationResponse | null>(null);
+  currentOrganization = signal<OrganizationDetailResponse | null>(null);
 
   createOrganization(request: CreateOrganizationRequest): Observable<OrganizationDetailResponse> {
     return this.http.post<OrganizationDetailResponse>(this.apiUrl, request).pipe(
