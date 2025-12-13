@@ -1,8 +1,3 @@
-// ===================================================================
-// ARCHIVO 4: COMPONENTE MODAL - JOIN ORGANIZATION
-// src/app/shared/components/join-organization-modal/join-organization-modal.ts
-// ===================================================================
-
 import { Component, inject, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
