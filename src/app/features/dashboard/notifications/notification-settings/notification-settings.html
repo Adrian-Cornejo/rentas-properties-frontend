@@ -1,0 +1,288 @@
+<!-- src/app/features/dashboard/notifications/notification-settings/notification-settings.html -->
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Configuración de Notificaciones</h1>
+      <p class="page-description">
+        Gestiona cómo y cuándo se envían recordatorios de pago a tus inquilinos
+      </p>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Cargando configuración...</span>
+      </div>
+    } @else {
+
+      <!-- Plan BASICO - Sin acceso -->
+      @if (isPlanBasico) {
+        <div class="upgrade-banner">
+          <div class="upgrade-icon">
+            <i class="pi pi-lock"></i>
+          </div>
+          <div class="upgrade-content">
+            <h3>Notificaciones Automáticas No Disponibles</h3>
+            <p>Esta función está disponible desde el plan INTERMEDIO. Actualiza tu suscripción para:</p>
+            <ul>
+              <li>Recordatorios automáticos de pago por SMS o WhatsApp</li>
+              <li>Notificaciones consolidadas para administradores</li>
+              <li>Reducción de morosidad y mejora en cobros</li>
+            </ul>
+            <button type="button" class="btn btn-primary">
+              <i class="pi pi-arrow-up"></i>
+              Actualizar Plan
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Plan INTERMEDIO o SUPERIOR -->
+      @if (!isPlanBasico) {
+        <form [formGroup]="settingsForm" class="settings-form">
+
+          <!-- Toggle Principal -->
+          <div class="card">
+            <div class="card-body">
+              <div class="setting-header">
+                <div class="setting-info">
+                  <h3>Notificaciones Automáticas</h3>
+                  <p>Envía recordatorios de pago a tus inquilinos de forma automática</p>
+                </div>
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    formControlName="enabled"
+                    [disabled]="!isAdmin()"
+                  />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Configuración de Canales -->
+          @if (settingsForm.value.enabled) {
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Canal de Notificación</h2>
+              </div>
+              <div class="card-body">
+                <!-- Plan INTERMEDIO - Solo un canal -->
+                @if (isPlanIntermedio) {
+                  <div class="channel-options">
+                    <label class="radio-card">
+                      <input
+                        type="radio"
+                        formControlName="channel"
+                        value="SMS"
+                        [disabled]="!isAdmin()"
+                      />
+                      <div class="radio-content">
+                        <i class="pi pi-mobile"></i>
+                        <div>
+                          <strong>SMS</strong>
+                          <span>Mensajes de texto tradicionales</span>
+                        </div>
+                      </div>
+                    </label>
+
+                    <label class="radio-card">
+                      <input
+                        type="radio"
+                        formControlName="channel"
+                        value="WHATSAPP"
+                        [disabled]="!isAdmin()"
+                      />
+                      <div class="radio-content">
+                        <i class="pi pi-whatsapp"></i>
+                        <div>
+                          <strong>WhatsApp</strong>
+                          <span>Mensajes por WhatsApp Business</span>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                }
+
+                <!-- Plan SUPERIOR - Ambos canales -->
+                @if (isPlanSuperior) {
+                  <div class="channel-options">
+                    <label class="checkbox-card">
+                      <input
+                        type="checkbox"
+                        [checked]="settingsForm.value.channel === 'BOTH' || settingsForm.value.channel === 'SMS'"
+                        (change)="settingsForm.patchValue({ channel: settingsForm.value.channel === 'WHATSAPP' ? 'BOTH' : 'SMS' })"
+                        [disabled]="!isAdmin()"
+                      />
+                      <div class="checkbox-content">
+                        <i class="pi pi-mobile"></i>
+                        <div>
+                          <strong>SMS</strong>
+                          <span>Mensajes de texto</span>
+                        </div>
+                      </div>
+                    </label>
+
+                    <label class="checkbox-card">
+                      <input
+                        type="checkbox"
+                        [checked]="settingsForm.value.channel === 'BOTH' || settingsForm.value.channel === 'WHATSAPP'"
+                        (change)="settingsForm.patchValue({ channel: settingsForm.value.channel === 'SMS' ? 'BOTH' : 'WHATSAPP' })"
+                        [disabled]="!isAdmin()"
+                      />
+                      <div class="checkbox-content">
+                        <i class="pi pi-whatsapp"></i>
+                        <div>
+                          <strong>WhatsApp</strong>
+                          <span>WhatsApp Business</span>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Notificaciones Admin -->
+            <div class="card">
+              <div class="card-body">
+                <label class="checkbox-setting">
+                  <input
+                    type="checkbox"
+                    formControlName="adminNotifications"
+                    [disabled]="!isAdmin()"
+                  />
+                  <div class="checkbox-info">
+                    <strong>Resumen diario para administrador</strong>
+                    <span>Recibe un mensaje consolidado con los pagos del día</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Uso del Mes -->
+            @if (settings()) {
+              <div class="card">
+                <div class="card-header">
+                  <h2 class="card-title">Uso del Mes</h2>
+                </div>
+                <div class="card-body">
+                  <div class="usage-stats">
+                    <div class="usage-count">
+                      <span class="count-number">{{ settings()!.sentThisMonth }}</span>
+                      <span class="count-label">de {{ settings()!.monthlyLimit }} notificaciones</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div
+                        class="progress-fill"
+                        [style.width.%]="progressPercentage"
+                        [style.background-color]="progressColor"
+                      ></div>
+                    </div>
+                    <p class="usage-remaining">
+                      Te quedan <strong>{{ settings()!.remainingCredits }}</strong> notificaciones este mes
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Botón de Prueba -->
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Probar Configuración</h2>
+              </div>
+              <div class="card-body">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="toggleTestPanel()"
+                  [disabled]="!isAdmin()"
+                >
+                  <i class="pi pi-send"></i>
+                  Enviar Notificación de Prueba
+                </button>
+
+                @if (showTestPanel()) {
+                  <div class="test-panel">
+                    <form [formGroup]="testForm" (ngSubmit)="sendTestNotification()">
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label class="form-label">Número de Teléfono</label>
+                          <input
+                            type="tel"
+                            formControlName="phoneNumber"
+                            placeholder="+52442XXXXXXX"
+                            class="form-control"
+                          />
+                          @if (testForm.get('phoneNumber')?.invalid && testForm.get('phoneNumber')?.touched) {
+                            <span class="form-error">Ingresa un número válido con código de país</span>
+                          }
+                        </div>
+
+                        <div class="form-group">
+                          <label class="form-label">Canal</label>
+                          <select formControlName="channel" class="form-control">
+                            <option value="SMS">SMS</option>
+                            <option value="WHATSAPP">WhatsApp</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="test-actions">
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm"
+                          (click)="toggleTestPanel()"
+                          [disabled]="isSendingTest()"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          class="btn btn-primary btn-sm"
+                          [disabled]="isSendingTest() || testForm.invalid"
+                        >
+                          @if (isSendingTest()) {
+                            <i class="pi pi-spin pi-spinner"></i>
+                          } @else {
+                            <i class="pi pi-send"></i>
+                          }
+                          Enviar Prueba
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Botones de Acción -->
+          @if (isAdmin()) {
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="saveSettings()"
+                [disabled]="isSaving() || settingsForm.invalid"
+              >
+                @if (isSaving()) {
+                  <i class="pi pi-spin pi-spinner"></i>
+                } @else {
+                  <i class="pi pi-check"></i>
+                }
+                Guardar Configuración
+              </button>
+            </div>
+          }
+        </form>
+      }
+    }
+  </div>
+</div>

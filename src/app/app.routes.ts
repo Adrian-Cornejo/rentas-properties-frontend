@@ -163,6 +163,26 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/organization/organization').then(m => m.OrganizationComponent)
       },
       {
+        path: 'notifications',
+        children: [
+          {
+            path: 'settings',
+            canActivate: [adminGuard],
+            loadComponent: () => import('./features/dashboard/notifications/notification-settings/notification-settings').then(m => m.NotificationSettingsComponent)
+          },
+          {
+            path: 'stats',
+            canActivate: [adminGuard],
+            loadComponent: () => import('./features/dashboard/notifications/notification-stats/notification-stats').then(m => m.NotificationStatsComponent)
+          },
+          {
+            path: '',
+            redirectTo: 'settings',
+            pathMatch: 'full'
+          }
+        ]
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full'

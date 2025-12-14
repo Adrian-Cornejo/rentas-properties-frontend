@@ -1,4 +1,4 @@
-
+<!-- src/app/shared/components/dashboard-layout/dashboard-layout.html -->
 <div class="dashboard-layout">
   <!-- NAVBAR SUPERIOR -->
   <nav class="dashboard-navbar">
@@ -67,19 +67,59 @@
     [class.collapsed]="!isSidebarOpen()"
   >
     <nav class="sidebar-nav">
-      @for (item of visibleMenuItems(); track item.route) {
+      @for (item of visibleMenuItems(); track item.label) {
 
-        <a [routerLink]="item.route"
-          routerLinkActive="active"
-          class="sidebar-item"
-          [pTooltip]="!isSidebarOpen() ? item.label : ''"
-          tooltipPosition="right"
-          >
-        <i [class]="item.icon"></i>
-        @if (isSidebarOpen()) {
-          <span class="sidebar-label">{{ item.label }}</span>
+        <!-- Item con submenú -->
+        @if (item.children) {
+          <div class="sidebar-item-group">
+            <button
+              class="sidebar-item"
+              [class.active]="isSubmenuActive(item)"
+              [class.expanded]="item.isExpanded"
+              (click)="toggleSubmenu(item)"
+              [pTooltip]="!isSidebarOpen() ? item.label : ''"
+              tooltipPosition="right"
+            >
+              <i [class]="item.icon"></i>
+              @if (isSidebarOpen()) {
+                <span class="sidebar-label">{{ item.label }}</span>
+                <i class="pi pi-chevron-down submenu-arrow" [class.rotated]="item.isExpanded"></i>
+              }
+            </button>
+
+            <!-- Submenú desplegable -->
+            @if (item.isExpanded && isSidebarOpen()) {
+              <div class="submenu">
+                @for (subItem of item.children; track subItem.route) {
+                  <a
+                    [routerLink]="subItem.route"
+                    routerLinkActive="active"
+                    class="submenu-item"
+                  >
+                    <i [class]="subItem.icon"></i>
+                    <span class="submenu-label">{{ subItem.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
         }
-        </a>
+
+        <!-- Item simple (sin submenú) -->
+        @if (!item.children && item.route) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="sidebar-item"
+            [pTooltip]="!isSidebarOpen() ? item.label : ''"
+            tooltipPosition="right"
+          >
+            <i [class]="item.icon"></i>
+            @if (isSidebarOpen()) {
+              <span class="sidebar-label">{{ item.label }}</span>
+            }
+          </a>
+        }
       }
     </nav>
   </aside>
@@ -94,15 +134,31 @@
 
   <!-- BOTTOM NAVIGATION (Mobile only) -->
   <nav class="bottom-nav">
-    @for (item of visibleMenuItems(); track item.route) {
+    @for (item of visibleMenuItems(); track item.label) {
 
-      <a [routerLink]="item.route"
-        routerLinkActive="active"
-        class="bottom-nav-item"
+      <!-- Items simples en bottom nav -->
+      @if (!item.children && item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="bottom-nav-item"
         >
-      <i [class]="item.icon"></i>
-      <span class="bottom-nav-label">{{ item.label }}</span>
-      </a>
+          <i [class]="item.icon"></i>
+          <span class="bottom-nav-label">{{ item.label }}</span>
+        </a>
+      }
+
+      <!-- Items con submenú - mostrar primer hijo en mobile -->
+      @if (item.children && item.children.length > 0) {
+        <a
+          [routerLink]="item.children[0].route"
+          routerLinkActive="active"
+          class="bottom-nav-item"
+        >
+          <i [class]="item.icon"></i>
+          <span class="bottom-nav-label">{{ item.label }}</span>
+        </a>
+      }
     }
   </nav>
 </div>

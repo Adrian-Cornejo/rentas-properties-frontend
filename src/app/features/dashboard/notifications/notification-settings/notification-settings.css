@@ -1,0 +1,434 @@
+/* src/app/features/dashboard/notifications/notification-settings/notification-settings.css */
+@import '../../home/dashboard-common.css';
+
+/* ============================================
+   NOTIFICATION SETTINGS - MAIN STYLES
+   ============================================ */
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ============================================
+   UPGRADE BANNER (Plan BASICO)
+   ============================================ */
+.upgrade-banner {
+  display: flex;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: var(--bg-surface);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+}
+
+.upgrade-icon {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-500);
+  color: white;
+  border-radius: 12px;
+  font-size: 1.75rem;
+}
+
+.upgrade-content h3 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.upgrade-content p {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.upgrade-content ul {
+  margin: 0 0 1.5rem 0;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.upgrade-content ul li {
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   SETTING HEADER
+   ============================================ */
+.setting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.setting-info h3 {
+  margin: 0 0 0.25rem 0;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.setting-info p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* ============================================
+   TOGGLE SWITCH
+   ============================================ */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color);
+  border-radius: 28px;
+  transition: all 0.3s ease;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--color-primary-500);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+}
+
+.toggle-switch input:disabled + .toggle-slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   CHANNEL OPTIONS
+   ============================================ */
+.channel-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.radio-card,
+.checkbox-card {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.radio-card input,
+.checkbox-card input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-content,
+.checkbox-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.radio-content i,
+.checkbox-content i {
+  font-size: 1.75rem;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.radio-content div,
+.checkbox-content div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.radio-content strong,
+.checkbox-content strong {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.radio-content span,
+.checkbox-content span {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.radio-card input:checked ~ .radio-content,
+.checkbox-card input:checked ~ .checkbox-content {
+  border-color: var(--color-primary-500);
+  background: oklch(from var(--color-primary-500) l c h / 0.05);
+}
+
+.radio-card input:checked ~ .radio-content i,
+.checkbox-card input:checked ~ .checkbox-content i {
+  color: var(--color-primary-500);
+}
+
+.radio-card:hover .radio-content,
+.checkbox-card:hover .checkbox-content {
+  border-color: var(--color-primary-500);
+}
+
+.radio-card input:disabled ~ .radio-content,
+.checkbox-card input:disabled ~ .checkbox-content {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   CHECKBOX SETTING
+   ============================================ */
+.checkbox-setting {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.75rem 0;
+}
+
+.checkbox-setting input {
+  margin-top: 0.25rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-primary-500);
+}
+
+.checkbox-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.checkbox-info strong {
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.checkbox-info span {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* ============================================
+   USAGE STATS
+   ============================================ */
+.usage-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.usage-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: oklch(from var(--color-primary-500) l c h / 0.05);
+  border-radius: 8px;
+}
+
+.count-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary-500);
+  line-height: 1;
+}
+
+.count-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.progress-bar {
+  height: 12px;
+  background: var(--bg-hover);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.5s ease, background-color 0.3s ease;
+  border-radius: 6px;
+}
+
+.usage-remaining {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.usage-remaining strong {
+  color: var(--color-primary-500);
+  font-weight: 600;
+}
+
+/* ============================================
+   TEST PANEL
+   ============================================ */
+.test-panel {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-control {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px oklch(from var(--color-primary-500) l c h / 0.1);
+}
+
+.form-error {
+  color: var(--color-error-500);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.test-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* ============================================
+   FORM ACTIONS
+   ============================================ */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .upgrade-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .upgrade-icon {
+    margin: 0 auto;
+  }
+
+  .channel-options {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .test-actions {
+    flex-direction: column-reverse;
+  }
+
+  .test-actions .btn {
+    width: 100%;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}

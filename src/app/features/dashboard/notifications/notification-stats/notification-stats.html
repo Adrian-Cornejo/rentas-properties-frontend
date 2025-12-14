@@ -1,0 +1,179 @@
+<!-- src/app/features/dashboard/notifications/notification-stats/notification-stats.html -->
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Estadísticas de Notificaciones</h1>
+      <p class="page-description">Seguimiento y métricas de tus notificaciones automáticas</p>
+    </div>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="refreshStats()"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+          <i class="pi pi-refresh"></i>
+        }
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <div class="page-content">
+    @if (isLoading() && !stats()) {
+      <div class="grid-layout">
+        <div class="card">
+          <div class="loading-placeholder">
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>Cargando estadísticas...</span>
+          </div>
+        </div>
+      </div>
+    } @else if (stats()) {
+
+      <!-- Tarjetas de Métricas -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #3B82F6;">
+            <i class="pi pi-send"></i>
+          </div>
+          <div class="metric-content">
+            <span class="metric-label">Total Enviadas</span>
+            <span class="metric-value">{{ stats()!.totalSent }}</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #10B981;">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="metric-content">
+            <span class="metric-label">Entregadas</span>
+            <span class="metric-value">{{ stats()!.totalDelivered }}</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #EF4444;">
+            <i class="pi pi-times-circle"></i>
+          </div>
+          <div class="metric-content">
+            <span class="metric-label">Fallidas</span>
+            <span class="metric-value">{{ stats()!.totalFailed }}</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #8B5CF6;">
+            <i class="pi pi-percentage"></i>
+          </div>
+          <div class="metric-content">
+            <span class="metric-label">Tasa de Entrega</span>
+            <span class="metric-value">{{ stats()!.deliveryRate }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Uso Mensual -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Uso Mensual</h2>
+        </div>
+        <div class="card-body">
+          <div class="usage-container">
+            <div class="usage-info">
+              <div class="usage-stat">
+                <span class="usage-label">Enviadas este mes</span>
+                <span class="usage-number">{{ stats()!.sentThisMonth }}</span>
+              </div>
+              <div class="usage-stat">
+                <span class="usage-label">Límite mensual</span>
+                <span class="usage-number">{{ stats()!.monthlyLimit }}</span>
+              </div>
+              <div class="usage-stat">
+                <span class="usage-label">Disponibles</span>
+                <span class="usage-number highlight">{{ stats()!.remainingCredits }}</span>
+              </div>
+            </div>
+            <div class="usage-progress">
+              <div class="progress-bar-large">
+                <div
+                  class="progress-fill-large"
+                  [style.width.%]="(stats()!.sentThisMonth / stats()!.monthlyLimit) * 100"
+                ></div>
+              </div>
+              <span class="progress-label">
+                {{ ((stats()!.sentThisMonth / stats()!.monthlyLimit) * 100).toFixed(1) }}% utilizado
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfica de Tendencia -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Tendencia de Notificaciones (Últimos 30 días)</h2>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas #chartCanvas></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notificaciones Recientes -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Notificaciones Recientes</h2>
+        </div>
+        <div class="card-body">
+          @if (stats()!.recentNotifications.length === 0) {
+            <div class="empty-state">
+              <i class="pi pi-inbox"></i>
+              <p>No hay notificaciones recientes</p>
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Canal</th>
+                  <th>Destinatario</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (notification of stats()!.recentNotifications; track notification.recipientPhone) {
+                    <tr>
+                      <td>{{ getTypeText(notification.type) }}</td>
+                      <td>
+                        <div class="channel-badge">
+                          <i [class]="'pi ' + getChannelIcon(notification.channel)"></i>
+                          {{ getChannelText(notification.channel) }}
+                        </div>
+                      </td>
+                      <td class="phone-cell">{{ notification.recipientPhone }}</td>
+                      <td>
+                        <span [class]="'status-badge ' + getStatusBadgeClass(notification.status)">
+                          {{ getStatusText(notification.status) }}
+                        </span>
+                      </td>
+                      <td class="date-cell">{{ formatDateTime(notification.sentAt) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
