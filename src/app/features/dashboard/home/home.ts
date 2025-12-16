@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PlanService } from '../../../core/services/plan.service';
 import { JoinOrganizationModalComponent } from '../../../shared/components/join-organization-modal/join-organization-modal';
-import {DashboardResponse} from '../../../core/models/dashboard/dashboad-response';
+import { DashboardResponse } from '../../../core/models/dashboard/dashboad-response';
 
 Chart.register(...registerables);
 
@@ -21,6 +22,7 @@ Chart.register(...registerables);
 export class HomeComponent implements OnInit, OnDestroy {
   private dashboardService = inject(DashboardService);
   private authService = inject(AuthService);
+  private planService = inject(PlanService);
 
   // Signals
   currentUser = this.authService.currentUser;
@@ -29,12 +31,26 @@ export class HomeComponent implements OnInit, OnDestroy {
   isLoading = signal<boolean>(true);
   error = signal<string | null>(null);
 
+  planCode = this.planService.planCode;
+  planName = this.planService.planName;
+  currentPlan = this.planService.currentPlan;
+  isPlanLoaded = signal<boolean>(false);
+
   // Computed
   hasOrganization = computed(() => !!this.currentUser()?.organizationId);
   isRegularUser = computed(() => this.currentUser()?.role === 'USER');
   shouldShowJoinButton = computed(() =>
     this.isRegularUser() && !this.hasOrganization()
   );
+
+  propertyUsage = computed(() => this.planService.getUsage('properties'));
+  userUsage = computed(() => this.planService.getUsage('users'));
+  notificationUsage = computed(() => this.planService.getNotificationUsage());
+
+  hasNotifications = computed(() => this.planService.hasFeature('NOTIFICATIONS'));
+  hasAdvancedReports = computed(() => this.planService.hasFeature('ADVANCED_REPORTS'));
+  hasMaintenancePhotos = computed(() => this.planService.hasFeature('MAINTENANCE_PHOTOS'));
+  allowsImages = computed(() => this.planService.hasFeature('ALLOWS_IMAGES'));
 
   // Charts instances
   private monthlyRevenueChart: Chart | null = null;
@@ -48,8 +64,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     console.log('Home - Tiene organización:', this.hasOrganization());
     console.log('Home - Mostrar botón:', this.shouldShowJoinButton());
 
-    // Solo cargar dashboard si tiene organización
     if (this.hasOrganization()) {
+      this.loadPlan();
       this.loadDashboardData();
     } else {
       this.isLoading.set(false);
@@ -58,6 +74,45 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyCharts();
+  }
+
+  private loadPlan(): void {
+    console.log('[Home] Loading plan...');
+
+    if (this.planService.isLoaded()) {
+      console.log('[Home] Plan already loaded from cache:', this.planCode());
+      this.isPlanLoaded.set(true);
+      this.logPlanInfo();
+      return;
+    }
+
+    this.planService.loadPlanFeatures().subscribe({
+      next: (plan) => {
+        console.log('[Home] Plan loaded successfully:', plan.planCode);
+        this.isPlanLoaded.set(true);
+        this.logPlanInfo();
+      },
+      error: (err) => {
+        console.error('[Home] Error loading plan:', err);
+        this.isPlanLoaded.set(false);
+      }
+    });
+  }
+
+  private logPlanInfo(): void {
+    console.log('[Home] Plan Info:', {
+      code: this.planCode(),
+      name: this.planName(),
+      propertyUsage: this.propertyUsage(),
+      userUsage: this.userUsage(),
+      notificationUsage: this.notificationUsage(),
+      features: {
+        notifications: this.hasNotifications(),
+        advancedReports: this.hasAdvancedReports(),
+        maintenancePhotos: this.hasMaintenancePhotos(),
+        allowsImages: this.allowsImages()
+      }
+    });
   }
 
   openJoinModal(): void {
@@ -70,7 +125,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   onOrganizationJoined(): void {
     this.showJoinModal.set(false);
-    // Cargar dashboard después de unirse a organización
+    // ✅ Recargar plan y dashboard después de unirse
+    this.loadPlan();
     this.loadDashboardData();
   }
 
@@ -414,5 +470,16 @@ export class HomeComponent implements OnInit, OnDestroy {
       default:
         return 'alert-info';
     }
+  }
+
+  getPlanBadgeClass(): string {
+    const code = this.planCode().toLowerCase();
+    return `badge-${code}`;
+  }
+
+  getUsagePercentageClass(percentage: number): string {
+    if (percentage >= 90) return 'text-danger';
+    if (percentage >= 75) return 'text-warning';
+    return 'text-success';
   }
 }

@@ -64,8 +64,7 @@
 }
 
 .navbar-logo {
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 4.5rem;
   object-fit: contain;
   border-radius: 0.375rem;
 }
@@ -356,4 +355,130 @@
 
 .bottom-nav {
   animation: slideUp 0.3s ease-out;
+}
+
+/* AGREGAR ESTOS ESTILOS AL FINAL DE: src/app/shared/components/dashboard-layout/dashboard-layout.css */
+
+/* ============================================
+   SIDEBAR - SUBMENU SUPPORT
+   ============================================ */
+
+.sidebar-item-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-item button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.sidebar-item.expanded {
+  background-color: var(--bg-hover);
+}
+
+.submenu-arrow {
+  margin-left: auto;
+  font-size: 0.75rem;
+  transition: transform 0.3s ease;
+}
+
+.submenu-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+  margin-left: 1rem;
+  border-left: 2px solid var(--border-color);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    padding: 0.5rem 0;
+  }
+}
+
+.submenu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  margin: 0 0.5rem 0 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.submenu-item i {
+  font-size: 1rem;
+  min-width: 1rem;
+}
+
+.submenu-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.submenu-item.active {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.dark .submenu-item.active {
+  background-color: var(--color-primary-900);
+  color: var(--color-primary-400);
+}
+
+.submenu-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Collapsed state - hide submenu */
+.dashboard-sidebar.collapsed .submenu {
+  display: none;
+}
+
+.dashboard-sidebar.collapsed .submenu-arrow {
+  display: none;
+}
+
+/* Mobile: indicador visual para items con submenú */
+@media (max-width: 767px) {
+  .bottom-nav-item[routerLinkActive="active"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background-color: var(--color-primary-600);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .dark .bottom-nav-item[routerLinkActive="active"]::before {
+    background-color: var(--color-primary-400);
+  }
 }

@@ -9,11 +9,19 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { OrganizationDetailResponse } from '../../../core/models/organization/organization-detail-response';
 
-interface MenuItem {
+interface SubMenuItem {
   label: string;
   icon: string;
   route: string;
+}
+
+interface MenuItem {
+  label: string;
+  icon: string;
+  route?: string;
   adminOnly?: boolean;
+  children?: SubMenuItem[];
+  isExpanded?: boolean;
 }
 
 @Component({
@@ -54,7 +62,7 @@ export class DashboardLayoutComponent implements OnInit {
   );
 
   // Menu items
-  readonly menuItems: MenuItem[] = [
+  menuItems = signal<MenuItem[]>([
     {
       label: 'Dashboard',
       icon: 'pi pi-home',
@@ -91,22 +99,75 @@ export class DashboardLayoutComponent implements OnInit {
       route: '/dashboard/maintenance'
     },
     {
+      label: 'Notificaciones',
+      icon: 'pi pi-bell',
+      adminOnly: true,
+      children: [
+        {
+          label: 'Configuración',
+          icon: 'pi pi-cog',
+          route: '/dashboard/notifications/settings'
+        },
+        {
+          label: 'Estadísticas',
+          icon: 'pi pi-chart-bar',
+          route: '/dashboard/notifications/stats'
+        }
+      ]
+    },
+    {
       label: 'Organización',
-      icon: 'pi pi-cog',
+      icon: 'pi pi-building-columns',
       route: '/dashboard/organization',
       adminOnly: true
     }
-  ];
+  ]);
 
-  // Filtered menu items based on role
   visibleMenuItems = computed(() => {
-    return this.menuItems.filter(item =>
+    return this.menuItems().filter(item =>
       !item.adminOnly || this.isAdmin()
     );
   });
 
   ngOnInit(): void {
     this.loadOrganizationData();
+    this.initializeMenuState();
+  }
+  private initializeMenuState(): void {
+
+    const currentUrl = this.router.url;
+    const items = this.menuItems();
+
+    items.forEach(item => {
+      if (item.children) {
+        const isInSubmenu = item.children.some(child =>
+          currentUrl.includes(child.route)
+        );
+        if (isInSubmenu) {
+          item.isExpanded = true;
+        }
+      }
+    });
+
+    this.menuItems.set([...items]);
+  }
+
+  toggleSubmenu(item: MenuItem): void {
+    if (!item.children) return;
+
+    const items = this.menuItems();
+    const index = items.findIndex(i => i.label === item.label);
+
+    if (index !== -1) {
+      items[index].isExpanded = !items[index].isExpanded;
+      this.menuItems.set([...items]);
+    }
+  }
+
+  isSubmenuActive(item: MenuItem): boolean {
+    if (!item.children) return false;
+    const currentUrl = this.router.url;
+    return item.children.some(child => currentUrl.includes(child.route));
   }
 
   private loadOrganizationData(): void {

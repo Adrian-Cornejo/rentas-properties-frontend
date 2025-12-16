@@ -1,0 +1,30 @@
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.plan-starter {
+  background-color: #E5E7EB;
+  color: #374151;
+}
+
+.plan-basico {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+.plan-profesional {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.plan-empresarial {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
