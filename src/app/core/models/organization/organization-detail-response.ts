@@ -18,6 +18,7 @@ export interface OrganizationDetailResponse {
   maxProperties: number;
   currentUsersCount: number;
   currentPropertiesCount: number;
+  subscriptionId: string;
   subscriptionStatus: string;
   subscriptionPlan: string;
   trialEndsAt?: string;
