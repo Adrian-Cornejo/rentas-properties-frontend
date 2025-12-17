@@ -90,9 +90,19 @@
               formControlName="propertyCode"
               placeholder="Ej: CALV-CASA-01"
               [disabled]="isEditing()">
-            <span class="error-message" *ngIf="propertyForm.get('propertyCode')?.invalid && propertyForm.get('propertyCode')?.touched">
-              El código es requerido
-            </span>
+            @if (propertyForm.get('propertyCode')?.invalid && propertyForm.get('propertyCode')?.touched) {
+              <small class="error-message">
+                @if (propertyForm.get('propertyCode')?.errors?.['required']) {
+                  El código es requerido
+                } @else if (propertyForm.get('propertyCode')?.errors?.['minlength']) {
+                  El código debe tener mínimo 3 caracteres
+                } @else if (propertyForm.get('propertyCode')?.errors?.['maxlength']) {
+                  El código no puede exceder 50 caracteres
+                } @else if (propertyForm.get('propertyCode')?.errors?.['invalidPropertyCode']) {
+                  El código solo puede contener letras mayúsculas, números y guiones
+                }
+              </small>
+            }
           </div>
 
           <div class="form-group">

@@ -1,6 +1,13 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PropertyService } from '../../../../core/services/property.service';
 import { LocationService } from '../../../../core/services/location.service';
@@ -103,7 +110,7 @@ export class PropertyFormComponent implements OnInit {
   private initForm(): void {
     this.propertyForm = this.fb.group({
       locationId: [''],
-      propertyCode: ['', [Validators.required, Validators.maxLength(50)]],
+      propertyCode: ['', [Validators.required, Validators.maxLength(50), this.propertyCodeValidator()]],
       propertyType: ['CASA', Validators.required],
       address: ['', [Validators.required, Validators.maxLength(500)]],
       monthlyRent: [0, [Validators.required, Validators.min(0)]],
@@ -135,6 +142,19 @@ export class PropertyFormComponent implements OnInit {
         console.error('Error al cargar ubicaciones:', error);
       }
     });
+  }
+
+  private propertyCodeValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) {
+        return null; // No validar si está vacío (lo maneja required)
+      }
+
+      const regex = /^[A-Z0-9-]+$/;
+      const valid = regex.test(control.value);
+
+      return valid ? null : { invalidPropertyCode: true };
+    };
   }
 
   private loadProperty(id: string): void {

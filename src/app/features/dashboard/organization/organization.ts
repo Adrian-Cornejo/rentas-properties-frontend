@@ -9,7 +9,6 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { PlanService } from '../../../core/services/plan.service';
 import { OrganizationDetailResponse } from '../../../core/models/organization/organization-detail-response';
 import { UpdateOrganizationRequest } from '../../../core/models/organization/update-organization-request';
-import { OrganizationStatsResponse } from '../../../core/models/organization/organization-stats-response';
 import { CreateOrganizationRequest } from '../../../core/models/organization/organization-request';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload';
@@ -41,7 +40,6 @@ export class OrganizationComponent implements OnInit {
   isEditMode = signal<boolean>(false);
   isCreatingMode = signal<boolean>(false);
   organization = signal<OrganizationDetailResponse | null>(null);
-  stats = signal<OrganizationStatsResponse | null>(null);
   showConfirmDialog = signal<boolean>(false);
   logoUrl = signal<string>('');
 
@@ -135,11 +133,11 @@ export class OrganizationComponent implements OnInit {
             console.log('[Organization] White Label Level:', this.whiteLabelLevel());
             console.log('[Organization] Can customize colors:', this.canCustomizeColors());
             console.log('[Organization] Can upload logo:', this.canUploadLogo());
-            this.loadStats();
+            this.isLoading.set(false);
           },
           error: (err) => {
             console.error('[Organization] Error loading plan:', err);
-            this.loadStats();
+            this.isLoading.set(false);
           }
         });
       },
@@ -152,18 +150,6 @@ export class OrganizationComponent implements OnInit {
     });
   }
 
-  private loadStats(): void {
-    this.organizationService.getMyOrganizationStats().subscribe({
-      next: (data) => {
-        this.stats.set(data);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error al cargar estadísticas:', error);
-        this.isLoading.set(false);
-      }
-    });
-  }
 
   private patchFormValues(data: OrganizationDetailResponse): void {
     this.organizationForm.patchValue({
@@ -249,7 +235,6 @@ export class OrganizationComponent implements OnInit {
 
         // Recargar plan después de crear organización
         this.planService.reload().subscribe();
-        this.loadStats();
       },
       error: (error) => {
         this.notification.error(error.message || 'Error al crear organización');
