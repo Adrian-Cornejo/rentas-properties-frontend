@@ -432,7 +432,8 @@ export class PlanService {
       allowsImages: false,
       currentProperties: 0,
       currentUsers: 0,
-      notificationsSentThisMonth: 0
+      notificationsSentThisMonth: 0,
+      whiteLabelLevel: 'BASIC'
     };
   }
 }

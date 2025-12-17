@@ -50,6 +50,7 @@
       <button
         class="tab-button"
         [class.active]="activeTab() === 'photos'"
+        [class.disabled]="!planAllowsImages()"
         (click)="setActiveTab('photos')">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -57,6 +58,9 @@
           <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
         </svg>
         <span class="tab-text">Fotografías</span>
+        @if (!planAllowsImages()) {
+          <i class="pi pi-lock tab-lock-icon"></i>
+        }
       </button>
 
       <button
@@ -97,15 +101,6 @@
               <option value="CASA">Casa</option>
               <option value="DEPARTAMENTO">Departamento</option>
               <option value="LOCAL_COMERCIAL">Local Comercial</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="status">Estado *</label>
-            <select id="status" formControlName="status">
-              <option value="DISPONIBLE">Disponible</option>
-              <option value="RENTADA">Rentada</option>
-              <option value="MANTENIMIENTO">Mantenimiento</option>
             </select>
           </div>
         </div>
@@ -467,89 +462,109 @@
         </div>
       </div>
 
+      <!-- Tab 4: Photos -->
       <div class="tab-content" *ngIf="activeTab() === 'photos'">
-        <div class="photos-section">
-          <div class="photos-header">
-            <div class="photos-header-info">
-              <h3 class="section-title">Fotografías de la Propiedad</h3>
-              <p class="photos-limit-info">
-                Plan {{ getPlanName() }}: {{ propertyImages().length }} / {{ maxImagesAllowed() }} imágenes
-              </p>
-            </div>
 
-            <label
-              class="btn btn-primary btn-upload"
-              [class.disabled]="!canAddMoreImages() || isUploadingImage()"
-              *ngIf="canAddMoreImages()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" x2="12" y1="3" y2="15"/>
-              </svg>
-              {{ isUploadingImage() ? 'Subiendo...' : 'Subir Imagen' }}
-              <input
-                type="file"
-                accept="image/*"
-                (change)="onFileSelected($event)"
-                [disabled]="!canAddMoreImages() || isUploadingImage()"
-                style="display: none;">
-            </label>
+        <!-- Si el plan NO permite imágenes -->
+        @if (!planAllowsImages()) {
+          <div class="feature-locked-full">
+            <i class="pi pi-lock"></i>
+            <h3>Funcionalidad Bloqueada</h3>
+            <p>Tu plan <strong>{{ getPlanName() }}</strong> no incluye la funcionalidad de agregar fotografías a las propiedades.</p>
+            <p class="upgrade-hint">Mejora tu plan para desbloquear esta característica y hacer tus listados más atractivos.</p>
+            <button type="button" class="btn btn-primary" (click)="cancel()">
+              <i class="pi pi-arrow-up"></i>
+              Ver Planes Disponibles
+            </button>
           </div>
+        }
 
-          <div class="photos-limit-warning" *ngIf="!canAddMoreImages()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-              <path d="M12 9v4"/>
-              <path d="M12 17h.01"/>
-            </svg>
-            <span>Has alcanzado el límite de imágenes para tu plan {{ getPlanName() }}</span>
-          </div>
+        <!-- Si el plan SÍ permite imágenes -->
+        @if (planAllowsImages()) {
+          <div class="photos-section">
+            <div class="photos-header">
+              <div class="photos-header-info">
+                <h3 class="section-title">Fotografías de la Propiedad</h3>
+                <p class="photos-limit-info">
+                </p>
+                <p class="photos-count">
+                  {{ propertyImages().length }} / {{ maxImagesAllowed() === -1 ? '∞' : maxImagesAllowed() }} imágenes usadas
+                </p>
+              </div>
 
-          <div class="photos-grid" *ngIf="propertyImages().length > 0">
-            <div class="photo-item" *ngFor="let image of propertyImages(); let i = index">
-              <img [src]="image" [alt]="'Imagen ' + (i + 1)">
-              <button
-                type="button"
-                class="btn-remove-photo"
-                (click)="removeImage(i)"
-                title="Eliminar imagen">
+              <label
+                class="btn btn-primary btn-upload"
+                [class.disabled]="!canAddMoreImages() || isUploadingImage()"
+                *ngIf="canAddMoreImages()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 6 6 18M6 6l12 12"/>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" x2="12" y1="3" y2="15"/>
                 </svg>
-              </button>
-              <div class="photo-number">{{ i + 1 }}</div>
+                {{ isUploadingImage() ? 'Subiendo...' : 'Subir Imagen' }}
+                <input
+                  type="file"
+                  accept="image/*"
+                  (change)="onFileSelected($event)"
+                  [disabled]="!canAddMoreImages() || isUploadingImage()"
+                  style="display: none;">
+              </label>
+            </div>
+
+            <div class="photos-limit-warning" *ngIf="!canAddMoreImages() && maxImagesAllowed() !== -1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                <path d="M12 9v4"/>
+                <path d="M12 17h.01"/>
+              </svg>
+              <span>Has alcanzado el límite de {{ maxImagesAllowed() }} imágenes para tu plan {{ getPlanName() }}</span>
+            </div>
+
+            <div class="photos-grid" *ngIf="propertyImages().length > 0">
+              <div class="photo-item" *ngFor="let image of propertyImages(); let i = index">
+                <img [src]="image" [alt]="'Imagen ' + (i + 1)">
+                <button
+                  type="button"
+                  class="btn-remove-photo"
+                  (click)="removeImage(i)"
+                  title="Eliminar imagen">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+                <div class="photo-number">{{ i + 1 }}</div>
+              </div>
+            </div>
+
+            <div class="photos-empty" *ngIf="propertyImages().length === 0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+              <p>No hay imágenes agregadas</p>
+              <p class="empty-hint">{{ getImagesFeatureDescription() }}</p>
+            </div>
+
+            <div class="photos-info-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+              </svg>
+              <div class="info-content">
+                <strong>Requisitos de las imágenes:</strong>
+                <ul>
+                  <li>Formato: JPG, PNG, WebP</li>
+                  <li>Tamaño máximo: 5MB por imagen</li>
+                </ul>
+              </div>
             </div>
           </div>
-
-          <div class="photos-empty" *ngIf="propertyImages().length === 0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <circle cx="9" cy="9" r="2"/>
-              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-            </svg>
-            <p>No hay imágenes agregadas</p>
-            <p class="empty-hint">Puedes agregar hasta {{ maxImagesAllowed() }} imágenes con tu plan {{ getPlanName() }}</p>
-          </div>
-
-          <div class="photos-info-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 16v-4"/>
-              <path d="M12 8h.01"/>
-            </svg>
-            <div class="info-content">
-              <strong>Requisitos de las imágenes:</strong>
-              <ul>
-                <li>Formato: JPG, PNG, WebP</li>
-                <li>Tamaño máximo: 5MB por imagen</li>
-                <li>Límite según plan: Básico (3), Intermedio (5), Superior (10)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        }
       </div>
 
-      <!-- Tab 4: Notes -->
+      <!-- Tab 5: Notes -->
       <div class="tab-content" *ngIf="activeTab() === 'notes'">
         <div class="notes-section">
           <label for="notes" class="notes-label">Observaciones</label>

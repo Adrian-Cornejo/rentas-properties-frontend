@@ -77,17 +77,35 @@
             <h2 class="card-title">Nueva Organización</h2>
           </div>
           <div class="card-body">
+
+            <!-- Alerta de White Label -->
+            @if (showWhiteLabelWarning()) {
+              <div class="alert alert-info">
+                <i class="pi pi-info-circle"></i>
+                <div>
+                  <strong>Personalización limitada</strong>
+                  <p>Tu plan <strong>{{ getPlanName() }}</strong> no incluye personalización de marca (White Label). Para personalizar logo y colores, considera mejorar tu plan.</p>
+                </div>
+              </div>
+            }
+
             <form [formGroup]="organizationForm" class="form-grid">
 
-              <div class="form-section">
-                <h3 class="section-title">Logo de la Organización</h3>
-                <app-image-upload
-                  [imageUrl]="logoUrl()"
-                  [folder]="'rentmaster/organizations'"
-                  [altText]="'Logo de la organización'"
-                  (imageUrlChange)="onLogoUrlChange($event)"
-                />
-              </div>
+              <!-- Logo Section - Solo si tiene white label -->
+              @if (canUploadLogo()) {
+                <div class="form-section">
+                  <h3 class="section-title">
+                    Logo de la Organización
+                    <span class="feature-badge">White Label</span>
+                  </h3>
+                  <app-image-upload
+                    [imageUrl]="logoUrl()"
+                    [folder]="'rentmaster/organizations'"
+                    [altText]="'Logo de la organización'"
+                    (imageUrlChange)="onLogoUrlChange($event)"
+                  />
+                </div>
+              }
 
               <!-- Nombre -->
               <div class="form-field">
@@ -116,44 +134,62 @@
                 ></textarea>
               </div>
 
-              <!-- Colores -->
-              <div class="form-row">
-                <div class="form-field">
-                  <label for="primaryColor" class="form-label required">Color Primario</label>
-                  <div class="color-input-group">
-                    <input
-                      type="color"
-                      id="primaryColor"
-                      formControlName="primaryColor"
-                      class="color-picker"
-                    />
-                    <input
-                      type="text"
-                      formControlName="primaryColor"
-                      placeholder="#3B82F6"
-                      class="form-control"
-                    />
-                  </div>
-                </div>
+              <!-- Colores - Solo si tiene white label -->
+              @if (canCustomizeColors()) {
+                <div class="form-section">
+                  <h3 class="section-title">
+                    Colores de Marca
+                    <span class="feature-badge">White Label</span>
+                  </h3>
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="primaryColor" class="form-label required">Color Primario</label>
+                      <div class="color-input-group">
+                        <input
+                          type="color"
+                          id="primaryColor"
+                          formControlName="primaryColor"
+                          class="color-picker"
+                        />
+                        <input
+                          type="text"
+                          formControlName="primaryColor"
+                          placeholder="#3B82F6"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
 
-                <div class="form-field">
-                  <label for="secondaryColor" class="form-label required">Color Secundario</label>
-                  <div class="color-input-group">
-                    <input
-                      type="color"
-                      id="secondaryColor"
-                      formControlName="secondaryColor"
-                      class="color-picker"
-                    />
-                    <input
-                      type="text"
-                      formControlName="secondaryColor"
-                      placeholder="#10B981"
-                      class="form-control"
-                    />
+                    <div class="form-field">
+                      <label for="secondaryColor" class="form-label required">Color Secundario</label>
+                      <div class="color-input-group">
+                        <input
+                          type="color"
+                          id="secondaryColor"
+                          formControlName="secondaryColor"
+                          class="color-picker"
+                        />
+                        <input
+                          type="text"
+                          formControlName="secondaryColor"
+                          placeholder="#10B981"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              } @else {
+                <!-- Mensaje de colores bloqueados -->
+                <div class="form-section">
+                  <h3 class="section-title">Colores de Marca</h3>
+                  <div class="feature-locked">
+                    <i class="pi pi-lock"></i>
+                    <p>La personalización de colores está disponible en planes superiores</p>
+                    <small>{{ getWhiteLabelLevelDescription() }}</small>
+                  </div>
+                </div>
+              }
             </form>
           </div>
         </div>
@@ -207,12 +243,27 @@
             }
           </div>
           <div class="card-body">
+
+            <!-- Alerta de White Label en modo edición -->
+            @if (showWhiteLabelWarning()) {
+              <div class="alert alert-warning">
+                <i class="pi pi-exclamation-triangle"></i>
+                <div>
+                  <strong>Funcionalidad limitada</strong>
+                  <p>Tu plan <strong>{{ getPlanName() }}</strong> no permite personalizar logo y colores. Mejora tu plan para acceder a White Label {{ getWhiteLabelLevelDescription() }}.</p>
+                </div>
+              </div>
+            }
+
             <form [formGroup]="organizationForm" class="form-grid">
 
-              <!-- Logo Section - Solo en modo edición -->
-              @if (isEditMode()) {
+              <!-- Logo Section - Edición -->
+              @if (isEditMode() && canUploadLogo()) {
                 <div class="form-section">
-                  <h3 class="section-title">Logo de la Organización</h3>
+                  <h3 class="section-title">
+                    Logo de la Organización
+                    <span class="feature-badge success">White Label Activo</span>
+                  </h3>
                   <app-image-upload
                     [imageUrl]="logoUrl()"
                     [folder]="'rentmaster/organizations'"
@@ -222,12 +273,24 @@
                 </div>
               }
 
-              <!-- Logo Display - Solo en modo visualización -->
+              <!-- Logo Display - Solo visualización -->
               @if (!isEditMode() && organization()?.logoUrl) {
                 <div class="form-section">
                   <h3 class="section-title">Logo de la Organización</h3>
                   <div class="logo-display">
                     <img [src]="organization()!.logoUrl" alt="Logo de la organización" class="organization-logo" />
+                  </div>
+                </div>
+              }
+
+              <!-- Logo Bloqueado -->
+              @if (isEditMode() && !canUploadLogo()) {
+                <div class="form-section">
+                  <h3 class="section-title">Logo de la Organización</h3>
+                  <div class="feature-locked">
+                    <i class="pi pi-lock"></i>
+                    <p>Subida de logo disponible en planes con White Label</p>
+                    <small>{{ getWhiteLabelLevelDescription() }}</small>
                   </div>
                 </div>
               }
@@ -259,44 +322,87 @@
                 ></textarea>
               </div>
 
-              <!-- Colores -->
-              <div class="form-row">
-                <div class="form-field">
-                  <label for="primaryColor" class="form-label required">Color Primario</label>
-                  <div class="color-input-group">
-                    <input
-                      type="color"
-                      id="primaryColor"
-                      formControlName="primaryColor"
-                      class="color-picker"
-                    />
-                    <input
-                      type="text"
-                      formControlName="primaryColor"
-                      placeholder="#3B82F6"
-                      class="form-control"
-                    />
-                  </div>
-                </div>
+              <!-- Colores - Edición con White Label -->
+              @if (isEditMode() && canCustomizeColors()) {
+                <div class="form-section">
+                  <h3 class="section-title">
+                    Colores de Marca
+                    <span class="feature-badge success">White Label Activo</span>
+                  </h3>
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="primaryColor" class="form-label required">Color Primario</label>
+                      <div class="color-input-group">
+                        <input
+                          type="color"
+                          id="primaryColor"
+                          formControlName="primaryColor"
+                          class="color-picker"
+                        />
+                        <input
+                          type="text"
+                          formControlName="primaryColor"
+                          placeholder="#3B82F6"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
 
-                <div class="form-field">
-                  <label for="secondaryColor" class="form-label required">Color Secundario</label>
-                  <div class="color-input-group">
-                    <input
-                      type="color"
-                      id="secondaryColor"
-                      formControlName="secondaryColor"
-                      class="color-picker"
-                    />
-                    <input
-                      type="text"
-                      formControlName="secondaryColor"
-                      placeholder="#10B981"
-                      class="form-control"
-                    />
+                    <div class="form-field">
+                      <label for="secondaryColor" class="form-label required">Color Secundario</label>
+                      <div class="color-input-group">
+                        <input
+                          type="color"
+                          id="secondaryColor"
+                          formControlName="secondaryColor"
+                          class="color-picker"
+                        />
+                        <input
+                          type="text"
+                          formControlName="secondaryColor"
+                          placeholder="#10B981"
+                          class="form-control"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              }
+
+              <!-- Colores - Vista (sin edición) -->
+              @if (!isEditMode()) {
+                <div class="form-section">
+                  <h3 class="section-title">Colores de Marca</h3>
+                  <div class="color-preview-grid">
+                    <div class="color-preview-item">
+                      <label>Color Primario</label>
+                      <div class="color-preview">
+                        <div class="color-swatch" [style.background-color]="organization()?.primaryColor"></div>
+                        <span class="color-code">{{ organization()?.primaryColor }}</span>
+                      </div>
+                    </div>
+                    <div class="color-preview-item">
+                      <label>Color Secundario</label>
+                      <div class="color-preview">
+                        <div class="color-swatch" [style.background-color]="organization()?.secondaryColor"></div>
+                        <span class="color-code">{{ organization()?.secondaryColor }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Colores Bloqueados -->
+              @if (isEditMode() && !canCustomizeColors()) {
+                <div class="form-section">
+                  <h3 class="section-title">Colores de Marca</h3>
+                  <div class="feature-locked">
+                    <i class="pi pi-lock"></i>
+                    <p>Personalización de colores disponible en planes superiores</p>
+                    <small>{{ getWhiteLabelLevelDescription() }}</small>
+                  </div>
+                </div>
+              }
 
               <!-- Código Reutilizable -->
               <div class="form-field">
@@ -410,8 +516,19 @@
 
               <div class="info-row">
                 <span class="info-label">Plan:</span>
-                <span class="info-value">{{ organization()?.subscriptionPlan }}</span>
+                <span class="info-value">{{ getPlanName() }}</span>
               </div>
+
+              <!-- White Label Info -->
+              @if (hasWhiteLabelFeature()) {
+                <div class="info-row">
+                  <span class="info-label">White Label:</span>
+                  <span class="feature-badge success">
+                    <i class="pi pi-check"></i>
+                    {{ getWhiteLabelLevelDescription() }}
+                  </span>
+                </div>
+              }
 
               <div class="divider"></div>
 
@@ -419,14 +536,14 @@
                 <div class="limit-item">
                   <p class="limit-label">Usuarios</p>
                   <p class="limit-value">
-                    {{ organization()?.currentUsersCount }} / {{ organization()?.maxUsers }}
+                    {{ organization()?.currentUsersCount }} / {{ organization()?.maxUsers === -1 ? '∞' : organization()?.maxUsers }}
                   </p>
                 </div>
 
                 <div class="limit-item">
                   <p class="limit-label">Propiedades</p>
                   <p class="limit-value">
-                    {{ organization()?.currentPropertiesCount }} / {{ organization()?.maxProperties }}
+                    {{ organization()?.currentPropertiesCount }} / {{ organization()?.maxProperties === -1 ? '∞' : organization()?.maxProperties }}
                   </p>
                 </div>
               </div>
@@ -458,80 +575,80 @@
         </div>
 
         <!-- Estadísticas -->
-        @if (stats()) {
-          <div class="card full-width">
-            <div class="card-header">
-              <h2 class="card-title">Estadísticas</h2>
-            </div>
-            <div class="card-body">
-              <div class="stats-grid">
-                <div class="stat-card">
-                  <i class="pi pi-users stat-icon primary"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.currentUsersCount }} / {{ stats()?.maxUsers }}</p>
-                    <p class="stat-label">Usuarios Activos</p>
-                  </div>
-                </div>
+<!--        @if (stats()) {-->
+<!--          <div class="card full-width">-->
+<!--            <div class="card-header">-->
+<!--              <h2 class="card-title">Estadísticas</h2>-->
+<!--            </div>-->
+<!--            <div class="card-body">-->
+<!--              <div class="stats-grid">-->
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-users stat-icon primary"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ stats()?.currentUsersCount }} / {{ stats()?.maxUsers === -1 ? '∞' : stats()?.maxUsers }}</p>-->
+<!--                    <p class="stat-label">Usuarios Activos</p>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="stat-card">
-                  <i class="pi pi-building stat-icon secondary"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.currentPropertiesCount }}</p>
-                    <p class="stat-label">Propiedades</p>
-                  </div>
-                </div>
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-building stat-icon secondary"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ stats()?.currentPropertiesCount }}</p>-->
+<!--                    <p class="stat-label">Propiedades</p>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="stat-card">
-                  <i class="pi pi-check-circle stat-icon success"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.availableProperties }}</p>
-                    <p class="stat-label">Disponibles</p>
-                  </div>
-                </div>
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-check-circle stat-icon success"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ stats()?.availableProperties }}</p>-->
+<!--                    <p class="stat-label">Disponibles</p>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="stat-card">
-                  <i class="pi pi-home stat-icon info"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.rentedProperties }}</p>
-                    <p class="stat-label">Rentadas</p>
-                  </div>
-                </div>
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-home stat-icon info"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ stats()?.rentedProperties }}</p>-->
+<!--                    <p class="stat-label">Rentadas</p>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="stat-card">
-                  <i class="pi pi-file stat-icon warning"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.activeContracts }}</p>
-                    <p class="stat-label">Contratos Activos</p>
-                  </div>
-                </div>
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-file stat-icon warning"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ stats()?.activeContracts }}</p>-->
+<!--                    <p class="stat-label">Contratos Activos</p>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="stat-card">
-                  <i class="pi pi-dollar stat-icon success"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ formatCurrency(stats()?.totalRevenue) }}</p>
-                    <p class="stat-label">Ingresos Totales</p>
-                  </div>
-                </div>
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-dollar stat-icon success"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ formatCurrency(stats()?.totalRevenue) }}</p>-->
+<!--                    <p class="stat-label">Ingresos Totales</p>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="stat-card">
-                  <i class="pi pi-clock stat-icon warning"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ formatCurrency(stats()?.pendingRevenue) }}</p>
-                    <p class="stat-label">Pagos Pendientes</p>
-                  </div>
-                </div>
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-clock stat-icon warning"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ formatCurrency(stats()?.pendingRevenue) }}</p>-->
+<!--                    <p class="stat-label">Pagos Pendientes</p>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="stat-card">
-                  <i class="pi pi-calendar-times stat-icon danger"></i>
-                  <div class="stat-content">
-                    <p class="stat-value">{{ stats()?.expiredContracts }}</p>
-                    <p class="stat-label">Contratos Vencidos</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        }
+<!--                <div class="stat-card">-->
+<!--                  <i class="pi pi-calendar-times stat-icon danger"></i>-->
+<!--                  <div class="stat-content">-->
+<!--                    <p class="stat-value">{{ stats()?.expiredContracts }}</p>-->
+<!--                    <p class="stat-label">Contratos Vencidos</p>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        }-->
       </div>
     }
 

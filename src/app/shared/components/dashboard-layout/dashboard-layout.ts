@@ -50,16 +50,27 @@ export class DashboardLayoutComponent implements OnInit {
   isDarkMode = this.themeService.isDarkMode;
   currentUser = this.authService.currentUser;
   currentOrganization = this.organizationService.currentOrganization;
+  currentTheme = this.themeService.isDarkMode;
 
   // Computed
   isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
   platformName = computed(() => {
     const orgName = this.currentOrganization()?.name;
-    return orgName ? `${orgName} by RentMaster` : 'RentMaster';
+    return orgName ? `${orgName} by ArriendaFacil` : 'ArriendaFacil';
   });
-  platformLogo = computed(() =>
-    this.currentOrganization()?.logoUrl || '../../../../assets/logo.svg'
-  );
+  platformLogo = computed(() => {
+    const org = this.currentOrganization();
+
+    if (org?.logoUrl) {
+      return org.logoUrl;
+    }
+
+    if (this.currentTheme()) {
+      return '/logo_dark.svg';
+    } else {
+      return '/logo_light.svg';
+    }
+  });
 
   // Menu items
   menuItems = signal<MenuItem[]>([

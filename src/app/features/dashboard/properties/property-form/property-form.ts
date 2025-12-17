@@ -6,6 +6,7 @@ import { PropertyService } from '../../../../core/services/property.service';
 import { LocationService } from '../../../../core/services/location.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { PlanService } from '../../../../core/services/plan.service';
 import { PropertyDetailResponse } from '../../../../core/models/properties/property-detail-response';
 import { LocationResponse } from '../../../../core/models/location/location-response';
 import { CreatePropertyRequest } from '../../../../core/models/properties/property-request';
@@ -27,6 +28,7 @@ export class PropertyFormComponent implements OnInit {
   private locationService = inject(LocationService);
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
+  private planService = inject(PlanService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -50,27 +52,46 @@ export class PropertyFormComponent implements OnInit {
     return notes.length;
   });
 
+  // Plan features - Usar PlanService
+  planAllowsImages = computed(() => {
+    const plan = this.planService.currentPlan();
+    return plan?.allowsImages === true;
+  });
+
   maxImagesAllowed = computed(() => {
-    const plan = this.authService.organizationInfo()?.subscriptionPlan;
-    switch (plan) {
-      case 'BASICO':
-        return 3;
-      case 'INTERMEDIO':
-        return 5;
-      case 'SUPERIOR':
-        return 10;
-      default:
-        return 3; // Por defecto BASICO
+    const plan = this.planService.currentPlan();
+    if (!plan || !plan.allowsImages) {
+      return 0;
     }
+    return plan.imagesPerProperty || 0;
   });
 
   canAddMoreImages = computed(() => {
+    if (!this.planAllowsImages()) {
+      return false;
+    }
     return this.propertyImages().length < this.maxImagesAllowed();
+  });
+
+  showPhotosTab = computed(() => {
+    return this.planAllowsImages();
   });
 
   ngOnInit(): void {
     this.initForm();
     this.loadLocations();
+
+    // Cargar plan features
+    this.planService.loadPlanFeatures().subscribe({
+      next: () => {
+        console.log('[PropertyForm] Plan loaded');
+        console.log('[PropertyForm] Allows images:', this.planAllowsImages());
+        console.log('[PropertyForm] Max images:', this.maxImagesAllowed());
+      },
+      error: (err) => {
+        console.error('[PropertyForm] Error loading plan:', err);
+      }
+    });
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -86,8 +107,7 @@ export class PropertyFormComponent implements OnInit {
       propertyType: ['CASA', Validators.required],
       address: ['', [Validators.required, Validators.maxLength(500)]],
       monthlyRent: [0, [Validators.required, Validators.min(0)]],
-      waterFee: [105.00, [Validators.min(0)]],
-      status: ['DISPONIBLE', Validators.required],
+      waterFee: [0, [Validators.min(0)]],
       floors: [1, [Validators.min(1)]],
       bedrooms: [0, [Validators.min(0)]],
       bathrooms: [0, [Validators.min(0)]],
@@ -122,8 +142,8 @@ export class PropertyFormComponent implements OnInit {
       next: (data) => {
         this.selectedProperty.set(data);
 
-        // Cargar imágenes existentes si las hay
-        if (data.imageUrls && data.imageUrls.length > 0) {
+        // Cargar imágenes existentes si las hay (solo si el plan lo permite)
+        if (this.planAllowsImages() && data.imageUrls && data.imageUrls.length > 0) {
           this.propertyImages.set([...data.imageUrls]);
         }
 
@@ -134,7 +154,6 @@ export class PropertyFormComponent implements OnInit {
           address: data.address,
           monthlyRent: data.monthlyRent,
           waterFee: data.waterFee,
-          status: data.status,
           floors: data.floors || 1,
           bedrooms: data.bedrooms || 0,
           bathrooms: data.bathrooms || 0,
@@ -173,6 +192,8 @@ export class PropertyFormComponent implements OnInit {
 
     const formValue = this.propertyForm.value;
 
+    const imageUrls = this.planAllowsImages() ? this.propertyImages() : [];
+
     if (this.isEditing()) {
       const request: UpdatePropertyRequest = {
         locationId: formValue.locationId || undefined,
@@ -180,7 +201,6 @@ export class PropertyFormComponent implements OnInit {
         address: formValue.address,
         monthlyRent: formValue.monthlyRent,
         waterFee: formValue.waterFee,
-        status: formValue.status,
         floors: formValue.floors,
         bedrooms: formValue.bedrooms,
         bathrooms: formValue.bathrooms,
@@ -196,7 +216,7 @@ export class PropertyFormComponent implements OnInit {
         includesGas: formValue.includesGas,
         includesInternet: formValue.includesInternet,
         notes: formValue.notes,
-        imageUrls: this.propertyImages()
+        imageUrls: imageUrls
       };
 
       this.propertyService.updateProperty(this.selectedProperty()!.id, request).subscribe({
@@ -233,7 +253,7 @@ export class PropertyFormComponent implements OnInit {
         includesGas: formValue.includesGas,
         includesInternet: formValue.includesInternet,
         notes: formValue.notes,
-        imageUrls: this.propertyImages()
+        imageUrls: imageUrls
       };
 
       this.propertyService.createProperty(request).subscribe({
@@ -251,6 +271,11 @@ export class PropertyFormComponent implements OnInit {
   }
 
   setActiveTab(tab: string): void {
+    // Validar que si intenta ir a photos, el plan lo permita
+    if (tab === 'photos' && !this.planAllowsImages()) {
+      this.notification.warning('Tu plan no permite agregar fotografías. Mejora tu plan para acceder a esta característica.');
+      return;
+    }
     this.activeTab.set(tab);
   }
 
@@ -280,9 +305,17 @@ export class PropertyFormComponent implements OnInit {
 
     const file = input.files[0];
 
+    // Validar que el plan permita imágenes
+    if (!this.planAllowsImages()) {
+      this.notification.error('Tu plan no permite agregar fotografías. Mejora tu plan para acceder a esta característica.');
+      input.value = '';
+      return;
+    }
+
     // Validar que sea una imagen
     if (!file.type.startsWith('image/')) {
       this.notification.error('Por favor selecciona un archivo de imagen válido');
+      input.value = '';
       return;
     }
 
@@ -290,12 +323,14 @@ export class PropertyFormComponent implements OnInit {
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
       this.notification.error('La imagen no debe superar los 5MB');
+      input.value = '';
       return;
     }
 
     // Validar límite de imágenes según plan
     if (!this.canAddMoreImages()) {
       this.notification.error(`Has alcanzado el límite de ${this.maxImagesAllowed()} imágenes para tu plan`);
+      input.value = '';
       return;
     }
 
@@ -311,8 +346,6 @@ export class PropertyFormComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', file);
 
-    // Aquí usa tu servicio de Cloudinary existente
-    // Ejemplo: this.cloudinaryService.uploadImage(formData)
     this.propertyService.uploadPropertyImage(formData).subscribe({
       next: (response: { url: string }) => {
         const currentImages = this.propertyImages();
@@ -335,16 +368,17 @@ export class PropertyFormComponent implements OnInit {
   }
 
   getPlanName(): string {
-    const plan = this.authService.organizationInfo()?.subscriptionPlan;
-    switch (plan) {
-      case 'BASICO':
-        return 'Básico';
-      case 'INTERMEDIO':
-        return 'Intermedio';
-      case 'SUPERIOR':
-        return 'Superior';
-      default:
-        return 'Básico';
+    return this.planService.getPlanName();
+  }
+
+  getImagesFeatureDescription(): string {
+    if (!this.planAllowsImages()) {
+      return 'Funcionalidad no disponible en tu plan';
     }
+    const max = this.maxImagesAllowed();
+    if (max === -1) {
+      return 'Imágenes ilimitadas';
+    }
+    return `Hasta ${max} imágenes por propiedad`;
   }
 }

@@ -1,10 +1,11 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import {Component, inject, signal, OnInit, input, computed} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoginRequest } from '../../../core/models/auth/login-request.model';
+import {ThemeService} from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class LoginComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private notification = inject(NotificationService);
+  private themeService = inject(ThemeService);
 
   loginForm: FormGroup;
   isLoading = signal<boolean>(false);
@@ -33,6 +35,16 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  platformName = input<string>('ArriendaFacil');
+  currentTheme = this.themeService.isDarkMode;
+  logoUrl = computed(() => {
+
+    if (this.currentTheme()) {
+      return '/logo_dark.svg';
+    } else {
+      return '/logo_light.svg';
+    }
+  });
   ngOnInit(): void {
     this.returnUrl.set(
       this.route.snapshot.queryParams['returnUrl'] || '/dashboard/home'

@@ -1,11 +1,12 @@
 // src/app/features/auth/register/register.component.ts
-import { Component, inject, signal } from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RegisterRequest } from '../../../core/models/auth/register-request.model';
+import {ThemeService} from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-register',
@@ -23,6 +24,7 @@ export class RegisterComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private notification = inject(NotificationService);
+  private themeService = inject(ThemeService);
 
   registerForm: FormGroup;
   isLoading = signal<boolean>(false);
@@ -47,6 +49,17 @@ export class RegisterComponent {
       validators: this.passwordMatchValidator
     });
   }
+
+  platformName = input<string>('ArriendaFacil');
+  currentTheme = this.themeService.isDarkMode;
+  logoUrl = computed(() => {
+
+    if (this.currentTheme()) {
+      return '/logo_dark.svg';
+    } else {
+      return '/logo_light.svg';
+    }
+  });
 
   // Validador personalizado para la fortaleza de la contraseña
   private passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {

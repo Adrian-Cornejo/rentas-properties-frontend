@@ -46,6 +46,7 @@ export interface SubscriptionPlan {
 }
 
 export interface PlanWithUsage extends SubscriptionPlan {
+  whiteLabelLevel?: string;
   currentProperties: number;
   currentUsers: number;
   notificationsSentThisMonth: number;
