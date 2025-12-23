@@ -17,7 +17,7 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon primary">
-        <span>📋</span>
+        <i class="pi pi-file"></i>
       </div>
       <div class="stat-content">
         <div class="stat-value">{{ totalContracts() }}</div>
@@ -27,7 +27,7 @@
 
     <div class="stat-card">
       <div class="stat-icon success">
-        <span>✓</span>
+        <i class="pi pi-check-circle"></i>
       </div>
       <div class="stat-content">
         <div class="stat-value">{{ activeCount() }}</div>
@@ -37,7 +37,7 @@
 
     <div class="stat-card">
       <div class="stat-icon warning">
-        <span>⚠</span>
+        <i class="pi pi-exclamation-triangle"></i>
       </div>
       <div class="stat-content">
         <div class="stat-value">{{ expiringSoonCount() }}</div>
@@ -47,7 +47,7 @@
 
     <div class="stat-card">
       <div class="stat-icon error">
-        <span>⏱</span>
+        <i class="pi pi-clock"></i>
       </div>
       <div class="stat-content">
         <div class="stat-value">{{ expiredCount() }}</div>
@@ -120,7 +120,7 @@
       }
     } @else {
       <div class="empty-state">
-        <div class="empty-icon">📋</div>
+        <i class="pi pi-file empty-icon"></i>
         <h3>No se encontraron contratos</h3>
         <p>No hay contratos que coincidan con los filtros seleccionados</p>
       </div>

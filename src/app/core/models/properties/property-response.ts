@@ -7,6 +7,7 @@ export interface PropertyResponse {
   waterFee: number;
   status: string;
   locationId?: string;
+  location: Location;
   locationName?: string;
   organizationId: string;
   organizationName: string;
@@ -19,4 +20,11 @@ export interface PropertyResponse {
   updatedAt: string;
   mainImageUrl?: string;
   imageUrls?: string[];
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
 }

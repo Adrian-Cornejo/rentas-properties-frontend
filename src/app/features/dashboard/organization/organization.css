@@ -770,7 +770,7 @@ textarea.form-control {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--text-color);
+  color: var(--text-primary);
 }
 
 .logo-display {
@@ -791,4 +791,415 @@ textarea.form-control {
 .info-item.logo-display .organization-logo {
   width: 150px;
   height: 150px;
+}
+/* ============================================
+   FEATURE BADGES
+   ============================================ */
+.feature-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--color-primary-500);
+  color: white;
+  margin-left: 0.5rem;
+}
+
+.feature-badge.success {
+  background-color: var(--color-success-500);
+}
+
+.feature-badge.warning {
+  background-color: var(--color-warning-500);
+}
+
+.feature-badge.info {
+  background-color: var(--color-info-500);
+}
+
+/* ============================================
+   FEATURE LOCKED STATE
+   ============================================ */
+.feature-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  background-color: var(--bg-hover);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+}
+
+.feature-locked i {
+  font-size: 3rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.feature-locked p {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.feature-locked small {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Dark mode adjustments */
+.dark .feature-locked {
+  background-color: var(--color-gray-200);
+  border-color: var(--color-gray-300);
+}
+
+.dark .feature-locked i {
+  color: var(--color-gray-400);
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.alert {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid;
+}
+
+.alert i {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.alert > div {
+  flex: 1;
+}
+
+.alert strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.alert p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Alert variants - Light mode */
+.alert-info {
+  background-color: oklch(0.96 0.02 240);
+  border-left-color: var(--color-info-500);
+  color: var(--color-info-500);
+}
+
+.alert-info i {
+  color: var(--color-info-500);
+}
+
+.alert-info strong,
+.alert-info p {
+  color: var(--text-primary);
+}
+
+.alert-warning {
+  background-color: oklch(0.96 0.03 75);
+  border-left-color: var(--color-warning-500);
+  color: var(--color-warning-500);
+}
+
+.alert-warning i {
+  color: var(--color-warning-500);
+}
+
+.alert-warning strong,
+.alert-warning p {
+  color: var(--text-primary);
+}
+
+.alert-success {
+  background-color: oklch(0.96 0.02 145);
+  border-left-color: var(--color-success-500);
+  color: var(--color-success-500);
+}
+
+.alert-success i {
+  color: var(--color-success-500);
+}
+
+.alert-success strong,
+.alert-success p {
+  color: var(--text-primary);
+}
+
+.alert-danger {
+  background-color: oklch(0.96 0.02 25);
+  border-left-color: var(--color-error-500);
+  color: var(--color-error-500);
+}
+
+.alert-danger i {
+  color: var(--color-error-500);
+}
+
+.alert-danger strong,
+.alert-danger p {
+  color: var(--text-primary);
+}
+
+/* Dark mode alerts */
+.dark .alert-info {
+  background-color: oklch(0.25 0.03 240);
+}
+
+.dark .alert-warning {
+  background-color: oklch(0.25 0.03 75);
+}
+
+.dark .alert-success {
+  background-color: oklch(0.25 0.03 145);
+}
+
+.dark .alert-danger {
+  background-color: oklch(0.25 0.03 25);
+}
+
+/* ============================================
+   COLOR PREVIEW (for view mode)
+   ============================================ */
+.color-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.color-preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.color-preview-item label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.color-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background-color: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.color-swatch {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.color-code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.dark .color-preview {
+  background-color: var(--color-gray-200);
+  border-color: var(--color-gray-300);
+}
+
+.dark .color-swatch {
+  border-color: var(--color-gray-300);
+}
+
+/* ============================================
+   SECTION TITLE WITH BADGE
+   ============================================ */
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dark .section-title {
+  border-bottom-color: var(--color-gray-300);
+}
+
+/* ============================================
+   LIMITS GRID IMPROVEMENTS
+   ============================================ */
+.limits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.limit-item {
+  padding: 1rem;
+  background-color: var(--bg-hover);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.limit-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+}
+
+.limit-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.dark .limit-item {
+  background-color: var(--color-gray-200);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+  .feature-badge {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: fit-content;
+  }
+
+  .alert {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .color-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .limits-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   ANIMATION FOR FEATURE LOCKED
+   ============================================ */
+.feature-locked {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   INFO ROW IMPROVEMENTS
+   ============================================ */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+}
+
+.info-row:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dark .info-row:not(:last-child) {
+  border-bottom-color: var(--color-gray-300);
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ============================================
+   DIVIDER
+   ============================================ */
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 1rem 0;
+}
+
+.dark .divider {
+  background-color: var(--color-gray-300);
+}
+
+/* ============================================
+   LOGO DISPLAY
+   ============================================ */
+.logo-display {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.organization-logo {
+  max-width: 200px;
+  max-height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* ============================================
+   FORM SECTION
+   ============================================ */
+.form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.dark .form-section {
+  border-bottom-color: var(--color-gray-300);
 }

@@ -6,14 +6,12 @@ import { OrganizationService } from '../../../core/services/organization.service
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { PlanService } from '../../../core/services/plan.service';
 import { OrganizationDetailResponse } from '../../../core/models/organization/organization-detail-response';
 import { UpdateOrganizationRequest } from '../../../core/models/organization/update-organization-request';
-import { OrganizationStatsResponse } from '../../../core/models/organization/organization-stats-response';
-import {CreateOrganizationRequest} from '../../../core/models/organization/organization-request';
+import { CreateOrganizationRequest } from '../../../core/models/organization/organization-request';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
-import {ImageUploadComponent} from '../../../shared/components/image-upload/image-upload';
-
-
+import { ImageUploadComponent } from '../../../shared/components/image-upload/image-upload';
 
 @Component({
   selector: 'app-organization',
@@ -34,6 +32,7 @@ export class OrganizationComponent implements OnInit {
   private notification = inject(NotificationService);
   private themeService = inject(ThemeService);
   private cloudinaryService = inject(CloudinaryService);
+  private planService = inject(PlanService);
 
   // Signals
   isLoading = signal<boolean>(false);
@@ -41,7 +40,6 @@ export class OrganizationComponent implements OnInit {
   isEditMode = signal<boolean>(false);
   isCreatingMode = signal<boolean>(false);
   organization = signal<OrganizationDetailResponse | null>(null);
-  stats = signal<OrganizationStatsResponse | null>(null);
   showConfirmDialog = signal<boolean>(false);
   logoUrl = signal<string>('');
 
@@ -58,6 +56,46 @@ export class OrganizationComponent implements OnInit {
   });
 
   isDarkMode = this.themeService.isDarkMode;
+
+  // Plan features - COMPUTED SIGNALS
+  hasWhiteLabelFeature = computed(() => {
+    const plan = this.planService.currentPlan();
+    return plan?.hasWhiteLabel === true;
+  });
+
+  whiteLabelLevel = computed(() => {
+    const plan = this.planService.currentPlan();
+    if (!plan?.hasWhiteLabel) return null;
+    return plan.whiteLabelLevel || null;
+  });
+
+  canCustomizeColors = computed(() => {
+    const plan = this.planService.currentPlan();
+    if (!plan?.hasWhiteLabel) return false;
+
+    const level = plan.whiteLabelLevel;
+    return level === 'BASIC' || level === 'FULL';
+  });
+
+  canUploadLogo = computed(() => {
+    const plan = this.planService.currentPlan();
+    if (!plan?.hasWhiteLabel) return false;
+
+    const level = plan.whiteLabelLevel;
+    return level === 'BASIC' || level === 'FULL';
+  });
+
+  canUseCustomDomain = computed(() => {
+    const plan = this.planService.currentPlan();
+    if (!plan?.hasWhiteLabel) return false;
+
+    return plan.whiteLabelLevel === 'FULL';
+  });
+
+  // Helper computed
+  showWhiteLabelWarning = computed(() => {
+    return !this.hasWhiteLabelFeature() && (this.isEditMode() || this.isCreatingMode());
+  });
 
   ngOnInit(): void {
     this.initForm();
@@ -86,31 +124,32 @@ export class OrganizationComponent implements OnInit {
         this.organization.set(data);
         this.patchFormValues(data);
         this.logoUrl.set(data.logoUrl || '');
-        this.loadStats();
+
+        // Cargar plan después de obtener la organización
+        this.planService.loadPlanFeatures().subscribe({
+          next: () => {
+            console.log('[Organization] Plan loaded');
+            console.log('[Organization] Has White Label:', this.hasWhiteLabelFeature());
+            console.log('[Organization] White Label Level:', this.whiteLabelLevel());
+            console.log('[Organization] Can customize colors:', this.canCustomizeColors());
+            console.log('[Organization] Can upload logo:', this.canUploadLogo());
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            console.error('[Organization] Error loading plan:', err);
+            this.isLoading.set(false);
+          }
+        });
       },
       error: (error) => {
         if (error.status === 404) {
           console.log('Usuario sin organización asignada');
-        } else {
-          // this.notification.error(error.message || 'Error al cargar organización');
         }
         this.isLoading.set(false);
       }
     });
   }
 
-  private loadStats(): void {
-    this.organizationService.getMyOrganizationStats().subscribe({
-      next: (data) => {
-        this.stats.set(data);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error al cargar estadísticas:', error);
-        this.isLoading.set(false);
-      }
-    });
-  }
 
   private patchFormValues(data: OrganizationDetailResponse): void {
     this.organizationForm.patchValue({
@@ -123,7 +162,12 @@ export class OrganizationComponent implements OnInit {
       codeIsReusable: data.codeIsReusable
     });
   }
+
   onLogoUrlChange(url: string): void {
+    if (!this.canUploadLogo()) {
+      this.notification.warning('Tu plan no permite subir logo personalizado. Mejora tu plan para acceder a esta característica.');
+      return;
+    }
     this.logoUrl.set(url);
     this.organizationForm.patchValue({ logoUrl: url });
   }
@@ -131,6 +175,15 @@ export class OrganizationComponent implements OnInit {
   startCreating(): void {
     this.isCreatingMode.set(true);
     this.organizationForm.enable();
+
+    // Si no tiene white label, deshabilitar campos de personalización
+    if (!this.hasWhiteLabelFeature()) {
+      this.organizationForm.get('primaryColor')?.disable();
+      this.organizationForm.get('secondaryColor')?.disable();
+      this.organizationForm.get('logoUrl')?.disable();
+      this.organizationForm.get('logoPublicId')?.disable();
+    }
+
     this.organizationForm.reset({
       name: '',
       description: '',
@@ -161,9 +214,9 @@ export class OrganizationComponent implements OnInit {
     const request: CreateOrganizationRequest = {
       name: this.organizationForm.value.name,
       description: this.organizationForm.value.description,
-      primaryColor: this.organizationForm.value.primaryColor,
-      secondaryColor: this.organizationForm.value.secondaryColor,
-      logoUrl: this.organizationForm.value.logoUrl
+      primaryColor: this.canCustomizeColors() ? this.organizationForm.value.primaryColor : '#3B82F6',
+      secondaryColor: this.canCustomizeColors() ? this.organizationForm.value.secondaryColor : '#10B981',
+      logoUrl: this.canUploadLogo() ? this.organizationForm.value.logoUrl : undefined
     };
 
     this.organizationService.createOrganization(request).subscribe({
@@ -176,8 +229,12 @@ export class OrganizationComponent implements OnInit {
         this.isSaving.set(false);
         this.notification.success('Organización creada exitosamente');
 
-        this.themeService.setOrganizationColors(data.primaryColor, data.secondaryColor);
-        this.loadStats();
+        if (this.canCustomizeColors()) {
+          this.themeService.setOrganizationColors(data.primaryColor, data.secondaryColor);
+        }
+
+        // Recargar plan después de crear organización
+        this.planService.reload().subscribe();
       },
       error: (error) => {
         this.notification.error(error.message || 'Error al crear organización');
@@ -192,6 +249,14 @@ export class OrganizationComponent implements OnInit {
     } else {
       this.isEditMode.set(true);
       this.organizationForm.enable();
+
+      // Si no tiene white label, deshabilitar campos de personalización
+      if (!this.hasWhiteLabelFeature()) {
+        this.organizationForm.get('primaryColor')?.disable();
+        this.organizationForm.get('secondaryColor')?.disable();
+        this.organizationForm.get('logoUrl')?.disable();
+        this.organizationForm.get('logoPublicId')?.disable();
+      }
     }
   }
 
@@ -201,6 +266,7 @@ export class OrganizationComponent implements OnInit {
     const org = this.organization();
     if (org) {
       this.patchFormValues(org);
+      this.logoUrl.set(org.logoUrl || '');
     }
   }
 
@@ -218,10 +284,10 @@ export class OrganizationComponent implements OnInit {
     const request: UpdateOrganizationRequest = {
       name: this.organizationForm.value.name,
       description: this.organizationForm.value.description,
-      primaryColor: this.organizationForm.value.primaryColor,
-      secondaryColor: this.organizationForm.value.secondaryColor,
-      logoUrl: this.organizationForm.value.logoUrl,
-      logoPublicId: this.organizationForm.value.logoPublicId,
+      primaryColor: this.canCustomizeColors() ? this.organizationForm.value.primaryColor : org.primaryColor,
+      secondaryColor: this.canCustomizeColors() ? this.organizationForm.value.secondaryColor : org.secondaryColor,
+      logoUrl: this.canUploadLogo() ? this.organizationForm.value.logoUrl : org.logoUrl,
+      logoPublicId: this.canUploadLogo() ? this.organizationForm.value.logoPublicId : org.logoPublicId,
       codeIsReusable: this.organizationForm.value.codeIsReusable
     };
 
@@ -234,7 +300,9 @@ export class OrganizationComponent implements OnInit {
         this.isSaving.set(false);
         this.notification.success('Organización actualizada exitosamente');
 
-        this.themeService.setOrganizationColors(data.primaryColor, data.secondaryColor);
+        if (this.canCustomizeColors()) {
+          this.themeService.setOrganizationColors(data.primaryColor, data.secondaryColor);
+        }
       },
       error: (error) => {
         this.notification.error(error.message || 'Error al actualizar organización');
@@ -284,22 +352,24 @@ export class OrganizationComponent implements OnInit {
 
   getSubscriptionStatusClass(status: string): string {
     const statusMap: Record<string, string> = {
-      'ACTIVE': 'status-success',
-      'TRIAL': 'status-info',
-      'EXPIRED': 'status-warning',
-      'CANCELLED': 'status-danger'
+      'active': 'status-success',
+      'trial': 'status-info',
+      'expired': 'status-warning',
+      'cancelled': 'status-danger',
+      'suspended': 'status-warning'
     };
-    return statusMap[status] || 'status-info';
+    return statusMap[status?.toLowerCase()] || 'status-info';
   }
 
   getSubscriptionStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      'ACTIVE': 'Activa',
-      'TRIAL': 'Prueba',
-      'EXPIRED': 'Expirada',
-      'CANCELLED': 'Cancelada'
+      'active': 'Activa',
+      'trial': 'Prueba',
+      'expired': 'Expirada',
+      'cancelled': 'Cancelada',
+      'suspended': 'Suspendida'
     };
-    return labels[status] || status;
+    return labels[status?.toLowerCase()] || status;
   }
 
   formatDate(date: string | undefined): string {
@@ -317,5 +387,24 @@ export class OrganizationComponent implements OnInit {
       style: 'currency',
       currency: 'MXN'
     }).format(amount);
+  }
+
+  getPlanName(): string {
+    return this.planService.getPlanName();
+  }
+
+  getWhiteLabelLevelDescription(): string {
+    const level = this.whiteLabelLevel();
+
+    if (!level) {
+      return '';
+    }
+
+    const descriptions: Record<string, string> = {
+      'BASIC': 'Personalización básica (logo y colores)',
+      'FULL': 'Personalización completa (logo, colores y dominio personalizado)'
+    };
+
+    return descriptions[level] || 'Personalización disponible';
   }
 }

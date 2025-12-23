@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import {Component, computed, inject, input} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -18,8 +18,16 @@ export class NavbarComponent {
 
   showLogo = input<boolean>(true);
   showThemeToggle = input<boolean>(true);
-  platformName = input<string>('RentMaster');
-  logoUrl = input<string>('../../../../assets/logo.svg');
+  platformName = input<string>('ArriendaFacil');
+  currentTheme = this.themeService.isDarkMode;
+  logoUrl = computed(() => {
+
+    if (this.currentTheme()) {
+      return '/logo_dark.svg';
+    } else {
+      return '/logo_light.svg';
+    }
+  });
 
   isDarkMode = this.themeService.isDarkMode;
 

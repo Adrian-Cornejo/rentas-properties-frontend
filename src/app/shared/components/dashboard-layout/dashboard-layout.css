@@ -64,7 +64,8 @@
 }
 
 .navbar-logo {
-  height: 4.5rem;
+  margin-top: 5px;
+  height: 4.3rem;
   object-fit: contain;
   border-radius: 0.375rem;
 }

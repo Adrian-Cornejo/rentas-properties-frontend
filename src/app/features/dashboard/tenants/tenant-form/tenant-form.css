@@ -480,3 +480,60 @@
     justify-content: center;
   }
 }
+.tab-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tab-button.disabled:hover {
+  background-color: transparent;
+}
+
+.tab-lock-icon {
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+/* Feature locked full page */
+.feature-locked-full {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background-color: var(--bg-hover);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  min-height: 300px;
+}
+
+.feature-locked-full i {
+  font-size: 3rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.feature-locked-full h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.feature-locked-full p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.5;
+}
+
+.feature-locked-full .upgrade-hint {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.dark .feature-locked-full {
+  background-color: var(--color-gray-200);
+  border-color: var(--color-gray-300);
+}
