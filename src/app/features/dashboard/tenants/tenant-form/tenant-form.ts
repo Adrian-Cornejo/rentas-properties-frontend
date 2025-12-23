@@ -1,10 +1,11 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { CloudinaryService } from '../../../../core/services/cloudinary.service';
+import { PlanService } from '../../../../core/services/plan.service';
 import { TenantDetailResponse } from '../../../../core/models/tenents/tenent-detail-response';
 import { CreateTenantRequest } from '../../../../core/models/tenents/tenant-request';
 import { UpdateTenantRequest } from '../../../../core/models/tenents/update-tenant-request';
@@ -24,6 +25,7 @@ export class TenantFormComponent implements OnInit {
   private tenantService = inject(TenantService);
   private cloudinaryService = inject(CloudinaryService);
   private notification = inject(NotificationService);
+  private planService = inject(PlanService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -39,9 +41,32 @@ export class TenantFormComponent implements OnInit {
   // Form
   tenantForm!: FormGroup;
 
+  // Plan features - COMPUTED SIGNALS
+  planAllowsImages = computed(() => {
+    const plan = this.planService.currentPlan();
+    return plan?.allowsImages === true;
+  });
+
+  showDocumentsTab = computed(() => {
+    return this.planAllowsImages();
+  });
+
   ngOnInit(): void {
     this.initializeForm();
+    this.loadPlanFeatures();
     this.checkEditMode();
+  }
+
+  private loadPlanFeatures(): void {
+    this.planService.loadPlanFeatures().subscribe({
+      next: () => {
+        console.log('[TenantForm] Plan loaded');
+        console.log('[TenantForm] Allows images:', this.planAllowsImages());
+      },
+      error: (err) => {
+        console.error('[TenantForm] Error loading plan:', err);
+      }
+    });
   }
 
   private initializeForm(): void {
@@ -86,16 +111,23 @@ export class TenantFormComponent implements OnInit {
       notes: tenant.notes || ''
     });
 
-    // Cargar imagen y public_id si existen
-    if (tenant.ineImageUrl) {
-      this.ineImageUrl.set(tenant.ineImageUrl);
-    }
-    if (tenant.inePublicId) {
-      this.inePublicId.set(tenant.inePublicId);
+    // Cargar imagen y public_id si existen (solo si el plan lo permite)
+    if (this.planAllowsImages()) {
+      if (tenant.ineImageUrl) {
+        this.ineImageUrl.set(tenant.ineImageUrl);
+      }
+      if (tenant.inePublicId) {
+        this.inePublicId.set(tenant.inePublicId);
+      }
     }
   }
 
   setActiveTab(tab: string): void {
+    // Validar que si intenta ir a documents, el plan lo permita
+    if (tab === 'documents' && !this.planAllowsImages()) {
+      this.notification.warning('Tu plan no permite subir documentos. Mejora tu plan para acceder a esta característica.');
+      return;
+    }
     this.activeTab.set(tab);
   }
 
@@ -115,11 +147,19 @@ export class TenantFormComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
+    // Validar que el plan permita imágenes
+    if (!this.planAllowsImages()) {
+      this.notification.error('Tu plan no permite subir documentos. Mejora tu plan para acceder a esta característica.');
+      input.value = '';
+      return;
+    }
+
     const file = input.files[0];
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
       this.notification.error('Solo se permiten archivos de imagen');
+      input.value = '';
       return;
     }
 
@@ -127,10 +167,12 @@ export class TenantFormComponent implements OnInit {
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       this.notification.error('La imagen no debe superar los 5MB');
+      input.value = '';
       return;
     }
 
     this.uploadINEImage(file);
+    input.value = '';
   }
 
   private uploadINEImage(file: File): void {
@@ -152,6 +194,11 @@ export class TenantFormComponent implements OnInit {
   }
 
   removeINEImage(): void {
+    if (!this.planAllowsImages()) {
+      this.notification.warning('Tu plan no permite gestionar documentos.');
+      return;
+    }
+
     const tenantId = this.selectedTenant()?.id;
 
     if (tenantId && this.isEditing()) {
@@ -199,8 +246,8 @@ export class TenantFormComponent implements OnInit {
       phone: this.tenantForm.get('phone')?.value,
       email: this.tenantForm.get('email')?.value || undefined,
       ineNumber: this.tenantForm.get('ineNumber')?.value || undefined,
-      ineImageUrl: this.ineImageUrl() || undefined,
-      inePublicId: this.inePublicId() || undefined,
+      ineImageUrl: this.planAllowsImages() ? (this.ineImageUrl() || undefined) : undefined,
+      inePublicId: this.planAllowsImages() ? (this.inePublicId() || undefined) : undefined,
       numberOfOccupants: this.tenantForm.get('numberOfOccupants')?.value,
       notes: this.tenantForm.get('notes')?.value || undefined,
     };
@@ -221,14 +268,14 @@ export class TenantFormComponent implements OnInit {
     const tenant = this.selectedTenant();
     if (!tenant) return;
 
-    // El backend se encarga de eliminar la imagen anterior si cambió
     const request: UpdateTenantRequest = {
       fullName: this.tenantForm.get('fullName')?.value,
       phone: this.tenantForm.get('phone')?.value,
       email: this.tenantForm.get('email')?.value || undefined,
       ineNumber: this.tenantForm.get('ineNumber')?.value || undefined,
-      ineImageUrl: this.ineImageUrl() || undefined,
-      inePublicId: this.inePublicId() || undefined,
+      // Solo incluir imagen si el plan lo permite
+      ineImageUrl: this.planAllowsImages() ? (this.ineImageUrl() || undefined) : undefined,
+      inePublicId: this.planAllowsImages() ? (this.inePublicId() || undefined) : undefined,
       numberOfOccupants: this.tenantForm.get('numberOfOccupants')?.value,
       notes: this.tenantForm.get('notes')?.value || undefined,
     };
@@ -251,5 +298,9 @@ export class TenantFormComponent implements OnInit {
 
   getCharCount(): number {
     return this.tenantForm.get('notes')?.value?.length || 0;
+  }
+
+  getPlanName(): string {
+    return this.planService.getPlanName();
   }
 }

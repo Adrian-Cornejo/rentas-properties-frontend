@@ -31,12 +31,16 @@
       <button
         class="tab-button"
         [class.active]="activeTab() === 'documents'"
+        [class.disabled]="!planAllowsImages()"
         (click)="setActiveTab('documents')">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
         </svg>
         <span class="tab-text">Documentos</span>
+        @if (!planAllowsImages()) {
+          <i class="pi pi-lock tab-lock-icon"></i>
+        }
       </button>
 
       <button
@@ -125,57 +129,71 @@
 
       <!-- Tab 2: Documents -->
       <div class="tab-content" *ngIf="activeTab() === 'documents'">
-        <div class="documents-section">
-          <h3 class="section-title">Identificación Oficial (INE/IFE)</h3>
-          <p class="section-description">Sube una imagen de la identificación oficial del inquilino</p>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ineNumber">Número de INE</label>
-              <input
-                id="ineNumber"
-                type="text"
-                formControlName="ineNumber"
-                placeholder="IDMEX1234567890">
-            </div>
+        <!-- Si el plan NO permite imágenes -->
+        @if (!planAllowsImages()) {
+          <div class="feature-locked-full">
+            <i class="pi pi-lock"></i>
+            <h3>Funcionalidad Bloqueada</h3>
+            <p>Tu plan <strong>{{ getPlanName() }}</strong> no incluye la funcionalidad de subir documentos.</p>
+            <p class="upgrade-hint">Mejora tu plan para desbloquear esta característica.</p>
           </div>
+        }
 
-          <!-- INE Image Upload -->
-          <div class="ine-upload-section">
-            <div class="ine-preview" *ngIf="ineImageUrl()">
-              <img [src]="ineImageUrl()" alt="INE Preview">
-              <button
-                type="button"
-                class="btn-remove-image"
-                (click)="removeINEImage()"
-                title="Eliminar imagen">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 6 6 18M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
+        <!-- Si el plan SÍ permite imágenes -->
+        @if (planAllowsImages()) {
+          <div class="documents-section">
+            <h3 class="section-title">Identificación Oficial (INE/IFE)</h3>
+            <p class="section-description">Sube una imagen de la identificación oficial del inquilino</p>
 
-            <div class="ine-upload-placeholder" *ngIf="!ineImageUrl()">
-              <label class="upload-label">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ineNumber">Número de INE</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  (change)="onFileSelected($event)"
-                  style="display: none;">
-                <div class="upload-content">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                  id="ineNumber"
+                  type="text"
+                  formControlName="ineNumber"
+                  placeholder="IDMEX1234567890">
+              </div>
+            </div>
+
+            <!-- INE Image Upload -->
+            <div class="ine-upload-section">
+              <div class="ine-preview" *ngIf="ineImageUrl()">
+                <img [src]="ineImageUrl()" alt="INE Preview">
+                <button
+                  type="button"
+                  class="btn-remove-image"
+                  (click)="removeINEImage()"
+                  title="Eliminar imagen">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6 6 18M6 6l12 12"/>
                   </svg>
-                  <p class="upload-text">
-                    {{ isUploadingINE() ? 'Subiendo imagen...' : 'Click para subir imagen de INE' }}
-                  </p>
-                  <p class="upload-hint">PNG, JPG (máx. 5MB)</p>
-                </div>
-              </label>
+                </button>
+              </div>
+
+              <div class="ine-upload-placeholder" *ngIf="!ineImageUrl()">
+                <label class="upload-label">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onFileSelected($event)"
+                    style="display: none;">
+                  <div class="upload-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                    </svg>
+                    <p class="upload-text">
+                      {{ isUploadingINE() ? 'Subiendo imagen...' : 'Click para subir imagen de INE' }}
+                    </p>
+                    <p class="upload-hint">PNG, JPG (máx. 5MB)</p>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
 
       <!-- Tab 3: Notes -->

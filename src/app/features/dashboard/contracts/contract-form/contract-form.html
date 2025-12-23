@@ -59,12 +59,16 @@
         type="button"
         class="tab-button"
         [class.active]="activeTab() === 'documents'"
+        [class.disabled]="!planAllowsImages()"
         (click)="selectTab('documents')">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
           <polyline points="14 2 14 8 20 8"/>
         </svg>
         <span class="tab-text">Documentos</span>
+        @if (!planAllowsImages()) {
+          <i class="pi pi-lock tab-lock-icon"></i>
+        }
       </button>
     </div>
 
@@ -193,6 +197,7 @@
                     name="primaryTenant"
                     [checked]="assignment.isPrimary"
                     (change)="!isEditing() && setPrimaryTenant(assignment.tenantId)"
+                    [disabled]="isEditing()"
                   />
                   <span>{{ assignment.isPrimary ? 'Inquilino Principal' : 'Inquilino Adicional' }}</span>
                 </label>
@@ -308,61 +313,77 @@
 
       <!-- Tab 4: Documents -->
       <div class="tab-content" *ngIf="activeTab() === 'documents'">
-        <div class="upload-section">
-          <label>Contrato PDF</label>
 
-          <div class="upload-area" *ngIf="!contractDocumentUrl()">
-            <input
-              type="file"
-              accept="application/pdf"
-              id="documentUpload"
-              class="file-input"
-              #fileInput
-            />
-            <label for="documentUpload" class="upload-label">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" x2="12" y1="3" y2="15"/>
-              </svg>
-              <span>{{ isUploadingDocument() ? 'Subiendo documento...' : 'Clic para seleccionar archivo PDF' }}</span>
-              <small>Máximo 10MB</small>
-            </label>
+        <!-- Si el plan NO permite imágenes -->
+        @if (!planAllowsImages()) {
+          <div class="feature-locked-full">
+            <i class="pi pi-lock"></i>
+            <h3>Funcionalidad Bloqueada</h3>
+            <p>Tu plan <strong>{{ getPlanName() }}</strong> no incluye la funcionalidad de subir documentos.</p>
+            <p class="upgrade-hint">Mejora tu plan para desbloquear esta característica.</p>
+          </div>
+        }
+
+        <!-- Si el plan SÍ permite imágenes -->
+        @if (planAllowsImages()) {
+          <div class="upload-section">
+            <label>Contrato PDF</label>
+
+            <div class="upload-area" *ngIf="!contractDocumentUrl()">
+              <input
+                type="file"
+                accept="application/pdf"
+                id="documentUpload"
+                class="file-input"
+                (change)="onDocumentSelect($event)"
+                #fileInput
+              />
+              <label for="documentUpload" class="upload-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" x2="12" y1="3" y2="15"/>
+                </svg>
+                <span>{{ isUploadingDocument() ? 'Subiendo documento...' : 'Clic para seleccionar archivo PDF' }}</span>
+                <small>Máximo 10MB</small>
+              </label>
+            </div>
+
+            <div class="document-preview" *ngIf="contractDocumentUrl()">
+              <div class="document-info">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <div class="document-details">
+                  <span class="document-name">Contrato.pdf</span>
+                  <a [href]="contractDocumentUrl()" target="_blank" class="document-link">Ver documento</a>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-danger-outline"
+                >
+                Eliminar
+              </button>
+            </div>
           </div>
 
-          <div class="document-preview" *ngIf="contractDocumentUrl()">
-            <div class="document-info">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14 2 14 8 20 8"/>
-              </svg>
-              <div class="document-details">
-                <span class="document-name">Contrato.pdf</span>
-                <a [href]="contractDocumentUrl()" target="_blank" class="document-link">Ver documento</a>
+          <div class="notes-section">
+            <label for="notes">Notas</label>
+            <div class="textarea-wrapper">
+              <textarea
+                id="notes"
+                formControlName="notes"
+                rows="5"
+                maxlength="500"
+                placeholder="Escribe notas adicionales sobre este contrato..."></textarea>
+              <div class="char-counter">
+                {{ getCharCount() }} / 500 caracteres
               </div>
             </div>
-            <button
-              type="button"
-              class="btn btn-danger-outline">
-              Eliminar
-            </button>
           </div>
-        </div>
-
-        <div class="notes-section">
-          <label for="notes">Notas</label>
-          <div class="textarea-wrapper">
-            <textarea
-              id="notes"
-              formControlName="notes"
-              rows="5"
-              maxlength="500"
-              placeholder="Escribe notas adicionales sobre este contrato..."></textarea>
-            <div class="char-counter">
-              {{ getCharCount() }} / 500 caracteres
-            </div>
-          </div>
-        </div>
+        }
       </div>
     </form>
   </div>

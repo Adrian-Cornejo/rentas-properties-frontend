@@ -7,6 +7,7 @@ import { PropertyService } from '../../../../core/services/property.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { CloudinaryService } from '../../../../core/services/cloudinary.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { PlanService } from '../../../../core/services/plan.service';
 import { ContractDetailResponse } from '../../../../core/models/contract/contract-detail-response';
 import { PropertyResponse } from '../../../../core/models/properties/property-response';
 import { TenantResponse } from '../../../../core/models/tenents/tenant-response';
@@ -30,6 +31,7 @@ export class ContractFormComponent implements OnInit {
   private tenantService = inject(TenantService);
   private cloudinaryService = inject(CloudinaryService);
   private notification = inject(NotificationService);
+  private planService = inject(PlanService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -51,6 +53,16 @@ export class ContractFormComponent implements OnInit {
 
   // Form
   contractForm!: FormGroup;
+
+  // Plan features - COMPUTED SIGNALS
+  planAllowsImages = computed(() => {
+    const plan = this.planService.currentPlan();
+    return plan?.allowsImages === true;
+  });
+
+  showDocumentsTab = computed(() => {
+    return this.planAllowsImages();
+  });
 
   // Computed
   selectedProperty = computed(() => {
@@ -78,7 +90,20 @@ export class ContractFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.loadPlanFeatures();
     this.checkEditMode();
+  }
+
+  private loadPlanFeatures(): void {
+    this.planService.loadPlanFeatures().subscribe({
+      next: () => {
+        console.log('[ContractForm] Plan loaded');
+        console.log('[ContractForm] Allows images:', this.planAllowsImages());
+      },
+      error: (err) => {
+        console.error('[ContractForm] Error loading plan:', err);
+      }
+    });
   }
 
   private initForm(): void {
@@ -249,7 +274,12 @@ export class ContractFormComponent implements OnInit {
         bathrooms: 0,
         totalAreaM2: 0,
         createdAt: '',
-        updatedAt: ''
+        updatedAt: '',
+        location: { name: '',
+          id: '',
+          city:'',
+          state:'',
+        }
       };
       this.availableProperties.update(props => [...props, propertyToAdd]);
     }
@@ -280,8 +310,8 @@ export class ContractFormComponent implements OnInit {
     this.contractForm.get('monthlyRent')?.disable();
     this.contractForm.get('waterFee')?.disable();
 
-    // Set document info
-    if (contract.contractDocumentUrl) {
+    // Set document info (solo si el plan lo permite)
+    if (this.planAllowsImages() && contract.contractDocumentUrl) {
       this.contractDocumentUrl.set(contract.contractDocumentUrl);
       this.contractDocumentPublicId.set(contract.contractDocumentPublicId || null);
     }
@@ -318,6 +348,11 @@ export class ContractFormComponent implements OnInit {
   }
 
   selectTab(tab: string): void {
+    // Validar que si intenta ir a documents, el plan lo permita
+    if (tab === 'documents' && !this.planAllowsImages()) {
+      this.notification.warning('Tu plan no permite subir documentos. Mejora tu plan para acceder a esta característica.');
+      return;
+    }
     this.activeTab.set(tab);
   }
 
@@ -382,40 +417,11 @@ export class ContractFormComponent implements OnInit {
     return tenant?.fullName || '';
   }
 
-  // async onDocumentSelect(event: Event): Promise<void> {
-  //   const input = event.target as HTMLInputElement;
-  //   const file = input.files?.[0];
-  //
-  //   if (!file) return;
-  //
-  //   // Validate file type
-  //   if (file.type !== 'application/pdf') {
-  //     this.notification.error('Solo se permiten archivos PDF');
-  //     input.value = '';
-  //     return;
-  //   }
-  //
-  //   // Validate file size (10MB)
-  //   if (file.size > 10 * 1024 * 1024) {
-  //     this.notification.error('El archivo no debe superar 10MB');
-  //     input.value = '';
-  //     return;
-  //   }
-  //
-  //   this.isUploadingDocument.set(true);
-  //
-  //   try {
-  //     const result = await this.cloudinaryService.uploadFile(file, 'contracts');
-  //     this.contractDocumentUrl.set(result.url);
-  //     this.contractDocumentPublicId.set(result.publicId);
-  //     this.notification.success('Documento cargado exitosamente');
-  //   } catch (error) {
-  //     this.notification.error('Error al cargar documento');
-  //   } finally {
-  //     this.isUploadingDocument.set(false);
-  //     input.value = '';
-  //   }
-  // }
+  onDocumentSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
 
   // async removeDocument(): Promise<void> {
   //   const publicId = this.contractDocumentPublicId();
@@ -430,6 +436,7 @@ export class ContractFormComponent implements OnInit {
   //     this.notification.error('Error al eliminar documento');
   //   }
   // }
+    }
 
   onSubmit(): void {
     if (!this.canSubmit()) {
@@ -486,8 +493,9 @@ export class ContractFormComponent implements OnInit {
       depositAmount: formValue.depositAmount,
       depositPaid: formValue.depositPaid,
       depositPaymentDeadline: formValue.depositPaymentDeadline || undefined,
-      contractDocumentUrl: this.contractDocumentUrl() || undefined,
-      contractDocumentPublicId: this.contractDocumentPublicId() || undefined,
+      // Solo incluir documento si el plan lo permite
+      contractDocumentUrl: this.planAllowsImages() ? (this.contractDocumentUrl() || undefined) : undefined,
+      contractDocumentPublicId: this.planAllowsImages() ? (this.contractDocumentPublicId() || undefined) : undefined,
       notes: formValue.notes || undefined
     };
 
@@ -514,8 +522,9 @@ export class ContractFormComponent implements OnInit {
       monthlyRent: formValue.monthlyRent,
       waterFee: formValue.waterFee,
       depositPaid: formValue.depositPaid,
-      contractDocumentUrl: this.contractDocumentUrl() || undefined,
-      contractDocumentPublicId: this.contractDocumentPublicId() || undefined,
+      // Solo incluir documento si el plan lo permite
+      contractDocumentUrl: this.planAllowsImages() ? (this.contractDocumentUrl() || undefined) : undefined,
+      contractDocumentPublicId: this.planAllowsImages() ? (this.contractDocumentPublicId() || undefined) : undefined,
       notes: formValue.notes || undefined
     };
 
@@ -537,5 +546,9 @@ export class ContractFormComponent implements OnInit {
 
   getCharCount(): number {
     return this.contractForm.get('notes')?.value?.length || 0;
+  }
+
+  getPlanName(): string {
+    return this.planService.getPlanName();
   }
 }

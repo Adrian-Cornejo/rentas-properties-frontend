@@ -168,7 +168,7 @@ export class PropertyFormComponent implements OnInit {
         }
 
         this.propertyForm.patchValue({
-          locationId: data.locationId || '',
+          locationId: data.location.id || '',
           propertyCode: data.propertyCode,
           propertyType: data.propertyType,
           address: data.address,
