@@ -1,0 +1,85 @@
+<!-- src/app/features/dashboard/reports/reports.component.html -->
+
+<div class="reports-container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Reportes</h1>
+        <p class="subtitle">Genera reportes detallados de tu negocio</p>
+      </div>
+
+      <div class="plan-info">
+        <span class="plan-badge">{{ planName() }}</span>
+        <span class="history-limit">Historial: {{ reportHistoryDays() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENSAJE DE RESTRICCIÓN -->
+  @if (!hasReportAccess()) {
+    <div class="alert alert-warning">
+      <div class="alert-icon">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <div class="alert-content">
+        <strong>Acceso Restringido</strong>
+        <p>Tu plan no incluye acceso a reportes. <strong>Actualiza tu plan</strong> para desbloquear esta funcionalidad.</p>
+      </div>
+    </div>
+  }
+
+  <!-- BANNER DE FEATURES DEL PLAN -->
+  @if (hasReportAccess()) {
+    <div class="plan-features-banner">
+      <div class="feature-item" [class.feature-enabled]="hasPdfReports()">
+        <span class="feature-icon" [class.enabled]="hasPdfReports()">
+          <i [class]="hasPdfReports() ? 'pi pi-check' : 'pi pi-times'"></i>
+        </span>
+        <span class="feature-label">Exportar PDF</span>
+      </div>
+      <div class="feature-item" [class.feature-enabled]="hasDataExport()">
+        <span class="feature-icon" [class.enabled]="hasDataExport()">
+          <i [class]="hasDataExport() ? 'pi pi-check' : 'pi pi-times'"></i>
+        </span>
+        <span class="feature-label">Exportar Excel</span>
+      </div>
+      <div class="feature-item" [class.feature-enabled]="hasAdvancedReports()">
+        <span class="feature-icon" [class.enabled]="hasAdvancedReports()">
+          <i [class]="hasAdvancedReports() ? 'pi pi-check' : 'pi pi-times'"></i>
+        </span>
+        <span class="feature-label">Reportes Avanzados</span>
+      </div>
+    </div>
+  }
+
+  <!-- NAVEGACIÓN DE TABS (SIN PRIMENG) -->
+  <div class="reports-tabs">
+    <nav class="tabs-nav">
+      @for (report of availableReports(); track report.route) {
+        <a
+          [routerLink]="[report.route]"
+          routerLinkActive="active"
+          class="tab-item"
+          [class.premium-tab]="report.premium"
+        >
+          <i [class]="report.icon + ' tab-icon'"></i>
+          <div class="tab-content">
+            <span class="tab-label">{{ report.label }}</span>
+            <span class="tab-description">{{ report.description }}</span>
+          </div>
+          @if (report.premium) {
+            <span class="badge-premium">Premium</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <!-- ROUTER OUTLET - AQUÍ SE CARGAN LOS COMPONENTES -->
+    <div class="tab-content-area">
+      <router-outlet />
+    </div>
+  </div>
+
+</div>

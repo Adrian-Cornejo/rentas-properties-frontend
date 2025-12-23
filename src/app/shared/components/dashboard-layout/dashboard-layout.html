@@ -87,18 +87,36 @@
               }
             </button>
 
-            <!-- Submenú desplegable -->
+            <!-- Submenú desplegable CON VERIFICACIÓN DE ACCESO -->
             @if (item.isExpanded && isSidebarOpen()) {
               <div class="submenu">
                 @for (subItem of item.children; track subItem.route) {
-                  <a
-                    [routerLink]="subItem.route"
-                    routerLinkActive="active"
-                    class="submenu-item"
-                  >
-                    <i [class]="subItem.icon"></i>
-                    <span class="submenu-label">{{ subItem.label }}</span>
-                  </a>
+
+                  <!-- Subitem CON acceso -->
+                  @if (hasFeatureAccess(subItem)) {
+                    <a
+                      [routerLink]="subItem.route"
+                      routerLinkActive="active"
+                      class="submenu-item"
+                    >
+                      <i [class]="subItem.icon"></i>
+                      <span class="submenu-label">{{ subItem.label }}</span>
+                    </a>
+                  }
+
+                  <!-- Subitem SIN acceso (CANDADO) -->
+                  @if (!hasFeatureAccess(subItem)) {
+                    <div
+                      class="submenu-item submenu-item-locked"
+                      [pTooltip]="'Actualiza tu plan para acceder a ' + subItem.label"
+                      tooltipPosition="right"
+                    >
+                      <i [class]="subItem.icon"></i>
+                      <span class="submenu-label">{{ subItem.label }}</span>
+                      <i class="pi pi-lock submenu-lock-icon"></i>
+                    </div>
+                  }
+
                 }
               </div>
             }

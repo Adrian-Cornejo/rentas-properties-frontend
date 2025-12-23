@@ -16,7 +16,7 @@ export class PlanService {
   private readonly PLANS_API_URL = `${environment.apiUrl}/subscription-plans`;
 
   // State
-  private planDataSignal = signal<PlanWithUsage | null>(null);
+  public planDataSignal = signal<PlanWithUsage | null>(null);
   private planData$ = new BehaviorSubject<PlanWithUsage | null>(null);
 
   // Computed signals

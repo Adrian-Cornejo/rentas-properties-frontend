@@ -1,0 +1,560 @@
+<!-- src/app/features/dashboard/reports/executive-report/executive-report.component.html -->
+
+<div class="executive-report">
+
+  <!-- FORMULARIO DE FILTROS -->
+  <div class="card filter-card">
+    <div class="card-header">
+      <div>
+        <h3>Reporte Ejecutivo</h3>
+        <p class="text-muted">Vista estratégica del desempeño del portafolio</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="filterForm" (ngSubmit)="generateReport()">
+        <div class="filter-grid">
+
+          <!-- Año -->
+          <div class="form-group">
+            <label for="year" class="required">Año</label>
+            <input
+              type="number"
+              id="year"
+              formControlName="year"
+              min="2000"
+              max="2100"
+              class="form-control"
+            />
+            @if (filterForm.get('year')?.invalid && filterForm.get('year')?.touched) {
+              <small class="error-message">Año requerido</small>
+            }
+          </div>
+
+          <!-- Año de Comparación -->
+          <div class="form-group">
+            <label for="comparisonYear">Año de Comparación (opcional)</label>
+            <input
+              type="number"
+              id="comparisonYear"
+              formControlName="comparisonYear"
+              min="2000"
+              max="2100"
+              placeholder="Ej: año anterior"
+              class="form-control"
+            />
+          </div>
+
+          <!-- Periodo -->
+          <div class="form-group">
+            <label for="period">Periodo</label>
+            <select id="period" formControlName="period" class="form-control">
+              @for (period of periods; track period.value) {
+                <option [value]="period.value">{{ period.label }}</option>
+              }
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+            <i class="pi pi-times"></i>
+            Limpiar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="filterForm.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="spinner"></span>
+            } @else {
+              <i class="pi pi-chart-line"></i>
+            }
+            Generar Reporte
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner-large"></div>
+      <p>Generando reporte ejecutivo...</p>
+    </div>
+  }
+
+  <!-- REPORTE GENERADO -->
+  @if (reportData() && !isLoading()) {
+    <div class="report-content">
+
+      <!-- ENCABEZADO -->
+      <div class="card header-card">
+        <div class="card-body">
+          <div class="header-content">
+            <div class="header-title">
+              <h2>Reporte Ejecutivo {{ reportData()!.year }}</h2>
+              <p class="period-label">{{ getPeriodLabel(reportData()!.period) }}</p>
+            </div>
+            @if (reportData()!.comparisonYear) {
+              <div class="comparison-badge">
+                <i class="pi pi-chart-line"></i>
+                <span>Comparado con {{ reportData()!.comparisonYear }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs PRINCIPALES (10 INDICADORES) -->
+      <div class="card kpis-card">
+        <div class="card-header">
+          <h3>Indicadores Clave de Rendimiento (KPIs)</h3>
+        </div>
+
+        <div class="card-body">
+          <div class="kpis-grid">
+
+            <!-- Ingresos Totales -->
+            <div class="kpi-item revenue">
+              <div class="kpi-icon"><i class="pi pi-wallet"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Ingresos Totales</span>
+                <span class="kpi-value">{{ formatCurrency(reportData()!.kpis.totalRevenue) }}</span>
+              </div>
+            </div>
+
+            <!-- Gastos Totales -->
+            <div class="kpi-item expenses">
+              <div class="kpi-icon"><i class="pi pi-money-bill"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Gastos Totales</span>
+                <span class="kpi-value">{{ formatCurrency(reportData()!.kpis.totalExpenses) }}</span>
+              </div>
+            </div>
+
+            <!-- Utilidad Neta -->
+            <div class="kpi-item profit">
+              <div class="kpi-icon"><i class="pi pi-dollar"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Utilidad Neta</span>
+                <span class="kpi-value">{{ formatCurrency(reportData()!.kpis.averageROI) }}</span>
+              </div>
+            </div>
+
+            <!-- Margen de Ganancia -->
+            <div class="kpi-item margin">
+              <div class="kpi-icon"><i class="pi pi-chart-line"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Margen de Ganancia</span>
+                <span class="kpi-value">{{ formatPercent(reportData()!.kpis.profitMargin) }}</span>
+              </div>
+            </div>
+
+            <!-- Tasa de Ocupación -->
+            <div class="kpi-item occupancy">
+              <div class="kpi-icon"><i class="pi pi-home"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Tasa de Ocupación</span>
+                <span class="kpi-value" [ngClass]="getOccupancyClass(reportData()!.kpis.occupancyRate)">
+                  {{ formatPercent(reportData()!.kpis.occupancyRate) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- ROI Promedio -->
+            <div class="kpi-item roi">
+              <div class="kpi-icon"><i class="pi pi-chart-bar"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">ROI Promedio</span>
+                <span class="kpi-value" [ngClass]="getROIClass(reportData()!.kpis.averageROI)">
+                  {{ formatPercent(reportData()!.kpis.averageROI) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Tasa de Morosidad -->
+            <div class="kpi-item delinquency">
+              <div class="kpi-icon"><i class="pi pi-exclamation-triangle"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Tasa de Morosidad</span>
+                <span class="kpi-value">{{ formatPercent(reportData()!.kpis.delinquencyRate) }}</span>
+              </div>
+            </div>
+
+            <!-- Eficiencia de Cobro -->
+            <div class="kpi-item collection">
+              <div class="kpi-icon"><i class="pi pi-credit-card"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Eficiencia de Cobro</span>
+                <span class="kpi-value" [ngClass]="getCollectionClass(reportData()!.kpis.collectionEfficiency)">
+                  {{ formatPercent(reportData()!.kpis.collectionEfficiency) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Propiedades Activas -->
+            <div class="kpi-item properties">
+              <div class="kpi-icon"><i class="pi pi-building"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Propiedades Activas</span>
+                <span class="kpi-value">{{ reportData()!.kpis.activeProperties }}</span>
+              </div>
+            </div>
+
+            <!-- Contratos Activos -->
+            <div class="kpi-item contracts">
+              <div class="kpi-icon"><i class="pi pi-file"></i></div>
+              <div class="kpi-content">
+                <span class="kpi-label">Contratos Activos</span>
+                <span class="kpi-value">{{ reportData()!.kpis.activeContracts }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARACIÓN ANUAL -->
+      @if (reportData()!.comparisonYear) {
+        <div class="card comparison-card">
+          <div class="card-header">
+            <h3>Comparación Anual</h3>
+            <span class="badge">{{ reportData()!.year }} vs {{ reportData()!.comparisonYear }}</span>
+          </div>
+
+          <div class="card-body">
+            <div class="comparison-grid">
+
+              <!-- Ingresos -->
+              <div class="comparison-item">
+                <div class="comparison-header">
+                  <i class="pi pi-wallet comparison-icon"></i>
+                  <span class="comparison-title">Ingresos</span>
+                </div>
+                <div class="comparison-values">
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.year }}</span>
+                    <span class="value-amount current">{{ formatCurrency(reportData()!.yearComparison.currentYearRevenue) }}</span>
+                  </div>
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.comparisonYear }}</span>
+                    <span class="value-amount previous">{{ formatCurrency(reportData()!.yearComparison.previousYearRevenue) }}</span>
+                  </div>
+                </div>
+                <div class="growth-badge" [ngClass]="getGrowthClass(reportData()!.yearComparison.revenueGrowth)">
+                  <span class="growth-icon">{{ getGrowthIcon(reportData()!.yearComparison.revenueGrowth) }}</span>
+                  <span>{{ reportData()!.yearComparison.revenueGrowth > 0 ? '+' : '' }}{{ formatPercent(reportData()!.yearComparison.revenueGrowth) }}</span>
+                </div>
+              </div>
+
+              <!-- Gastos -->
+              <div class="comparison-item">
+                <div class="comparison-header">
+                  <i class="pi pi-money-bill comparison-icon"></i>
+                  <span class="comparison-title">Gastos</span>
+                </div>
+                <div class="comparison-values">
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.year }}</span>
+                    <span class="value-amount current">{{ formatCurrency(reportData()!.yearComparison.currentYearExpenses) }}</span>
+                  </div>
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.comparisonYear }}</span>
+                    <span class="value-amount previous">{{ formatCurrency(reportData()!.yearComparison.previousYearExpenses) }}</span>
+                  </div>
+                </div>
+                <div class="growth-badge" [ngClass]="getGrowthClass(-reportData()!.yearComparison.expensesGrowth)">
+                  <span class="growth-icon">{{ getGrowthIcon(reportData()!.yearComparison.expensesGrowth) }}</span>
+                  <span>{{ reportData()!.yearComparison.expensesGrowth > 0 ? '+' : '' }}{{ formatPercent(reportData()!.yearComparison.expensesGrowth) }}</span>
+                </div>
+              </div>
+
+              <!-- Utilidad -->
+              <div class="comparison-item">
+                <div class="comparison-header">
+                  <i class="pi pi-dollar comparison-icon"></i>
+                  <span class="comparison-title">Utilidad Neta</span>
+                </div>
+                <div class="comparison-values">
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.year }}</span>
+                    <span class="value-amount current">{{ formatCurrency(reportData()!.yearComparison.currentYearProfit) }}</span>
+                  </div>
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.comparisonYear }}</span>
+                    <span class="value-amount previous">{{ formatCurrency(reportData()!.yearComparison.previousYearProfit) }}</span>
+                  </div>
+                </div>
+                <div class="growth-badge" [ngClass]="getGrowthClass(reportData()!.yearComparison.profitGrowth)">
+                  <span class="growth-icon">{{ getGrowthIcon(reportData()!.yearComparison.profitGrowth) }}</span>
+                  <span>{{ reportData()!.yearComparison.profitGrowth > 0 ? '+' : '' }}{{ formatPercent(reportData()!.yearComparison.profitGrowth) }}</span>
+                </div>
+              </div>
+
+              <!-- Ocupación -->
+              <div class="comparison-item">
+                <div class="comparison-header">
+                  <i class="pi pi-home comparison-icon"></i>
+                  <span class="comparison-title">Ocupación</span>
+                </div>
+                <div class="comparison-values">
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.year }}</span>
+                    <span class="value-amount current">{{ formatPercent(reportData()!.yearComparison.currentYearOccupancy) }}</span>
+                  </div>
+                  <div class="value-row">
+                    <span class="value-label">{{ reportData()!.comparisonYear }}</span>
+                    <span class="value-amount previous">{{ formatPercent(reportData()!.yearComparison.previousYearOccupancy) }}</span>
+                  </div>
+                </div>
+                <div class="growth-badge" [ngClass]="getGrowthClass(reportData()!.yearComparison.occupancyChange)">
+                  <span class="growth-icon">{{ getGrowthIcon(reportData()!.yearComparison.occupancyChange) }}</span>
+                  <span>{{ reportData()!.yearComparison.occupancyChange > 0 ? '+' : '' }}{{ formatPercent(reportData()!.yearComparison.occupancyChange) }}</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- TOP 5 MEJORES PROPIEDADES -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Top Propiedades por Rendimiento</h3>
+          <span class="badge-success"><i class="pi pi-trophy"></i> Mejores ROI</span>
+        </div>
+
+        <div class="card-body">
+          <div class="performance-list">
+            @for (property of paginatedTopPerformers(); track property.propertyCode; let idx = $index) {
+              <div class="performance-item top">
+                <div class="rank">{{ getPerformanceRank((topPerformersPage() - 1) * pageSize() + idx) }}</div>
+                <div class="property-info">
+                  <strong>{{ property.propertyCode }}</strong>
+                  <span class="property-address">{{ property.address }}</span>
+                  <span class="property-type">{{ property.propertyType }}</span>
+                </div>
+                <div class="property-metrics">
+                  <div class="metric">
+                    <span class="metric-label">Ingresos</span>
+                    <span class="metric-value">{{ formatCurrency(property.totalRevenue) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">Gastos</span>
+                    <span class="metric-value">{{ formatCurrency(property.totalExpenses) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">Utilidad</span>
+                    <span class="metric-value profit">{{ formatCurrency(property.netProfit) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">ROI</span>
+                    <span class="metric-value roi" [ngClass]="getROIClass(property.roi)">{{ formatPercent(property.roi) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">Ocupación</span>
+                    <span class="metric-value">{{ formatPercent(property.occupancyRate) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (topPerformersTotalPages() > 1) {
+            <div class="pagination">
+              @for (page of getPageNumbers(topPerformersPage(), topPerformersTotalPages()); track $index) {
+                @if (page === -1) {
+                  <span class="pagination-ellipsis">...</span>
+                } @else {
+                  <button
+                    class="pagination-btn"
+                    [class.active]="topPerformersPage() === page"
+                    (click)="goToTopPerformersPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- TOP 5 PEORES PROPIEDADES -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Propiedades que Requieren Atención</h3>
+          <span class="badge-warning"><i class="pi pi-exclamation-triangle"></i> Menor Rendimiento</span>
+        </div>
+
+        <div class="card-body">
+          <div class="performance-list">
+            @for (property of paginatedWorstPerformers(); track property.propertyCode; let idx = $index) {
+              <div class="performance-item worst">
+                <div class="rank">{{ (worstPerformersPage() - 1) * pageSize() + idx + 1 }}</div>
+                <div class="property-info">
+                  <strong>{{ property.propertyCode }}</strong>
+                  <span class="property-address">{{ property.address }}</span>
+                  <span class="property-type">{{ property.propertyType }}</span>
+                </div>
+                <div class="property-metrics">
+                  <div class="metric">
+                    <span class="metric-label">Ingresos</span>
+                    <span class="metric-value">{{ formatCurrency(property.totalRevenue) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">Gastos</span>
+                    <span class="metric-value">{{ formatCurrency(property.totalExpenses) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">Utilidad</span>
+                    <span class="metric-value" [class.negative]="property.netProfit < 0">{{ formatCurrency(property.netProfit) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">ROI</span>
+                    <span class="metric-value roi" [ngClass]="getROIClass(property.roi)">{{ formatPercent(property.roi) }}</span>
+                  </div>
+                  <div class="metric">
+                    <span class="metric-label">Ocupación</span>
+                    <span class="metric-value" [ngClass]="getOccupancyClass(property.occupancyRate)">{{ formatPercent(property.occupancyRate) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (worstPerformersTotalPages() > 1) {
+            <div class="pagination">
+              @for (page of getPageNumbers(worstPerformersPage(), worstPerformersTotalPages()); track $index) {
+                @if (page === -1) {
+                  <span class="pagination-ellipsis">...</span>
+                } @else {
+                  <button
+                    class="pagination-btn"
+                    [class.active]="worstPerformersPage() === page"
+                    (click)="goToWorstPerformersPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- RENTABILIDAD POR UBICACIÓN -->
+      @if (reportData()!.locationProfitability.length > 0) {
+        <div class="card">
+          <div class="card-header">
+            <h3>Rentabilidad por Ubicación</h3>
+          </div>
+
+          <div class="card-body">
+            <div class="location-list">
+              @for (location of reportData()!.locationProfitability; track location.locationName) {
+                <div class="location-item">
+                  <div class="location-header">
+                    <h4>{{ location.locationName }}</h4>
+                    <span class="properties-count">{{ location.propertiesCount }} propiedades</span>
+                  </div>
+                  <div class="location-metrics">
+                    <div class="metric-col">
+                      <span class="label">Ingresos</span>
+                      <span class="value">{{ formatCurrency(location.totalRevenue) }}</span>
+                    </div>
+                    <div class="metric-col">
+                      <span class="label">Gastos</span>
+                      <span class="value">{{ formatCurrency(location.totalExpenses) }}</span>
+                    </div>
+                    <div class="metric-col">
+                      <span class="label">Utilidad Neta</span>
+                      <span class="value profit">{{ formatCurrency(location.netProfit) }}</span>
+                    </div>
+                    <div class="metric-col">
+                      <span class="label">ROI Promedio</span>
+                      <span class="value" [ngClass]="getROIClass(location.averageROI)">{{ formatPercent(location.averageROI) }}</span>
+                    </div>
+                    <div class="metric-col">
+                      <span class="label">Ocupación Promedio</span>
+                      <span class="value">{{ formatPercent(location.averageOccupancy) }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- EXPORTACIÓN -->
+      <div class="card export-card">
+        <div class="card-body">
+          <div class="export-actions">
+            <div class="export-info">
+              <i class="pi pi-info-circle icon"></i>
+              <span>Exporta el reporte ejecutivo en diferentes formatos</span>
+            </div>
+
+            <div class="export-buttons">
+              @if (canExportCsv()) {
+                <button class="btn btn-secondary" (click)="exportCsv()">
+                  <i class="pi pi-file"></i>
+                  Exportar CSV
+                </button>
+              }
+
+              @if (canExportPdf()) {
+                <button
+                  class="btn btn-danger"
+                  (click)="exportPdf()"
+                  [disabled]="isExporting()"
+                >
+                  @if (isExporting()) {
+                    <span class="spinner"></span>
+                  } @else {
+                    <i class="pi pi-file-pdf"></i>
+                  }
+                  Exportar PDF
+                </button>
+              } @else {
+                <button class="btn btn-danger btn-disabled" disabled title="Actualiza tu plan">
+                  <i class="pi pi-lock"></i>
+                  Exportar PDF
+                </button>
+              }
+
+              @if (canExportExcel()) {
+                <button
+                  class="btn btn-success"
+                  (click)="exportExcel()"
+                  [disabled]="isExporting()"
+                >
+                  @if (isExporting()) {
+                    <span class="spinner"></span>
+                  } @else {
+                    <i class="pi pi-file-excel"></i>
+                  }
+                  Exportar Excel
+                </button>
+              } @else {
+                <button class="btn btn-success btn-disabled" disabled title="Actualiza tu plan">
+                  <i class="pi pi-lock"></i>
+                  Exportar Excel
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

@@ -158,6 +158,37 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'reports',
+        loadComponent: () => import('./features/dashboard/reports/reports').then(m => m.ReportsComponent),
+        children: [
+          {
+            path: '',
+            redirectTo: 'financial',
+            pathMatch: 'full'
+          },
+          {
+            path: 'financial',
+            loadComponent: () => import('./features/dashboard/reports/financial-report/financial-report').then(m => m.FinancialReportComponent)
+          },
+          {
+            path: 'occupancy',
+            loadComponent: () => import('./features/dashboard/reports/occupancy-report/occupancy-report').then(m => m.OccupancyReportComponent)
+          },
+          {
+            path: 'payment',
+            loadComponent: () => import('./features/dashboard/reports/payment-report/payment-report').then(m => m.PaymentReportComponent)
+          },
+          {
+            path: 'maintenance',
+            loadComponent: () => import('./features/dashboard/reports/maintenance-report/maintenance-report').then(m => m.MaintenanceReportComponent)
+          },
+          {
+            path: 'executive',
+            loadComponent: () => import('./features/dashboard/reports/executive-report/executive-report').then(m => m.ExecutiveReportComponent)
+          }
+        ]
+      },
+      {
         path: 'organization',
         canActivate: [adminGuard],
         loadComponent: () => import('./features/dashboard/organization/organization').then(m => m.OrganizationComponent)

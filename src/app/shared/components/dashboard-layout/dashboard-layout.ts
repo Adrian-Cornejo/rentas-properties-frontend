@@ -7,12 +7,14 @@ import { TooltipModule } from 'primeng/tooltip';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { OrganizationService } from '../../../core/services/organization.service';
+import { PlanService } from '../../../core/services/plan.service';
 import { OrganizationDetailResponse } from '../../../core/models/organization/organization-detail-response';
 
 interface SubMenuItem {
   label: string;
   icon: string;
   route: string;
+  requiresFeature?: string; // ← NUEVO
 }
 
 interface MenuItem {
@@ -42,6 +44,7 @@ export class DashboardLayoutComponent implements OnInit {
   private authService = inject(AuthService);
   private themeService = inject(ThemeService);
   private organizationService = inject(OrganizationService);
+  private planService = inject(PlanService); // ← NUEVO
   private router = inject(Router);
 
   // Signals
@@ -54,10 +57,14 @@ export class DashboardLayoutComponent implements OnInit {
 
   // Computed
   isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
+
+  hasAdvancedReports = computed(() => this.planService.hasFeature('ADVANCED_REPORTS'));
+
   platformName = computed(() => {
     const orgName = this.currentOrganization()?.name;
     return orgName ? `${orgName} by ArriendaFacil` : 'ArriendaFacil';
   });
+
   platformLogo = computed(() => {
     const org = this.currentOrganization();
 
@@ -127,6 +134,38 @@ export class DashboardLayoutComponent implements OnInit {
       ]
     },
     {
+      label: 'Reportes',
+      icon: 'pi pi-chart-bar',
+      children: [
+        {
+          label: 'Financiero',
+          icon: 'pi pi-dollar',
+          route: '/dashboard/reports/financial'
+        },
+        {
+          label: 'Ocupación',
+          icon: 'pi pi-percentage',
+          route: '/dashboard/reports/occupancy'
+        },
+        {
+          label: 'Pagos',
+          icon: 'pi pi-wallet',
+          route: '/dashboard/reports/payment'
+        },
+        {
+          label: 'Mantenimiento',
+          icon: 'pi pi-wrench',
+          route: '/dashboard/reports/maintenance'
+        },
+        {
+          label: 'Ejecutivo',
+          icon: 'pi pi-briefcase',
+          route: '/dashboard/reports/executive',
+          requiresFeature: 'ADVANCED_REPORTS'
+        }
+      ]
+    },
+    {
       label: 'Organización',
       icon: 'pi pi-building-columns',
       route: '/dashboard/organization',
@@ -143,9 +182,32 @@ export class DashboardLayoutComponent implements OnInit {
   ngOnInit(): void {
     this.loadOrganizationData();
     this.initializeMenuState();
+    this.loadPlanData(); // ← NUEVO
   }
-  private initializeMenuState(): void {
 
+  // ← NUEVO: Cargar datos del plan
+  private loadPlanData(): void {
+    if (!this.planService.isLoaded()) {
+      this.planService.loadPlanFeatures().subscribe({
+        next: (plan) => {
+          console.log('[DashboardLayout] Plan loaded:', plan.planCode);
+        },
+        error: (err) => {
+          console.error('[DashboardLayout] Error loading plan:', err);
+        }
+      });
+    }
+  }
+
+  // ← NUEVO: Verificar si un subitem tiene acceso según feature
+  hasFeatureAccess(subItem: SubMenuItem): boolean {
+    if (!subItem.requiresFeature) {
+      return true; // No requiere feature especial
+    }
+    return this.planService.hasFeature(subItem.requiresFeature);
+  }
+
+  private initializeMenuState(): void {
     const currentUrl = this.router.url;
     const items = this.menuItems();
 
