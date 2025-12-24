@@ -14,7 +14,7 @@ interface SubMenuItem {
   label: string;
   icon: string;
   route: string;
-  requiresFeature?: string; // ← NUEVO
+  requiresFeature?: string;
 }
 
 interface MenuItem {
@@ -22,6 +22,7 @@ interface MenuItem {
   icon: string;
   route?: string;
   adminOnly?: boolean;
+  requiresFeature?: string;
   children?: SubMenuItem[];
   isExpanded?: boolean;
 }
@@ -44,7 +45,7 @@ export class DashboardLayoutComponent implements OnInit {
   private authService = inject(AuthService);
   private themeService = inject(ThemeService);
   private organizationService = inject(OrganizationService);
-  private planService = inject(PlanService); // ← NUEVO
+  public planService = inject(PlanService); // ← NUEVO
   private router = inject(Router);
 
   // Signals
@@ -54,6 +55,8 @@ export class DashboardLayoutComponent implements OnInit {
   currentUser = this.authService.currentUser;
   currentOrganization = this.organizationService.currentOrganization;
   currentTheme = this.themeService.isDarkMode;
+  hasNotifications = computed(() => this.planService.hasFeature('NOTIFICATIONS'));
+  showMobileMenu = signal<boolean>(false);
 
   // Computed
   isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
@@ -120,6 +123,7 @@ export class DashboardLayoutComponent implements OnInit {
       label: 'Notificaciones',
       icon: 'pi pi-bell',
       adminOnly: true,
+      requiresFeature: 'NOTIFICATIONS',
       children: [
         {
           label: 'Configuración',
@@ -179,6 +183,22 @@ export class DashboardLayoutComponent implements OnInit {
     );
   });
 
+  primaryMenuItems = computed(() => {
+    const items = this.visibleMenuItems();
+    // Las 4 opciones más importantes
+    return items.filter(item =>
+      ['Dashboard', 'Propiedades', 'Inquilinos', 'Contratos'].includes(item.label)
+    );
+  });
+
+  secondaryMenuItems = computed(() => {
+    const items = this.visibleMenuItems();
+    // Las demás opciones
+    return items.filter(item =>
+      !['Dashboard', 'Propiedades', 'Inquilinos', 'Contratos'].includes(item.label)
+    );
+  });
+
   ngOnInit(): void {
     this.loadOrganizationData();
     this.initializeMenuState();
@@ -235,6 +255,14 @@ export class DashboardLayoutComponent implements OnInit {
       items[index].isExpanded = !items[index].isExpanded;
       this.menuItems.set([...items]);
     }
+  }
+
+  toggleMobileMenu(): void {
+    this.showMobileMenu.set(!this.showMobileMenu());
+  }
+
+  closeMobileMenu(): void {
+    this.showMobileMenu.set(false);
   }
 
   isSubmenuActive(item: MenuItem): boolean {
@@ -334,9 +362,6 @@ export class DashboardLayoutComponent implements OnInit {
     this.isSidebarOpen.set(!this.isSidebarOpen());
   }
 
-  toggleMobileMenu(): void {
-    this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
-  }
 
   toggleTheme(): void {
     this.themeService.toggleDarkMode();

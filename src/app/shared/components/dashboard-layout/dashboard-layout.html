@@ -72,35 +72,54 @@
         <!-- Item con submenú -->
         @if (item.children) {
           <div class="sidebar-item-group">
-            <button
-              class="sidebar-item"
-              [class.active]="isSubmenuActive(item)"
-              [class.expanded]="item.isExpanded"
-              (click)="toggleSubmenu(item)"
-              [pTooltip]="!isSidebarOpen() ? item.label : ''"
-              tooltipPosition="right"
-            >
-              <i [class]="item.icon"></i>
-              @if (isSidebarOpen()) {
-                <span class="sidebar-label">{{ item.label }}</span>
-                <i class="pi pi-chevron-down submenu-arrow" [class.rotated]="item.isExpanded"></i>
-              }
-            </button>
+
+            <!-- Item padre CON acceso -->
+            @if (!item.requiresFeature || planService.hasFeature(item.requiresFeature)) {
+              <button
+                class="sidebar-item"
+                [class.active]="isSubmenuActive(item)"
+                [class.expanded]="item.isExpanded"
+                (click)="toggleSubmenu(item)"
+                [pTooltip]="!isSidebarOpen() ? item.label : ''"
+                tooltipPosition="right"
+              >
+                <i [class]="item.icon"></i>
+                @if (isSidebarOpen()) {
+                  <span class="sidebar-label">{{ item.label }}</span>
+                  <i class="pi pi-chevron-down submenu-arrow" [class.rotated]="item.isExpanded"></i>
+                }
+              </button>
+            }
+
+            <!-- Item padre SIN acceso (CANDADO) -->
+            @if (item.requiresFeature && !planService.hasFeature(item.requiresFeature)) {
+              <div
+                class="sidebar-item sidebar-item-locked"
+                [pTooltip]="!isSidebarOpen() ? item.label : 'Actualiza tu plan para acceder a ' + item.label"
+                tooltipPosition="right"
+              >
+                <i [class]="item.icon"></i>
+                @if (isSidebarOpen()) {
+                  <span class="sidebar-label">{{ item.label }}</span>
+                  <i class="pi pi-lock submenu-lock-icon"></i>
+                }
+              </div>
+            }
 
             <!-- Submenú desplegable CON VERIFICACIÓN DE ACCESO -->
-            @if (item.isExpanded && isSidebarOpen()) {
+            @if (item.isExpanded && isSidebarOpen() && (!item.requiresFeature || planService.hasFeature(item.requiresFeature))) {
               <div class="submenu">
                 @for (subItem of item.children; track subItem.route) {
 
                   <!-- Subitem CON acceso -->
                   @if (hasFeatureAccess(subItem)) {
                     <a
-                      [routerLink]="subItem.route"
+                    [routerLink]="subItem.route"
                       routerLinkActive="active"
                       class="submenu-item"
-                    >
-                      <i [class]="subItem.icon"></i>
-                      <span class="submenu-label">{{ subItem.label }}</span>
+                      >
+                    <i [class]="subItem.icon"></i>
+                    <span class="submenu-label">{{ subItem.label }}</span>
                     </a>
                   }
 
@@ -125,17 +144,17 @@
 
         <!-- Item simple (sin submenú) -->
         @if (!item.children && item.route) {
-          <a
-            [routerLink]="item.route"
+        <a
+          [routerLink]="item.route"
             routerLinkActive="active"
             class="sidebar-item"
             [pTooltip]="!isSidebarOpen() ? item.label : ''"
             tooltipPosition="right"
-          >
-            <i [class]="item.icon"></i>
-            @if (isSidebarOpen()) {
-              <span class="sidebar-label">{{ item.label }}</span>
-            }
+            >
+          <i [class]="item.icon"></i>
+          @if (isSidebarOpen()) {
+            <span class="sidebar-label">{{ item.label }}</span>
+          }
           </a>
         }
       }
@@ -152,31 +171,113 @@
 
   <!-- BOTTOM NAVIGATION (Mobile only) -->
   <nav class="bottom-nav">
-    @for (item of visibleMenuItems(); track item.label) {
-
-      <!-- Items simples en bottom nav -->
+    <!-- Opciones primarias (4 principales) -->
+    @for (item of primaryMenuItems(); track item.label) {
       @if (!item.children && item.route) {
         <a
-          [routerLink]="item.route"
+        [routerLink]="item.route"
           routerLinkActive="active"
           class="bottom-nav-item"
-        >
-          <i [class]="item.icon"></i>
-          <span class="bottom-nav-label">{{ item.label }}</span>
+          >
+        <i [class]="item.icon"></i>
+        <span class="bottom-nav-label">{{ item.label }}</span>
         </a>
       }
 
-      <!-- Items con submenú - mostrar primer hijo en mobile -->
       @if (item.children && item.children.length > 0) {
         <a
-          [routerLink]="item.children[0].route"
+        [routerLink]="item.children[0].route"
           routerLinkActive="active"
           class="bottom-nav-item"
-        >
-          <i [class]="item.icon"></i>
-          <span class="bottom-nav-label">{{ item.label }}</span>
+          >
+        <i [class]="item.icon"></i>
+        <span class="bottom-nav-label">{{ item.label }}</span>
         </a>
       }
     }
+
+    <!-- Botón "Más" para abrir menú con opciones secundarias -->
+    <button
+      class="bottom-nav-item"
+      [class.active]="showMobileMenu()"
+      (click)="toggleMobileMenu()"
+    >
+      <i class="pi pi-ellipsis-h"></i>
+      <span class="bottom-nav-label">Más</span>
+    </button>
   </nav>
+
+  <!-- MENÚ MÓVIL OVERLAY -->
+  @if (showMobileMenu()) {
+    <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
+      <div class="mobile-menu-content" (click)="$event.stopPropagation()">
+        <!-- Header del menú -->
+        <div class="mobile-menu-header">
+          <h3>Menú</h3>
+          <button class="mobile-menu-close" (click)="closeMobileMenu()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <!-- Lista de opciones secundarias -->
+        <div class="mobile-menu-list">
+          @for (item of secondaryMenuItems(); track item.label) {
+
+            <!-- Item con submenú -->
+            @if (item.children) {
+              <div class="mobile-menu-group">
+                <!-- Título del grupo -->
+                <div class="mobile-menu-group-title">
+                  <i [class]="item.icon"></i>
+                  <span>{{ item.label }}</span>
+                  @if (item.requiresFeature && !planService.hasFeature(item.requiresFeature)) {
+                    <i class="pi pi-lock mobile-menu-lock"></i>
+                  }
+                </div>
+
+                <!-- Subitems -->
+                @if (!item.requiresFeature || planService.hasFeature(item.requiresFeature)) {
+                  <div class="mobile-menu-subitems">
+                    @for (subItem of item.children; track subItem.route) {
+                      @if (hasFeatureAccess(subItem)) {
+                        <a
+                        [routerLink]="subItem.route"
+                          routerLinkActive="active"
+                          class="mobile-menu-subitem"
+                          (click)="closeMobileMenu()"
+                          >
+                        <i [class]="subItem.icon"></i>
+                        <span>{{ subItem.label }}</span>
+                        </a>
+                      }
+                      @if (!hasFeatureAccess(subItem)) {
+                        <div class="mobile-menu-subitem mobile-menu-subitem-locked">
+                          <i [class]="subItem.icon"></i>
+                          <span>{{ subItem.label }}</span>
+                          <i class="pi pi-lock mobile-menu-lock"></i>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Item simple -->
+            @if (!item.children && item.route) {
+            <a
+              [routerLink]="item.route"
+                routerLinkActive="active"
+                class="mobile-menu-item"
+                (click)="closeMobileMenu()"
+                >
+              <i [class]="item.icon"></i>
+              <span>{{ item.label }}</span>
+              </a>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>

@@ -30,7 +30,7 @@ export class NotificationSettingsComponent implements OnInit {
   // Computed
   isAdmin = computed(() => this.authService.currentUser()?.role === 'ADMIN');
   subscriptionPlan = computed(() => {
-    return this.organizationService.currentOrganization()?.subscriptionPlan || 'BASIC';
+    return this.organizationService.currentOrganization()?.subscriptionPlan || 'STARTER';
   });
 
   // Signals
@@ -57,12 +57,12 @@ export class NotificationSettingsComponent implements OnInit {
     });
 
     this.testForm = this.fb.group({
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       channel: ['SMS', Validators.required]
     });
 
-    // Deshabilitar form si no es admin o plan BASICO
-    if (!this.isAdmin() || this.subscriptionPlan() === 'BASICO') {
+    // Deshabilitar form si no es admin o plan STARTER
+    if (!this.isAdmin() || this.subscriptionPlan() === 'STARTER') {
       this.settingsForm.disable();
     }
   }
@@ -129,8 +129,13 @@ export class NotificationSettingsComponent implements OnInit {
 
     this.isSendingTest.set(true);
 
+    const phoneNumber = this.formatPhoneNumber(
+      this.testForm.value.phoneNumber,
+      this.testForm.value.channel
+    );
+
     const request: SendTestNotificationRequest = {
-      phoneNumber: this.testForm.value.phoneNumber,
+      phoneNumber: phoneNumber,
       channel: this.testForm.value.channel
     };
 
@@ -148,20 +153,47 @@ export class NotificationSettingsComponent implements OnInit {
     });
   }
 
+  private formatPhoneNumber(phoneNumber: string, channel: string): string {
+    // Limpiar el número (solo dígitos)
+    let cleaned = phoneNumber.replace(/\D/g, '');
+
+    // Agregar prefijo +52 para México
+    let formatted = '+52' + cleaned;
+
+    // Para WhatsApp en México, agregar el "1" después de +52
+    if (channel === 'WHATSAPP') {
+      formatted = '+521' + cleaned;
+    }
+
+    return formatted;
+  }
+
+  get isPlanStarter(): boolean {
+    return this.subscriptionPlan() === 'STARTER';
+  }
+
   get isPlanBasico(): boolean {
     return this.subscriptionPlan() === 'BASICO';
   }
 
-  get isPlanIntermedio(): boolean {
-    return this.subscriptionPlan() === 'INTERMEDIO';
+  get isPlanProfesional(): boolean {
+    return this.subscriptionPlan() === 'PROFESIONAL';
   }
 
-  get isPlanSuperior(): boolean {
-    return this.subscriptionPlan() === 'SUPERIOR';
+  get isPlanEmpresarial(): boolean {
+    return this.subscriptionPlan() === 'EMPRESARIAL';
+  }
+
+  get canUseSingleChannel(): boolean {
+    return this.isPlanBasico;
   }
 
   get canUseBothChannels(): boolean {
-    return this.isPlanSuperior;
+    return this.isPlanProfesional || this.isPlanEmpresarial;
+  }
+
+  get hasNotifications(): boolean {
+    return !this.isPlanStarter;
   }
 
   get progressPercentage(): number {
