@@ -78,14 +78,16 @@
         <div class="form-row">
           <div class="form-group full-width">
             <label for="propertyId">Propiedad *</label>
-            <select
-              id="propertyId"
-              formControlName="propertyId">
-              <option value="">Selecciona una propiedad</option>
-              <option *ngFor="let property of availableProperties()" [value]="property.id">
-                {{ property.propertyCode }} - {{ property.address }}
-              </option>
-            </select>
+            <p-select
+              inputId="propertyId"
+              formControlName="propertyId"
+              [options]="propertyOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona una propiedad"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
             <span class="error-message" *ngIf="contractForm.get('propertyId')?.invalid && contractForm.get('propertyId')?.touched">
               La propiedad es requerida
             </span>
@@ -220,14 +222,16 @@
         <div class="form-row" *ngIf="!isEditing()">
           <div class="form-group full-width">
             <label for="addTenant">Agregar Inquilino</label>
-            <select
-              id="addTenant"
-              (change)="addTenant($event)">
-              <option value="">Selecciona un inquilino</option>
-              <option *ngFor="let tenant of availableTenants()" [value]="tenant.id">
-                {{ tenant.fullName }} - {{ tenant.phone }}
-              </option>
-            </select>
+            <p-select
+              inputId="addTenant"
+              [options]="tenantOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona un inquilino"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}"
+              (onChange)="addTenantFromSelect($event.value)">
+            </p-select>
           </div>
         </div>
 

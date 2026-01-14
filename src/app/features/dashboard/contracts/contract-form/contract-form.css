@@ -729,3 +729,93 @@
   background-color: var(--color-gray-200);
   border-color: var(--color-gray-300);
 }
+
+
+/* ============================================
+   PRIMENG SELECT CUSTOMIZATION
+   ============================================ */
+::ng-deep .p-select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-select:hover {
+  border-color: var(--color-primary-300) !important;
+}
+
+::ng-deep .p-select.p-focus,
+::ng-deep .p-select:focus-within {
+  border-color: var(--color-primary-300) !important;
+  box-shadow: 0 0 0 3px oklch(from var(--color-primary-300) l c h / 0.1);
+}
+
+::ng-deep .p-select .p-select-label {
+  padding: 0 1rem;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  line-height: 44px;
+}
+
+::ng-deep .p-select .p-select-trigger {
+  padding-right: 1rem;
+  color: var(--text-secondary);
+}
+
+::ng-deep .p-select .p-select-dropdown-icon {
+  margin-right: 0.25rem;
+}
+
+/* Panel de opciones */
+::ng-deep .p-select-overlay {
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  margin-top: 4px;
+}
+
+::ng-deep .p-select-overlay .p-select-option {
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  transition: background-color 0.15s ease;
+}
+
+::ng-deep .p-select-overlay .p-select-option:hover {
+  background-color: var(--bg-hover);
+}
+
+::ng-deep .p-select-overlay .p-select-option.p-select-option-selected {
+  background-color: oklch(from var(--color-primary-300) l c h / 0.1);
+  color: var(--color-primary-300);
+}
+
+::ng-deep .p-select-overlay .p-select-option:focus {
+  outline: none;
+  background-color: var(--bg-hover);
+}
+
+/* Estado disabled */
+::ng-deep .p-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-hover);
+}
+
+/* Placeholder */
+::ng-deep .p-select .p-select-label.p-placeholder {
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  ::ng-deep .p-select .p-select-label {
+    font-size: 0.875rem;
+  }
+
+  ::ng-deep .p-select-overlay .p-select-option {
+    padding: 0.625rem 0.875rem;
+  }
+}

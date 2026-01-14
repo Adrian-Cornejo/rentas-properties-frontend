@@ -13,13 +13,15 @@ import { PropertyResponse } from '../../../../core/models/properties/property-re
 import { TenantResponse } from '../../../../core/models/tenents/tenant-response';
 import { CreateContractRequest, TenantAssignment } from '../../../../core/models/contract/contract-request';
 import { UpdateContractRequest } from '../../../../core/models/contract/update-contract';
+import { Select } from 'primeng/select';
 
 @Component({
   selector: 'app-contract-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select
   ],
   templateUrl: './contract-form.html',
   styleUrl: './contract-form.css',
@@ -87,6 +89,26 @@ export class ContractFormComponent implements OnInit {
     const hasOnePrimary = this.assignedTenants().filter(t => t.isPrimary).length === 1;
     return formValid && hasOneTenant && hasOnePrimary && !this.isSaving();
   });
+
+  propertyOptions = computed(() =>
+    this.availableProperties().map(property => ({
+      label: `${property.propertyCode} - ${property.address}`,
+      value: property.id
+    }))
+  );
+
+  tenantOptions = computed(() =>
+    this.availableTenants().map(tenant => ({
+      label: `${tenant.fullName} - ${tenant.phone}`,
+      value: tenant.id
+    }))
+  );
+
+  addTenantFromSelect(tenantId: string | null): void {
+    if (tenantId) {
+      this.addTenant({ target: { value: tenantId } } as any);
+    }
+  }
 
   ngOnInit(): void {
     this.initForm();
