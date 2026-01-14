@@ -333,4 +333,79 @@
     padding: 0.625rem 0.875rem;
   }
 }
+::ng-deep .p-select-overlay .p-select-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-base);
+}
 
+::ng-deep .p-select-overlay .p-select-filter-container {
+  position: relative;
+  width: 100%;
+}
+
+::ng-deep .p-select-overlay .p-select-filter {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-select-overlay .p-select-filter::placeholder {
+  color: var(--text-muted);
+}
+
+::ng-deep .p-select-overlay .p-select-filter:focus {
+  outline: none;
+  border-color: var(--color-primary-300);
+  box-shadow: 0 0 0 2px oklch(from var(--color-primary-300) l c h / 0.1);
+}
+
+::ng-deep .p-select-overlay .p-select-filter-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-top: 0;
+}
+
+::ng-deep .p-select-overlay .p-select-list {
+  padding: 0.5rem 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+/* Scrollbar para la lista */
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+::ng-deep .p-select-overlay .p-select-empty-message {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}

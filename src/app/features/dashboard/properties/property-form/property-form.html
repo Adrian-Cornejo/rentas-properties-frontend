@@ -115,6 +115,7 @@
               optionValue="value"
               placeholder="Seleccionar tipo"
               styleClass="custom-select"
+              [filter]="true" filterBy="label,value"
               [style]="{'width': '100%'}">
             </p-select>
           </div>
@@ -131,6 +132,7 @@
               optionValue="value"
               placeholder="Sin ubicación"
               styleClass="custom-select"
+              [filter]="true" filterBy="label,value"
               [style]="{'width': '100%'}">
             </p-select>
           </div>

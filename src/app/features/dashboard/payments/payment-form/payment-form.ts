@@ -7,13 +7,17 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { MarkAsPaidRequest } from '../../../../core/models/payment/make-asi-paid-request';
 import { AddLateFeeRequest } from '../../../../core/models/payment/add-late-free-request';
 import { PaymentDetailResponse } from '../../../../core/models/payment/payment-detail-response';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-payment-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select,
+    DatePicker
   ],
   templateUrl: './payment-form.html',
   styleUrl: './payment-form.css',
@@ -48,6 +52,15 @@ export class PaymentFormComponent implements OnInit {
       this.loadPayment(paymentId);
     }
   }
+
+  paymentMethodOptions = [
+    { label: 'Efectivo', value: 'EFECTIVO' },
+    { label: 'Transferencia', value: 'TRANSFERENCIA' },
+    { label: 'Depósito Bancario', value: 'DEPOSITO' },
+    { label: 'Tarjeta', value: 'TARJETA' },
+    { label: 'Cheque', value: 'CHEQUE' },
+    { label: 'Otro', value: 'OTRO' }
+  ];
 
   initMarkAsPaidForm(): void {
     this.paymentForm = this.fb.group({
@@ -107,7 +120,7 @@ export class PaymentFormComponent implements OnInit {
     const request: MarkAsPaidRequest = {
       paymentMethod: this.paymentForm.value.paymentMethod,
       referenceNumber: this.paymentForm.value.referenceNumber || undefined,
-      paidAt: paidAtDateTime,
+      paidAt: this.formatDateToBackend(paidAtDate),
       notes: this.paymentForm.value.notes || undefined
     };
 
@@ -170,5 +183,14 @@ export class PaymentFormComponent implements OnInit {
       style: 'currency',
       currency: 'MXN'
     }).format(amount);
+  }
+
+  private formatDateToBackend(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}T00:00:00`; // Agregar la hora
   }
 }
