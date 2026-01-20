@@ -61,15 +61,19 @@
         <div class="form-row">
           <div class="form-group">
             <label for="propertyId">Propiedad *</label>
-            <select
-              id="propertyId"
+            <p-select
+              inputId="propertyId"
               formControlName="propertyId"
-              [disabled]="isEditing()">
-              <option value="">Selecciona una propiedad</option>
-              <option *ngFor="let property of availableProperties()" [value]="property.id">
-                {{ property.propertyCode }} - {{ property.address }}
-              </option>
-            </select>
+              [options]="propertyOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona una propiedad"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [disabled]="isEditing()"
+              [style]="{'width': '100%'}">
+            </p-select>
             <span class="error-message" *ngIf="maintenanceForm.get('propertyId')?.invalid && maintenanceForm.get('propertyId')?.touched">
               La propiedad es requerida
             </span>
@@ -77,15 +81,19 @@
 
           <div class="form-group">
             <label for="contractId">Contrato (Opcional)</label>
-            <select
-              id="contractId"
+            <p-select
+              inputId="contractId"
               formControlName="contractId"
-              [disabled]="isEditing() || !maintenanceForm.get('propertyId')?.value">
-              <option value="">Sin contrato asociado</option>
-              <option *ngFor="let contract of availableContracts()" [value]="contract.id">
-                {{ contract.contractNumber }}
-              </option>
-            </select>
+              [options]="contractOptions()"
+              optionLabel="label"
+              optionValue="value"
+              [filter]="true"
+              filterBy="value,label"
+              placeholder="Sin contrato asociado"
+              styleClass="custom-select"
+              [disabled]="isEditing() || !maintenanceForm.get('propertyId')?.value"
+              [style]="{'width': '100%'}">
+            </p-select>
             <span class="help-text">Selecciona un contrato si el mantenimiento es responsabilidad del inquilino</span>
           </div>
         </div>
@@ -93,12 +101,18 @@
         <div class="form-row">
           <div class="form-group">
             <label for="maintenanceType">Tipo de Mantenimiento *</label>
-            <select id="maintenanceType" formControlName="maintenanceType">
-              <option value="">Selecciona un tipo</option>
-              <option *ngFor="let type of maintenanceTypes" [value]="type.value">
-                {{ type.label }}
-              </option>
-            </select>
+            <p-select
+              inputId="maintenanceType"
+              formControlName="maintenanceType"
+              [options]="maintenanceTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              [filter]="true"
+              filterBy="value,label"
+              placeholder="Selecciona un tipo"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
             <span class="error-message" *ngIf="maintenanceForm.get('maintenanceType')?.invalid && maintenanceForm.get('maintenanceType')?.touched">
               El tipo es requerido
             </span>
@@ -106,12 +120,18 @@
 
           <div class="form-group">
             <label for="category">Categoría</label>
-            <select id="category" formControlName="category">
-              <option value="">Selecciona una categoría</option>
-              <option *ngFor="let cat of categories" [value]="cat.value">
-                {{ cat.label }}
-              </option>
-            </select>
+            <p-select
+              inputId="category"
+              formControlName="category"
+              [options]="categoryOptions"
+              optionLabel="label"
+              optionValue="value"
+              [filter]="true"
+              filterBy="value,label"
+              placeholder="Selecciona una categoría"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
         </div>
 
@@ -148,11 +168,16 @@
         <div class="form-row">
           <div class="form-group">
             <label for="maintenanceDate">Fecha de Mantenimiento *</label>
-            <input
-              id="maintenanceDate"
-              type="date"
+            <p-datepicker
+              inputId="maintenanceDate"
               formControlName="maintenanceDate"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona una fecha"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             <span class="error-message" *ngIf="maintenanceForm.get('maintenanceDate')?.invalid && maintenanceForm.get('maintenanceDate')?.touched">
               La fecha es requerida
             </span>
@@ -207,11 +232,16 @@
         <div class="form-row" *ngIf="isEditing()">
           <div class="form-group">
             <label for="status">Estado *</label>
-            <select id="status" formControlName="status">
-              <option *ngFor="let status of statusOptions" [value]="status.value">
-                {{ status.label }}
-              </option>
-            </select>
+            <p-select
+              inputId="status"
+              formControlName="status"
+              [options]="statusOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona un estado"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
             <span class="error-message" *ngIf="maintenanceForm.get('status')?.invalid && maintenanceForm.get('status')?.touched">
               El estado es requerido
             </span>

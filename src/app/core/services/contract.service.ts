@@ -43,6 +43,10 @@ export class ContractService {
     );
   }
 
+  getContractsByProperty(propertyId: string): Observable<ContractResponse[]> {
+    return this.http.get<ContractResponse[]>(`${this.apiUrl}/property/${propertyId}`);
+  }
+
   updateContract(id: string, request: UpdateContractRequest): Observable<ContractDetailResponse> {
     return this.http.put<ContractDetailResponse>(`${this.apiUrl}/${id}`, request).pipe(
       catchError(this.handleError)
