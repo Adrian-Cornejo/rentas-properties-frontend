@@ -180,9 +180,10 @@ export class ContractFormComponent implements OnInit {
     this.isLoadingTenants.set(true);
     this.tenantService.getAllTenants(false).subscribe({
       next: (data) => {
-        // Filter only active tenants
-        const active = data.filter(t => t.isActive);
-        this.availableTenants.set(active);
+        const available = data.filter(t =>
+          t.isActive && t.activeContractsCount === 0
+        );
+        this.availableTenants.set(available);
         this.isLoadingTenants.set(false);
       },
       error: (error) => {
@@ -191,7 +192,6 @@ export class ContractFormComponent implements OnInit {
       }
     });
   }
-
   private checkEditMode(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {

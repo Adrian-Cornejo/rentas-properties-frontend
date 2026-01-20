@@ -79,7 +79,8 @@ export class ContractCardComponent {
   }
 
   formatDate(dateString: string): string {
-    const date = new Date(dateString);
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(+year, +month - 1, +day);
     return date.toLocaleDateString('es-MX', {
       day: '2-digit',
       month: '2-digit',
