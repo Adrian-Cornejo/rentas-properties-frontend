@@ -20,14 +20,16 @@
           <!-- Fecha Inicio -->
           <div class="form-group">
             <label for="startDate" class="required">Fecha Inicio</label>
-            <input
-              type="date"
-              id="startDate"
+            <p-datepicker
+              inputId="startDate"
               formControlName="startDate"
-              [min]="minDate()"
-              [max]="maxDate()"
-              class="form-control"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha inicio"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             @if (filterForm.get('startDate')?.invalid && filterForm.get('startDate')?.touched) {
               <small class="error-message">Fecha de inicio requerida</small>
             }
@@ -36,14 +38,16 @@
           <!-- Fecha Fin -->
           <div class="form-group">
             <label for="endDate" class="required">Fecha Fin</label>
-            <input
-              type="date"
-              id="endDate"
+            <p-datepicker
+              inputId="endDate"
               formControlName="endDate"
-              [min]="minDate()"
-              [max]="maxDate()"
-              class="form-control"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha fin"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             @if (filterForm.get('endDate')?.invalid && filterForm.get('endDate')?.touched) {
               <small class="error-message">Fecha de fin requerida</small>
             }
@@ -52,34 +56,52 @@
           <!-- Propiedad -->
           <div class="form-group">
             <label for="property">Propiedad (opcional)</label>
-            <select id="property" formControlName="propertyId" class="form-control">
-              <option value="">Todas las propiedades</option>
-              @for (property of properties(); track property.id) {
-                <option [value]="property.id">{{ property.propertyCode }} - {{ property.address }}</option>
-              }
-            </select>
+            <p-select
+              inputId="property"
+              formControlName="propertyId"
+              [options]="propertyOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todas las propiedades"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
 
           <!-- Ubicación -->
           <div class="form-group">
             <label for="location">Ubicación (opcional)</label>
-            <select id="location" formControlName="locationId" class="form-control">
-              <option value="">Todas las ubicaciones</option>
-              @for (location of locations(); track location.id) {
-                <option [value]="location.id">{{ location.name }}</option>
-              }
-            </select>
+            <p-select
+              inputId="location"
+              formControlName="locationId"
+              [options]="locationOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todas las ubicaciones"
+              [filter]="true"
+              filterBy="value,label"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
 
           <!-- Tipo de Propiedad -->
           <div class="form-group">
             <label for="propertyType">Tipo de Propiedad (opcional)</label>
-            <select id="propertyType" formControlName="propertyType" class="form-control">
-              <option value="">Todos los tipos</option>
-              @for (type of propertyTypes; track type.value) {
-                <option [value]="type.value">{{ type.label }}</option>
-              }
-            </select>
+            <p-select
+              inputId="propertyType"
+              formControlName="propertyType"
+              [options]="propertyTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              [filter]="true"
+              filterBy="value,label"
+              placeholder="Todos los tipos"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
 
         </div>

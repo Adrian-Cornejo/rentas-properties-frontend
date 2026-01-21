@@ -10,13 +10,17 @@ import { LocationService } from '../../../../core/services/location.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { FinancialReportRequest } from '../../../../core/models/reports/report-requests';
 import { FinancialReportResponse } from '../../../../core/models/reports/report-responses';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-financial-report',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select,
+    DatePicker
   ],
   templateUrl: './financial-report.html',
   styleUrl: './financial-report.css'
@@ -54,7 +58,21 @@ export class FinancialReportComponent implements OnInit {
   // OPCIONES
   // ========================================
 
-  propertyTypes = [
+  propertyOptions = computed(() =>
+    this.properties().map(p => ({
+      label: `${p.propertyCode} - ${p.address}`,
+      value: p.id
+    }))
+  );
+
+  locationOptions = computed(() =>
+    this.locations().map(l => ({
+      label: l.name,
+      value: l.id
+    }))
+  );
+
+  propertyTypeOptions = [
     { label: 'Casa', value: 'CASA' },
     { label: 'Departamento', value: 'DEPARTAMENTO' },
     { label: 'Local Comercial', value: 'LOCAL_COMERCIAL' },
@@ -65,22 +83,6 @@ export class FinancialReportComponent implements OnInit {
   // ========================================
   // FECHAS LÍMITE SEGÚN PLAN
   // ========================================
-
-  maxDate = computed(() => {
-    return this.formatDateForInput(new Date());
-  });
-
-  minDate = computed(() => {
-    const reportHistoryDays = this.planService.getLimit('reportHistoryDays');
-    if (reportHistoryDays === -1) {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() - 10);
-      return this.formatDateForInput(date);
-    }
-    const date = new Date();
-    date.setDate(date.getDate() - reportHistoryDays);
-    return this.formatDateForInput(date);
-  });
 
   // ========================================
   // PERMISOS DE EXPORTACIÓN
@@ -129,8 +131,8 @@ export class FinancialReportComponent implements OnInit {
     startDate.setMonth(startDate.getMonth() - 1);
 
     this.filterForm = this.fb.group({
-      startDate: [this.formatDateForInput(startDate), Validators.required],
-      endDate: [this.formatDateForInput(endDate), Validators.required],
+      startDate: [startDate, Validators.required],
+      endDate: [endDate, Validators.required],
       propertyId: [''],
       locationId: [''],
       propertyType: ['']
@@ -178,8 +180,8 @@ export class FinancialReportComponent implements OnInit {
 
     const formValue = this.filterForm.value;
     const request: FinancialReportRequest = {
-      startDate: formValue.startDate,
-      endDate: formValue.endDate,
+      startDate: this.formatDateToBackend(formValue.startDate),
+      endDate: this.formatDateToBackend(formValue.endDate),
       propertyId: formValue.propertyId || undefined,
       locationId: formValue.locationId || undefined,
       propertyType: formValue.propertyType || undefined
@@ -305,10 +307,6 @@ export class FinancialReportComponent implements OnInit {
   // HELPERS
   // ========================================
 
-  private formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
   getTrendClass(trend: string): string {
     return trend === 'UP' ? 'trend-up' :
       trend === 'DOWN' ? 'trend-down' :
@@ -366,6 +364,15 @@ export class FinancialReportComponent implements OnInit {
     }
 
     return pages;
+  }
+
+  private formatDateToBackend(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   protected readonly Math = Math;

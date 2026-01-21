@@ -10,13 +10,17 @@ import { ContractService } from '../../../../core/services/contract.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { PaymentReportRequest } from '../../../../core/models/reports/report-requests';
 import { PaymentReportResponse } from '../../../../core/models/reports/report-responses';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-payment-report',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select,
+    DatePicker
   ],
   templateUrl: './payment-report.html',
   styleUrl: './payment-report.css'
@@ -54,33 +58,27 @@ export class PaymentReportComponent implements OnInit {
   // OPCIONES
   // ========================================
 
-  paymentStatuses = [
+  propertyOptions = computed(() =>
+    this.properties().map(p => ({
+      label: `${p.propertyCode} - ${p.address}`,
+      value: p.id
+    }))
+  );
+
+  contractOptions = computed(() =>
+    this.contracts().map(c => ({
+      label: c.contractNumber,
+      value: c.id
+    }))
+  );
+
+  paymentStatusOptions = [
     { label: 'Todos', value: '' },
     { label: 'Pendiente', value: 'PENDIENTE' },
     { label: 'Pagado', value: 'PAGADO' },
     { label: 'Atrasado', value: 'ATRASADO' },
     { label: 'Parcial', value: 'PARCIAL' }
   ];
-
-  // ========================================
-  // FECHAS LÍMITE SEGÚN PLAN
-  // ========================================
-
-  maxDate = computed(() => {
-    return this.formatDateForInput(new Date());
-  });
-
-  minDate = computed(() => {
-    const reportHistoryDays = this.planService.getLimit('reportHistoryDays');
-    if (reportHistoryDays === -1) {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() - 10);
-      return this.formatDateForInput(date);
-    }
-    const date = new Date();
-    date.setDate(date.getDate() - reportHistoryDays);
-    return this.formatDateForInput(date);
-  });
 
   // ========================================
   // PERMISOS DE EXPORTACIÓN
@@ -129,8 +127,8 @@ export class PaymentReportComponent implements OnInit {
     startDate.setMonth(startDate.getMonth() - 1); // Último mes por defecto
 
     this.filterForm = this.fb.group({
-      startDate: [this.formatDateForInput(startDate), Validators.required],
-      endDate: [this.formatDateForInput(endDate), Validators.required],
+      startDate: [startDate, Validators.required],
+      endDate: [endDate, Validators.required],
       paymentStatus: [''],
       propertyId: [''],
       contractId: ['']
@@ -178,8 +176,8 @@ export class PaymentReportComponent implements OnInit {
 
     const formValue = this.filterForm.value;
     const request: PaymentReportRequest = {
-      startDate: formValue.startDate,
-      endDate: formValue.endDate,
+      startDate: this.formatDateToBackend(formValue.startDate),
+      endDate: this.formatDateToBackend(formValue.endDate),
       paymentStatus: formValue.paymentStatus || undefined,
       propertyId: formValue.propertyId || undefined,
       contractId: formValue.contractId || undefined
@@ -304,11 +302,6 @@ export class PaymentReportComponent implements OnInit {
   // ========================================
   // HELPERS
   // ========================================
-
-  private formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
   formatDate(dateString: string | null): string {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('es-MX', {
@@ -394,6 +387,15 @@ export class PaymentReportComponent implements OnInit {
     }
 
     return pages;
+  }
+
+  private formatDateToBackend(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   protected readonly Math = Math;

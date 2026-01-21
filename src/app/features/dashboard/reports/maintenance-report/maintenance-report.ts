@@ -9,13 +9,17 @@ import { PropertyService } from '../../../../core/services/property.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { MaintenanceReportRequest } from '../../../../core/models/reports/report-requests';
 import { MaintenanceReportResponse } from '../../../../core/models/reports/report-responses';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-maintenance-report',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select,
+    DatePicker
   ],
   templateUrl: './maintenance-report.html',
   styleUrl: './maintenance-report.css'
@@ -47,18 +51,21 @@ export class MaintenanceReportComponent implements OnInit {
 
   filterForm!: FormGroup;
 
-  // ========================================
-  // OPCIONES
-  // ========================================
+  propertyOptions = computed(() =>
+    this.properties().map(p => ({
+      label: `${p.propertyCode} - ${p.address}`,
+      value: p.id
+    }))
+  );
 
-  maintenanceTypes = [
+  maintenanceTypeOptions = [
     { label: 'Todos', value: '' },
     { label: 'Preventivo', value: 'PREVENTIVO' },
     { label: 'Correctivo', value: 'CORRECTIVO' },
     { label: 'Emergencia', value: 'EMERGENCIA' }
   ];
 
-  maintenanceStatuses = [
+  maintenanceStatusOptions = [
     { label: 'Todos', value: '' },
     { label: 'Pendiente', value: 'PENDIENTE' },
     { label: 'En Progreso', value: 'EN_PROGRESO' },
@@ -66,7 +73,7 @@ export class MaintenanceReportComponent implements OnInit {
     { label: 'Cancelado', value: 'CANCELADO' }
   ];
 
-  categories = [
+  categoryOptions = [
     { label: 'Todas', value: '' },
     { label: 'Plomería', value: 'PLOMERIA' },
     { label: 'Electricidad', value: 'ELECTRICIDAD' },
@@ -77,25 +84,6 @@ export class MaintenanceReportComponent implements OnInit {
     { label: 'Otros', value: 'OTROS' }
   ];
 
-  // ========================================
-  // FECHAS LÍMITE SEGÚN PLAN
-  // ========================================
-
-  maxDate = computed(() => {
-    return this.formatDateForInput(new Date());
-  });
-
-  minDate = computed(() => {
-    const reportHistoryDays = this.planService.getLimit('reportHistoryDays');
-    if (reportHistoryDays === -1) {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() - 10);
-      return this.formatDateForInput(date);
-    }
-    const date = new Date();
-    date.setDate(date.getDate() - reportHistoryDays);
-    return this.formatDateForInput(date);
-  });
 
   // ========================================
   // PERMISOS DE EXPORTACIÓN
@@ -156,8 +144,8 @@ export class MaintenanceReportComponent implements OnInit {
     startDate.setMonth(startDate.getMonth() - 3); // Últimos 3 meses por defecto
 
     this.filterForm = this.fb.group({
-      startDate: [this.formatDateForInput(startDate), Validators.required],
-      endDate: [this.formatDateForInput(endDate), Validators.required],
+      startDate: [startDate, Validators.required],
+      endDate: [endDate, Validators.required],
       maintenanceType: [''],
       status: [''],
       category: [''],
@@ -194,8 +182,8 @@ export class MaintenanceReportComponent implements OnInit {
 
     const formValue = this.filterForm.value;
     const request: MaintenanceReportRequest = {
-      startDate: formValue.startDate,
-      endDate: formValue.endDate,
+      startDate: this.formatDateToBackend(formValue.startDate),
+      endDate: this.formatDateToBackend(formValue.endDate),
       maintenanceType: formValue.maintenanceType || undefined,
       status: formValue.status || undefined,
       category: formValue.category || undefined,
@@ -322,10 +310,6 @@ export class MaintenanceReportComponent implements OnInit {
   // HELPERS
   // ========================================
 
-  private formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
   formatDate(dateString: string | null): string {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('es-MX', {
@@ -441,6 +425,15 @@ export class MaintenanceReportComponent implements OnInit {
     }
 
     return pages;
+  }
+
+  private formatDateToBackend(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   protected readonly Math = Math;

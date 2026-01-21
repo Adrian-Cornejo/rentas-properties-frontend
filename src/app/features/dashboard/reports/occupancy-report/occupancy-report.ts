@@ -9,13 +9,18 @@ import { LocationService } from '../../../../core/services/location.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { OccupancyReportRequest } from '../../../../core/models/reports/report-requests';
 import { OccupancyReportResponse } from '../../../../core/models/reports/report-responses';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
+
 
 @Component({
   selector: 'app-occupancy-report',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select,
+    DatePicker
   ],
   templateUrl: './occupancy-report.html',
   styleUrl: './occupancy-report.css'
@@ -47,37 +52,20 @@ export class OccupancyReportComponent implements OnInit {
 
   filterForm!: FormGroup;
 
-  // ========================================
-  // OPCIONES
-  // ========================================
+  locationOptions = computed(() =>
+    this.locations().map(l => ({
+      label: l.name,
+      value: l.id
+    }))
+  );
 
-  propertyTypes = [
+  propertyTypeOptions = [
     { label: 'Casa', value: 'CASA' },
     { label: 'Departamento', value: 'DEPARTAMENTO' },
     { label: 'Local Comercial', value: 'LOCAL_COMERCIAL' },
     { label: 'Oficina', value: 'OFICINA' },
     { label: 'Bodega', value: 'BODEGA' }
   ];
-
-  // ========================================
-  // FECHAS LÍMITE SEGÚN PLAN
-  // ========================================
-
-  maxDate = computed(() => {
-    return this.formatDateForInput(new Date());
-  });
-
-  minDate = computed(() => {
-    const reportHistoryDays = this.planService.getLimit('reportHistoryDays');
-    if (reportHistoryDays === -1) {
-      const date = new Date();
-      date.setFullYear(date.getFullYear() - 10);
-      return this.formatDateForInput(date);
-    }
-    const date = new Date();
-    date.setDate(date.getDate() - reportHistoryDays);
-    return this.formatDateForInput(date);
-  });
 
   // ========================================
   // PERMISOS DE EXPORTACIÓN
@@ -125,8 +113,8 @@ export class OccupancyReportComponent implements OnInit {
     startDate.setMonth(startDate.getMonth() - 3); // Últimos 3 meses por defecto
 
     this.filterForm = this.fb.group({
-      startDate: [this.formatDateForInput(startDate), Validators.required],
-      endDate: [this.formatDateForInput(endDate), Validators.required],
+      startDate: [startDate, Validators.required],
+      endDate: [endDate, Validators.required],
       locationId: [''],
       propertyType: ['']
     });
@@ -161,8 +149,8 @@ export class OccupancyReportComponent implements OnInit {
 
     const formValue = this.filterForm.value;
     const request: OccupancyReportRequest = {
-      startDate: formValue.startDate,
-      endDate: formValue.endDate,
+      startDate: this.formatDateToBackend(formValue.startDate),
+      endDate: this.formatDateToBackend(formValue.endDate),
       locationId: formValue.locationId || undefined,
       propertyType: formValue.propertyType || undefined
     };
@@ -353,5 +341,14 @@ export class OccupancyReportComponent implements OnInit {
     return pages;
   }
 
+
+  private formatDateToBackend(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
   protected readonly Math = Math;
 }

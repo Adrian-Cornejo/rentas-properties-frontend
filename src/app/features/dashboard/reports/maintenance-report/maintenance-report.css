@@ -5,10 +5,11 @@
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem;
+  overflow: visible;
 }
 
 /* Cards, Form, Buttons - Reutilizado de reportes anteriores */
-.card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); transition: box-shadow 0.3s ease; }
+.card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; overflow: visible; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); transition: box-shadow 0.3s ease; }
 .card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
 .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--bg-hover); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
 .card-header h3 { margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--text-primary); }

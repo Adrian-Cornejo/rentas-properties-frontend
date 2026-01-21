@@ -8,13 +8,14 @@ import { PlanService } from '../../../../core/services/plan.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ExecutiveReportRequest } from '../../../../core/models/reports/report-requests';
 import { ExecutiveReportResponse } from '../../../../core/models/reports/report-responses';
-
+import { Select } from 'primeng/select';
 @Component({
   selector: 'app-executive-report',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select
   ],
   templateUrl: './executive-report.html',
   styleUrl: './executive-report.css'
@@ -48,7 +49,7 @@ export class ExecutiveReportComponent implements OnInit {
   // OPCIONES
   // ========================================
 
-  periods = [
+  periodOptions = [
     { label: 'Anual Completo', value: '' },
     { label: 'Q1 (Ene-Mar)', value: 'Q1' },
     { label: 'Q2 (Abr-Jun)', value: 'Q2' },

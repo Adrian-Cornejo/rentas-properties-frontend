@@ -20,14 +20,16 @@
           <!-- Fecha Inicio -->
           <div class="form-group">
             <label for="startDate" class="required">Fecha Inicio</label>
-            <input
-              type="date"
-              id="startDate"
+            <p-datepicker
+              inputId="startDate"
               formControlName="startDate"
-              [min]="minDate()"
-              [max]="maxDate()"
-              class="form-control"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha inicio"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             @if (filterForm.get('startDate')?.invalid && filterForm.get('startDate')?.touched) {
               <small class="error-message">Fecha de inicio requerida</small>
             }
@@ -36,14 +38,16 @@
           <!-- Fecha Fin -->
           <div class="form-group">
             <label for="endDate" class="required">Fecha Fin</label>
-            <input
-              type="date"
-              id="endDate"
+            <p-datepicker
+              inputId="endDate"
               formControlName="endDate"
-              [min]="minDate()"
-              [max]="maxDate()"
-              class="form-control"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha fin"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             @if (filterForm.get('endDate')?.invalid && filterForm.get('endDate')?.touched) {
               <small class="error-message">Fecha de fin requerida</small>
             }
@@ -52,33 +56,50 @@
           <!-- Estado del Pago -->
           <div class="form-group">
             <label for="paymentStatus">Estado del Pago</label>
-            <select id="paymentStatus" formControlName="paymentStatus" class="form-control">
-              @for (status of paymentStatuses; track status.value) {
-                <option [value]="status.value">{{ status.label }}</option>
-              }
-            </select>
+            <p-select
+              inputId="paymentStatus"
+              formControlName="paymentStatus"
+              [options]="paymentStatusOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todos los estados"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
 
           <!-- Propiedad -->
           <div class="form-group">
             <label for="property">Propiedad (opcional)</label>
-            <select id="property" formControlName="propertyId" class="form-control">
-              <option value="">Todas las propiedades</option>
-              @for (property of properties(); track property.id) {
-                <option [value]="property.id">{{ property.propertyCode }} - {{ property.address }}</option>
-              }
-            </select>
+            <p-select
+              inputId="property"
+              formControlName="propertyId"
+              [options]="propertyOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todas las propiedades"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
 
           <!-- Contrato -->
           <div class="form-group">
             <label for="contract">Contrato (opcional)</label>
-            <select id="contract" formControlName="contractId" class="form-control">
-              <option value="">Todos los contratos</option>
-              @for (contract of contracts(); track contract.id) {
-                <option [value]="contract.id">{{ contract.contractNumber }}</option>
-              }
-            </select>
+            <p-select
+              inputId="contract"
+              formControlName="contractId"
+              [options]="contractOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todos los contratos"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
 
         </div>

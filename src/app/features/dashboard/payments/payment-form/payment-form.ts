@@ -109,7 +109,7 @@ export class PaymentFormComponent implements OnInit {
     if (this.formType() === 'mark-paid') {
       this.submitMarkAsPaid(paymentId);
     } else {
-      this.submitAddLateFee(paymentId);
+      //this.submitAddLateFee(paymentId);
     }
   }
 

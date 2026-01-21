@@ -48,11 +48,16 @@
           <!-- Periodo -->
           <div class="form-group">
             <label for="period">Periodo</label>
-            <select id="period" formControlName="period" class="form-control">
-              @for (period of periods; track period.value) {
-                <option [value]="period.value">{{ period.label }}</option>
-              }
-            </select>
+            <p-select
+              inputId="period"
+              formControlName="period"
+              [options]="periodOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona periodo"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
 
         </div>
