@@ -10,7 +10,6 @@
   flex-direction: column;
   gap: 1.5rem;
 }
-
 /* ============================================
    UPGRADE BANNER (Plan BASICO)
    ============================================ */
@@ -431,4 +430,49 @@
   .form-actions .btn {
     width: 100%;
   }
+}
+
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+
+.phone-prefix {
+  display: flex;
+  align-items: center;
+  padding: 1.45rem;
+  background-color: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  font-weight: 500;
+  color: var(--text-primary);
+  user-select: none;
+  height: 42px;
+  font-size: 0.875rem;
+}
+
+.phone-input {
+  flex: 1;
+  border-radius: 0 6px 6px 0 !important;
+  border-left: none !important;
+}
+
+.phone-input:focus {
+  border-left: none !important;
+}
+
+.phone-input-wrapper:focus-within .phone-prefix {
+  border-color: var(--color-primary-500);
+  background-color: var(--bg-surface);
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
 }

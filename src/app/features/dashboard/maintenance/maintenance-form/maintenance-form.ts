@@ -2,6 +2,9 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
+import { PrimeNG } from 'primeng/config';
 import { MaintenanceRecordService } from '../../../../core/services/maintenance-record.service';
 import { PropertyService } from '../../../../core/services/property.service';
 import { ContractService } from '../../../../core/services/contract.service';
@@ -18,7 +21,9 @@ import { UpdateMaintenanceRecordRequest } from '../../../../core/models/maintena
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select,
+    DatePicker
   ],
   templateUrl: './maintenance-form.html',
   styleUrl: './maintenance-form.css',
@@ -46,17 +51,21 @@ export class MaintenanceFormComponent implements OnInit {
   availableContracts = signal<ContractResponse[]>([]);
   uploadedImages = signal<{ url: string; publicId: string; type: string; description?: string }[]>([]);
 
+  // Opciones para los selects
+  propertyOptions = signal<{ label: string; value: string }[]>([]);
+  contractOptions = signal<{ label: string; value: string }[]>([]);
+
   // Form
   maintenanceForm!: FormGroup;
 
   // Options
-  maintenanceTypes = [
+  maintenanceTypeOptions = [
     { value: 'PREVENTIVO', label: 'Preventivo' },
     { value: 'CORRECTIVO', label: 'Correctivo' },
     { value: 'EMERGENCIA', label: 'Emergencia' }
   ];
 
-  categories = [
+  categoryOptions = [
     { value: 'PLOMERIA', label: 'Plomería' },
     { value: 'ELECTRICIDAD', label: 'Electricidad' },
     { value: 'PINTURA', label: 'Pintura' },
@@ -99,7 +108,7 @@ export class MaintenanceFormComponent implements OnInit {
       description: ['', Validators.required],
       maintenanceType: ['', Validators.required],
       category: [''],
-      maintenanceDate: ['', Validators.required],
+      maintenanceDate: [new Date(), Validators.required],
       estimatedCost: ['', [Validators.min(0)]],
       actualCost: ['', [Validators.min(0)]],
       status: ['PENDIENTE', Validators.required],
@@ -107,16 +116,13 @@ export class MaintenanceFormComponent implements OnInit {
       notes: ['']
     });
 
-    // Set default date to today
-    const today = new Date().toISOString().split('T')[0];
-    this.maintenanceForm.patchValue({ maintenanceDate: today });
-
     // Listen to property changes to load contracts
     this.maintenanceForm.get('propertyId')?.valueChanges.subscribe(propertyId => {
       if (propertyId) {
-        // this.loadContractsForProperty(propertyId);
+        this.loadContractsForProperty(propertyId);
       } else {
         this.availableContracts.set([]);
+        this.contractOptions.set([]);
         this.maintenanceForm.patchValue({ contractId: '' });
       }
     });
@@ -127,6 +133,13 @@ export class MaintenanceFormComponent implements OnInit {
     this.propertyService.getAllProperties(false).subscribe({
       next: (properties) => {
         this.availableProperties.set(properties);
+        // Actualizar opciones para el select
+        this.propertyOptions.set(
+          properties.map(p => ({
+            label: `${p.propertyCode} - ${p.address}`,
+            value: p.id
+          }))
+        );
         this.isLoadingProperties.set(false);
       },
       error: (error) => {
@@ -136,21 +149,30 @@ export class MaintenanceFormComponent implements OnInit {
     });
   }
 
-  // loadContractsForProperty(propertyId: string): void {
-  //   this.isLoadingContracts.set(true);
-  //   this.contractService.getContractsByProperty(propertyId).subscribe({
-  //     next: (contracts) => {
-  //       // Only show active contracts
-  //       const activeContracts = contracts.filter(c => c.status === 'ACTIVO');
-  //       this.availableContracts.set(activeContracts);
-  //       this.isLoadingContracts.set(false);
-  //     },
-  //     error: (error) => {
-  //       this.notification.error('Error al cargar contratos');
-  //       this.isLoadingContracts.set(false);
-  //     }
-  //   });
-  // }
+  loadContractsForProperty(propertyId: string): void {
+    this.isLoadingContracts.set(true);
+    this.contractService.getContractsByProperty(propertyId).subscribe({
+      next: (contracts) => {
+        // Only show active contracts
+        const activeContracts = contracts.filter(c => c.status === 'ACTIVO');
+        this.availableContracts.set(activeContracts);
+        // Actualizar opciones para el select
+        this.contractOptions.set(
+          activeContracts.map(c => ({
+            label: c.contractNumber,
+            value: c.id
+          }))
+        );
+        this.isLoadingContracts.set(false);
+      },
+      error: (error) => {
+        this.notification.error('Error al cargar contratos');
+        this.availableContracts.set([]);
+        this.contractOptions.set([]);
+        this.isLoadingContracts.set(false);
+      }
+    });
+  }
 
   loadRecord(id: string): void {
     this.maintenanceService.getMaintenanceRecordById(id).subscribe({
@@ -160,7 +182,7 @@ export class MaintenanceFormComponent implements OnInit {
 
         // Load contracts for the property
         if (record.property.id) {
-          // this.loadContractsForProperty(record.property.id);
+          this.loadContractsForProperty(record.property.id);
         }
 
         // Set uploaded images
@@ -187,7 +209,7 @@ export class MaintenanceFormComponent implements OnInit {
       description: record.description,
       maintenanceType: record.maintenanceType,
       category: record.category || '',
-      maintenanceDate: record.maintenanceDate,
+      maintenanceDate: new Date(record.maintenanceDate),
       estimatedCost: record.estimatedCost || '',
       actualCost: record.actualCost || '',
       status: record.status,
@@ -226,7 +248,7 @@ export class MaintenanceFormComponent implements OnInit {
       description: formValue.description,
       maintenanceType: formValue.maintenanceType,
       category: formValue.category || undefined,
-      maintenanceDate: formValue.maintenanceDate,
+      maintenanceDate: this.formatDateToBackend(formValue.maintenanceDate),
       estimatedCost: formValue.estimatedCost || undefined,
       assignedTo: formValue.assignedTo || undefined,
       notes: formValue.notes || undefined
@@ -260,7 +282,7 @@ export class MaintenanceFormComponent implements OnInit {
       description: formValue.description,
       maintenanceType: formValue.maintenanceType,
       category: formValue.category || undefined,
-      maintenanceDate: formValue.maintenanceDate,
+      maintenanceDate: this.formatDateToBackend(formValue.maintenanceDate),
       estimatedCost: formValue.estimatedCost || undefined,
       actualCost: formValue.actualCost || undefined,
       status: formValue.status,
@@ -279,31 +301,6 @@ export class MaintenanceFormComponent implements OnInit {
       }
     });
   }
-
-  // uploadImagesToRecord(recordId: string): void {
-  //   const images = this.uploadedImages();
-  //   let uploadedCount = 0;
-  //
-  //   images.forEach(image => {
-  //     this.maintenanceService.addImage(
-  //       recordId,
-  //       image.url,
-  //       image.,
-  //       image.url,
-  //     ).subscribe({
-  //       next: () => {
-  //         uploadedCount++;
-  //         if (uploadedCount === images.length) {
-  //           this.notification.success('Registro de mantenimiento creado exitosamente');
-  //           this.router.navigate(['/dashboard/maintenance']);
-  //         }
-  //       },
-  //       error: (error) => {
-  //         this.notification.error('Error al subir imagen');
-  //       }
-  //     });
-  //   });
-  // }
 
   onImageUpload(event: Event, imageType: string): void {
     const input = event.target as HTMLInputElement;
@@ -375,5 +372,14 @@ export class MaintenanceFormComponent implements OnInit {
   getContractLabel(contractId: string): string {
     const contract = this.availableContracts().find(c => c.id === contractId);
     return contract ? contract.contractNumber : '';
+  }
+
+  private formatDateToBackend(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

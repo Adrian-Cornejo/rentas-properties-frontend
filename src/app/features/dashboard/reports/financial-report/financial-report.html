@@ -1,0 +1,418 @@
+<!-- src/app/features/dashboard/reports/financial-report/financial-report.component.html -->
+
+<div class="financial-report">
+
+  <!-- ========================================
+       SECCIÓN: FORMULARIO DE FILTROS
+       ======================================== -->
+  <div class="card filter-card">
+    <div class="card-header">
+      <div>
+        <h3>Filtros del Reporte</h3>
+        <p class="text-muted">Configura el periodo y filtros para generar el reporte</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="filterForm" (ngSubmit)="generateReport()">
+        <div class="filter-grid">
+
+          <!-- Fecha Inicio -->
+          <div class="form-group">
+            <label for="startDate" class="required">Fecha Inicio</label>
+            <p-datepicker
+              inputId="startDate"
+              formControlName="startDate"
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha inicio"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
+            @if (filterForm.get('startDate')?.invalid && filterForm.get('startDate')?.touched) {
+              <small class="error-message">Fecha de inicio requerida</small>
+            }
+          </div>
+
+          <!-- Fecha Fin -->
+          <div class="form-group">
+            <label for="endDate" class="required">Fecha Fin</label>
+            <p-datepicker
+              inputId="endDate"
+              formControlName="endDate"
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha fin"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
+            @if (filterForm.get('endDate')?.invalid && filterForm.get('endDate')?.touched) {
+              <small class="error-message">Fecha de fin requerida</small>
+            }
+          </div>
+
+          <!-- Propiedad -->
+          <div class="form-group">
+            <label for="property">Propiedad (opcional)</label>
+            <p-select
+              inputId="property"
+              formControlName="propertyId"
+              [options]="propertyOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todas las propiedades"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [style]="{'width': '100%'}">
+            </p-select>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="form-group">
+            <label for="location">Ubicación (opcional)</label>
+            <p-select
+              inputId="location"
+              formControlName="locationId"
+              [options]="locationOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todas las ubicaciones"
+              [filter]="true"
+              filterBy="value,label"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
+          </div>
+
+          <!-- Tipo de Propiedad -->
+          <div class="form-group">
+            <label for="propertyType">Tipo de Propiedad (opcional)</label>
+            <p-select
+              inputId="propertyType"
+              formControlName="propertyType"
+              [options]="propertyTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              [filter]="true"
+              filterBy="value,label"
+              placeholder="Todos los tipos"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
+          </div>
+
+        </div>
+
+        <!-- Acciones del formulario -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+            <i class="pi pi-times"></i>
+            Limpiar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="filterForm.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="spinner"></span>
+            } @else {
+              <i class="pi pi-chart-line"></i>
+            }
+            Generar Reporte
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================
+       SECCIÓN: MENSAJE DE ERROR
+       ======================================== -->
+  @if (dateRangeError()) {
+    <div class="alert alert-error">
+      <span class="alert-icon"><i class="pi pi-exclamation-triangle"></i></span>
+      <div>
+        <strong>Error en rango de fechas</strong>
+        <p>{{ dateRangeError() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================
+       SECCIÓN: LOADING
+       ======================================== -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner-large"></div>
+      <p>Generando reporte financiero...</p>
+    </div>
+  }
+
+  <!-- ========================================
+       SECCIÓN: REPORTE GENERADO
+       ======================================== -->
+  @if (reportData() && !isLoading()) {
+    <div class="report-content">
+
+      <!-- RESUMEN FINANCIERO -->
+      <div class="card summary-card">
+        <div class="card-header">
+          <h3>Resumen Financiero</h3>
+          <span class="date-range">
+            {{ formatDate(reportData()!.startDate) }} - {{ formatDate(reportData()!.endDate) }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="summary-grid">
+
+            <!-- Ingresos -->
+            <div class="summary-item income">
+              <div class="summary-icon"><i class="pi pi-arrow-up-right"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Ingresos Totales</span>
+                <span class="summary-value">{{ formatCurrency(reportData()!.summary.totalIncome) }}</span>
+              </div>
+            </div>
+
+            <!-- Gastos -->
+            <div class="summary-item expense">
+              <div class="summary-icon"><i class="pi pi-arrow-down-left"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Gastos de Mantenimiento</span>
+                <span class="summary-value">{{ formatCurrency(reportData()!.summary.maintenanceExpenses) }}</span>
+              </div>
+            </div>
+
+            <!-- Ganancia Neta -->
+            <div class="summary-item" [ngClass]="getStatusClass(reportData()!.summary.netProfit)">
+              <div class="summary-icon"><i class="pi pi-chart-line"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Ganancia Neta</span>
+                <span class="summary-value">{{ formatCurrency(reportData()!.summary.netProfit) }}</span>
+              </div>
+            </div>
+
+            <!-- Margen -->
+            <div class="summary-item profit">
+              <div class="summary-icon"><i class="pi pi-percentage"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Margen de Ganancia</span>
+                <span class="summary-value">{{ formatPercent(reportData()!.summary.profitMargin) }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARATIVA -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Comparativa con Periodo Anterior</h3>
+        </div>
+
+        <div class="card-body">
+          <div class="comparison-list">
+
+            <div class="comparison-item">
+              <span class="label">Periodo Actual:</span>
+              <span class="value">{{ formatCurrency(reportData()!.comparison.currentIncome) }}</span>
+            </div>
+
+            <div class="comparison-item">
+              <span class="label">Periodo Anterior:</span>
+              <span class="value">{{ formatCurrency(reportData()!.comparison.previousIncome) }}</span>
+            </div>
+
+            <div class="comparison-item highlight">
+              <span class="label">Variación:</span>
+              <span class="value" [ngClass]="getTrendClass(reportData()!.comparison.trend)">
+                <span class="trend-icon">{{ getTrendIcon(reportData()!.comparison.trend) }}</span>
+                {{ formatCurrency(reportData()!.comparison.absoluteChange) }}
+                ({{ formatPercent(reportData()!.comparison.percentageChange) }})
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA DE PROPIEDADES -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Ingresos por Propiedad</h3>
+          <span class="badge">{{ reportData()!.propertyIncomes.length }} propiedades</span>
+        </div>
+
+        <div class="card-body">
+
+          <!-- Controles de tabla -->
+          <div class="table-controls">
+            <div class="table-info">
+              Mostrando {{ (currentPage() - 1) * pageSize() + 1 }}
+              a {{ Math.min(currentPage() * pageSize(), reportData()!.propertyIncomes.length) }}
+              de {{ reportData()!.propertyIncomes.length }} registros
+            </div>
+
+            <div class="page-size-selector">
+              <label>Mostrar:</label>
+              <select (change)="changePageSize($event)" [value]="pageSize()">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tabla -->
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Código</th>
+                <th>Dirección</th>
+                <th>Tipo</th>
+                <th class="text-right">Ingresos</th>
+                <th class="text-right">Gastos</th>
+                <th class="text-right">Ganancia Neta</th>
+                <th class="text-right">ROI</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (property of paginatedProperties(); track property.propertyCode) {
+                  <tr>
+                    <td><strong>{{ property.propertyCode }}</strong></td>
+                    <td>{{ property.address }}</td>
+                    <td><span class="badge-type">{{ property.propertyType }}</span></td>
+                    <td class="text-right income">{{ formatCurrency(property.totalIncome) }}</td>
+                    <td class="text-right expense">{{ formatCurrency(property.maintenanceExpenses) }}</td>
+                    <td class="text-right" [ngClass]="getStatusClass(property.netProfit)">
+                      <strong>{{ formatCurrency(property.netProfit) }}</strong>
+                    </td>
+                    <td class="text-right">
+                      <span class="badge-roi" [ngClass]="getStatusClass(property.roi)">
+                        {{ formatPercent(property.roi) }}
+                      </span>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="text-center empty-state">
+                      <div class="empty-icon"><i class="pi pi-inbox"></i></div>
+                      <p>No hay datos disponibles</p>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Paginación -->
+          @if (totalPages() > 1) {
+            <div class="pagination">
+              <button
+                class="pagination-btn"
+                (click)="previousPage()"
+                [disabled]="currentPage() === 1"
+              >
+                ← Anterior
+              </button>
+
+              @for (page of getPageNumbers(); track $index) {
+                @if (page === -1) {
+                  <span class="pagination-ellipsis">...</span>
+                } @else {
+                  <button
+                    class="pagination-btn"
+                    [class.active]="currentPage() === page"
+                    (click)="goToPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              }
+
+              <button
+                class="pagination-btn"
+                (click)="nextPage()"
+                [disabled]="currentPage() === totalPages()"
+              >
+                Siguiente →
+              </button>
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- EXPORTACIÓN -->
+      <div class="card export-card">
+        <div class="card-body">
+          <div class="export-actions">
+            <div class="export-info">
+              <span class="icon"><i class="pi pi-info-circle"></i></span>
+              <span>Exporta el reporte en diferentes formatos</span>
+            </div>
+
+            <div class="export-buttons">
+              @if (canExportCsv()) {
+                <button class="btn btn-secondary" (click)="exportCsv()">
+                  <i class="pi pi-file"></i>
+                  Exportar CSV
+                </button>
+              }
+
+              @if (canExportPdf()) {
+                <button
+                  class="btn btn-danger"
+                  (click)="exportPdf()"
+                  [disabled]="isExporting()"
+                >
+                  @if (isExporting()) {
+                    <span class="spinner"></span>
+                  } @else {
+                    <i class="pi pi-file-pdf"></i>
+                  }
+                  Exportar PDF
+                </button>
+              } @else {
+                <button class="btn btn-danger btn-disabled" disabled title="Actualiza tu plan">
+                  <i class="pi pi-lock"></i>
+                  Exportar PDF
+                </button>
+              }
+
+              @if (canExportExcel()) {
+                <button
+                  class="btn btn-success"
+                  (click)="exportExcel()"
+                  [disabled]="isExporting()"
+                >
+                  @if (isExporting()) {
+                    <span class="spinner"></span>
+                  } @else {
+                    <i class="pi pi-file-excel"></i>
+                  }
+                  Exportar Excel
+                </button>
+              } @else {
+                <button class="btn btn-success btn-disabled" disabled title="Actualiza tu plan">
+                  <i class="pi pi-lock"></i>
+                  Exportar Excel
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

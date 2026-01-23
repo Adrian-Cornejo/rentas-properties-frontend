@@ -107,23 +107,34 @@
 
           <div class="form-group">
             <label for="propertyType">Tipo de Propiedad *</label>
-            <select id="propertyType" formControlName="propertyType">
-              <option value="CASA">Casa</option>
-              <option value="DEPARTAMENTO">Departamento</option>
-              <option value="LOCAL_COMERCIAL">Local Comercial</option>
-            </select>
+            <p-select
+              inputId="propertyType"
+              formControlName="propertyType"
+              [options]="propertyTypes"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Seleccionar tipo"
+              styleClass="custom-select"
+              [filter]="true" filterBy="label,value"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group full-width">
             <label for="locationId">Ubicación</label>
-            <select id="locationId" formControlName="locationId">
-              <option value="">Sin ubicación</option>
-              <option *ngFor="let location of locations()" [value]="location.id">
-                {{ location.name }}
-              </option>
-            </select>
+            <p-select
+              inputId="locationId"
+              formControlName="locationId"
+              [options]="locationOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sin ubicación"
+              styleClass="custom-select"
+              [filter]="true" filterBy="label,value"
+              [style]="{'width': '100%'}">
+            </p-select>
           </div>
         </div>
 

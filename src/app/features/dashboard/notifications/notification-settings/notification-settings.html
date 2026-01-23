@@ -19,15 +19,15 @@
       </div>
     } @else {
 
-      <!-- Plan BASICO - Sin acceso -->
-      @if (isPlanBasico) {
+      <!-- Plan STARTER - Sin acceso -->
+      @if (isPlanStarter) {
         <div class="upgrade-banner">
           <div class="upgrade-icon">
             <i class="pi pi-lock"></i>
           </div>
           <div class="upgrade-content">
             <h3>Notificaciones Automáticas No Disponibles</h3>
-            <p>Esta función está disponible desde el plan INTERMEDIO. Actualiza tu suscripción para:</p>
+            <p>Esta función está disponible desde el plan BÁSICO. Actualiza tu suscripción para:</p>
             <ul>
               <li>Recordatorios automáticos de pago por SMS o WhatsApp</li>
               <li>Notificaciones consolidadas para administradores</li>
@@ -41,8 +41,8 @@
         </div>
       }
 
-      <!-- Plan INTERMEDIO o SUPERIOR -->
-      @if (!isPlanBasico) {
+      <!-- Plan BÁSICO, PROFESIONAL o EMPRESARIAL -->
+      @if (hasNotifications) {
         <form [formGroup]="settingsForm" class="settings-form">
 
           <!-- Toggle Principal -->
@@ -72,8 +72,8 @@
                 <h2 class="card-title">Canal de Notificación</h2>
               </div>
               <div class="card-body">
-                <!-- Plan INTERMEDIO - Solo un canal -->
-                @if (isPlanIntermedio) {
+                <!-- Plan BÁSICO - Solo un canal (SMS O WhatsApp) -->
+                @if (canUseSingleChannel) {
                   <div class="channel-options">
                     <label class="radio-card">
                       <input
@@ -107,10 +107,14 @@
                       </div>
                     </label>
                   </div>
+                  <p class="plan-note">
+                    <i class="pi pi-info-circle"></i>
+                    Tu plan BÁSICO permite usar SMS <strong>o</strong> WhatsApp. Actualiza a PROFESIONAL para usar ambos canales simultáneamente.
+                  </p>
                 }
 
-                <!-- Plan SUPERIOR - Ambos canales -->
-                @if (isPlanSuperior) {
+                <!-- Plan PROFESIONAL o EMPRESARIAL - Ambos canales (SMS Y WhatsApp) -->
+                @if (canUseBothChannels) {
                   <div class="channel-options">
                     <label class="checkbox-card">
                       <input
@@ -144,6 +148,10 @@
                       </div>
                     </label>
                   </div>
+                  <p class="plan-note success">
+                    <i class="pi pi-check-circle"></i>
+                    Tu plan {{ isPlanProfesional ? 'PROFESIONAL' : 'EMPRESARIAL' }} te permite usar SMS <strong>y</strong> WhatsApp simultáneamente.
+                  </p>
                 }
               </div>
             </div>
@@ -175,18 +183,25 @@
                   <div class="usage-stats">
                     <div class="usage-count">
                       <span class="count-number">{{ settings()!.sentThisMonth }}</span>
-                      <span class="count-label">de {{ settings()!.monthlyLimit }} notificaciones</span>
+                      <span class="count-label">de {{ settings()!.monthlyLimit === -1 ? 'ilimitadas' : settings()!.monthlyLimit }} notificaciones</span>
                     </div>
-                    <div class="progress-bar">
-                      <div
-                        class="progress-fill"
-                        [style.width.%]="progressPercentage"
-                        [style.background-color]="progressColor"
-                      ></div>
-                    </div>
-                    <p class="usage-remaining">
-                      Te quedan <strong>{{ settings()!.remainingCredits }}</strong> notificaciones este mes
-                    </p>
+                    @if (settings()!.monthlyLimit !== -1) {
+                      <div class="progress-bar">
+                        <div
+                          class="progress-fill"
+                          [style.width.%]="progressPercentage"
+                          [style.background-color]="progressColor"
+                        ></div>
+                      </div>
+                      <p class="usage-remaining">
+                        Te quedan <strong>{{ settings()!.remainingCredits }}</strong> notificaciones este mes
+                      </p>
+                    } @else {
+                      <p class="usage-remaining unlimited">
+                        <i class="pi pi-infinity"></i>
+                        Notificaciones ilimitadas en tu plan EMPRESARIAL
+                      </p>
+                    }
                   </div>
                 </div>
               </div>
@@ -214,15 +229,22 @@
                       <div class="form-row">
                         <div class="form-group">
                           <label class="form-label">Número de Teléfono</label>
-                          <input
-                            type="tel"
-                            formControlName="phoneNumber"
-                            placeholder="+52442XXXXXXX"
-                            class="form-control"
-                          />
+                          <div class="phone-input-wrapper">
+                            <span class="phone-prefix">+52</span>
+                            <input
+                              type="tel"
+                              formControlName="phoneNumber"
+                              placeholder="7711234567"
+                              maxlength="10"
+                              class="form-control phone-input"
+                            />
+                          </div>
                           @if (testForm.get('phoneNumber')?.invalid && testForm.get('phoneNumber')?.touched) {
-                            <span class="form-error">Ingresa un número válido con código de país</span>
+                            <span class="form-error">Ingresa un número válido de 10 dígitos</span>
                           }
+                          <small class="form-hint">
+                            Solo ingresa los 10 dígitos
+                          </small>
                         </div>
 
                         <div class="form-group">

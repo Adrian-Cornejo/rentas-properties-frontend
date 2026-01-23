@@ -224,7 +224,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           },
           title: {
             display: true,
-            text: 'Ingresos Mensuales 2024'
+            text: 'Ingresos Mensuales 2026'
           }
         },
         scales: {

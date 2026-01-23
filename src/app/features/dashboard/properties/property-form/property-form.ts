@@ -18,13 +18,15 @@ import { PropertyDetailResponse } from '../../../../core/models/properties/prope
 import { LocationResponse } from '../../../../core/models/location/location-response';
 import { CreatePropertyRequest } from '../../../../core/models/properties/property-request';
 import { UpdatePropertyRequest } from '../../../../core/models/properties/update-property-request';
+import { Select } from 'primeng/select';
 
 @Component({
   selector: 'app-property-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select
   ],
   templateUrl: './property-form.html',
   styleUrl: './property-form.css',
@@ -72,6 +74,20 @@ export class PropertyFormComponent implements OnInit {
     }
     return plan.imagesPerProperty || 0;
   });
+
+  propertyTypes = [
+    { label: 'Casa', value: 'CASA' },
+    { label: 'Departamento', value: 'DEPARTAMENTO' },
+    { label: 'Local Comercial', value: 'LOCAL_COMERCIAL' }
+  ];
+
+  locationOptions = computed(() => [
+    { label: 'Sin ubicación', value: '' },
+    ...this.locations().map(loc => ({
+      label: loc.name,
+      value: loc.id
+    }))
+  ]);
 
   canAddMoreImages = computed(() => {
     if (!this.planAllowsImages()) {

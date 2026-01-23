@@ -62,15 +62,17 @@
         <div class="form-row">
           <div class="form-group">
             <label for="paymentMethod">Método de Pago *</label>
-            <select id="paymentMethod" formControlName="paymentMethod">
-              <option value="">Selecciona un método</option>
-              <option value="EFECTIVO">Efectivo</option>
-              <option value="TRANSFERENCIA">Transferencia</option>
-              <option value="DEPOSITO">Depósito Bancario</option>
-              <option value="TARJETA">Tarjeta</option>
-              <option value="CHEQUE">Cheque</option>
-              <option value="OTRO">Otro</option>
-            </select>
+            <p-select
+              inputId="paymentMethod"
+              formControlName="paymentMethod"
+              [options]="paymentMethodOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona un método"
+              styleClass="custom-select"
+              [filter]="true" filterBy="label,value"
+              [style]="{'width': '100%'}">
+            </p-select>
             <span class="error-message" *ngIf="paymentForm.get('paymentMethod')?.invalid && paymentForm.get('paymentMethod')?.touched">
               El método de pago es requerido
             </span>
@@ -90,11 +92,16 @@
         <div class="form-row">
           <div class="form-group">
             <label for="paidAt">Fecha de Pago *</label>
-            <input
-              id="paidAt"
-              type="date"
+            <p-datepicker
+              inputId="paidAt"
               formControlName="paidAt"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona una fecha"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             <span class="error-message" *ngIf="paymentForm.get('paidAt')?.invalid && paymentForm.get('paidAt')?.touched">
               La fecha de pago es requerida
             </span>

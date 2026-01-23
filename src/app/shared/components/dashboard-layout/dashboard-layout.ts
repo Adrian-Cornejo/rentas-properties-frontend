@@ -7,12 +7,14 @@ import { TooltipModule } from 'primeng/tooltip';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { OrganizationService } from '../../../core/services/organization.service';
+import { PlanService } from '../../../core/services/plan.service';
 import { OrganizationDetailResponse } from '../../../core/models/organization/organization-detail-response';
 
 interface SubMenuItem {
   label: string;
   icon: string;
   route: string;
+  requiresFeature?: string;
 }
 
 interface MenuItem {
@@ -20,6 +22,7 @@ interface MenuItem {
   icon: string;
   route?: string;
   adminOnly?: boolean;
+  requiresFeature?: string;
   children?: SubMenuItem[];
   isExpanded?: boolean;
 }
@@ -42,6 +45,7 @@ export class DashboardLayoutComponent implements OnInit {
   private authService = inject(AuthService);
   private themeService = inject(ThemeService);
   private organizationService = inject(OrganizationService);
+  public planService = inject(PlanService); // ← NUEVO
   private router = inject(Router);
 
   // Signals
@@ -51,13 +55,19 @@ export class DashboardLayoutComponent implements OnInit {
   currentUser = this.authService.currentUser;
   currentOrganization = this.organizationService.currentOrganization;
   currentTheme = this.themeService.isDarkMode;
+  hasNotifications = computed(() => this.planService.hasFeature('NOTIFICATIONS'));
+  showMobileMenu = signal<boolean>(false);
 
   // Computed
   isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
+
+  hasAdvancedReports = computed(() => this.planService.hasFeature('ADVANCED_REPORTS'));
+
   platformName = computed(() => {
     const orgName = this.currentOrganization()?.name;
     return orgName ? `${orgName} by ArriendaFacil` : 'ArriendaFacil';
   });
+
   platformLogo = computed(() => {
     const org = this.currentOrganization();
 
@@ -113,6 +123,7 @@ export class DashboardLayoutComponent implements OnInit {
       label: 'Notificaciones',
       icon: 'pi pi-bell',
       adminOnly: true,
+      requiresFeature: 'NOTIFICATIONS',
       children: [
         {
           label: 'Configuración',
@@ -123,6 +134,38 @@ export class DashboardLayoutComponent implements OnInit {
           label: 'Estadísticas',
           icon: 'pi pi-chart-bar',
           route: '/dashboard/notifications/stats'
+        }
+      ]
+    },
+    {
+      label: 'Reportes',
+      icon: 'pi pi-chart-bar',
+      children: [
+        {
+          label: 'Financiero',
+          icon: 'pi pi-dollar',
+          route: '/dashboard/reports/financial'
+        },
+        {
+          label: 'Ocupación',
+          icon: 'pi pi-percentage',
+          route: '/dashboard/reports/occupancy'
+        },
+        {
+          label: 'Pagos',
+          icon: 'pi pi-wallet',
+          route: '/dashboard/reports/payment'
+        },
+        {
+          label: 'Mantenimiento',
+          icon: 'pi pi-wrench',
+          route: '/dashboard/reports/maintenance'
+        },
+        {
+          label: 'Ejecutivo',
+          icon: 'pi pi-briefcase',
+          route: '/dashboard/reports/executive',
+          requiresFeature: 'ADVANCED_REPORTS'
         }
       ]
     },
@@ -140,12 +183,51 @@ export class DashboardLayoutComponent implements OnInit {
     );
   });
 
+  primaryMenuItems = computed(() => {
+    const items = this.visibleMenuItems();
+    // Las 4 opciones más importantes
+    return items.filter(item =>
+      ['Dashboard', 'Propiedades', 'Inquilinos', 'Contratos'].includes(item.label)
+    );
+  });
+
+  secondaryMenuItems = computed(() => {
+    const items = this.visibleMenuItems();
+    // Las demás opciones
+    return items.filter(item =>
+      !['Dashboard', 'Propiedades', 'Inquilinos', 'Contratos'].includes(item.label)
+    );
+  });
+
   ngOnInit(): void {
     this.loadOrganizationData();
     this.initializeMenuState();
+    this.loadPlanData(); // ← NUEVO
   }
-  private initializeMenuState(): void {
 
+  // ← NUEVO: Cargar datos del plan
+  private loadPlanData(): void {
+    if (!this.planService.isLoaded()) {
+      this.planService.loadPlanFeatures().subscribe({
+        next: (plan) => {
+          console.log('[DashboardLayout] Plan loaded:', plan.planCode);
+        },
+        error: (err) => {
+          console.error('[DashboardLayout] Error loading plan:', err);
+        }
+      });
+    }
+  }
+
+  // ← NUEVO: Verificar si un subitem tiene acceso según feature
+  hasFeatureAccess(subItem: SubMenuItem): boolean {
+    if (!subItem.requiresFeature) {
+      return true; // No requiere feature especial
+    }
+    return this.planService.hasFeature(subItem.requiresFeature);
+  }
+
+  private initializeMenuState(): void {
     const currentUrl = this.router.url;
     const items = this.menuItems();
 
@@ -173,6 +255,14 @@ export class DashboardLayoutComponent implements OnInit {
       items[index].isExpanded = !items[index].isExpanded;
       this.menuItems.set([...items]);
     }
+  }
+
+  toggleMobileMenu(): void {
+    this.showMobileMenu.set(!this.showMobileMenu());
+  }
+
+  closeMobileMenu(): void {
+    this.showMobileMenu.set(false);
   }
 
   isSubmenuActive(item: MenuItem): boolean {
@@ -272,9 +362,6 @@ export class DashboardLayoutComponent implements OnInit {
     this.isSidebarOpen.set(!this.isSidebarOpen());
   }
 
-  toggleMobileMenu(): void {
-    this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
-  }
 
   toggleTheme(): void {
     this.themeService.toggleDarkMode();

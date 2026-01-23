@@ -78,14 +78,18 @@
         <div class="form-row">
           <div class="form-group full-width">
             <label for="propertyId">Propiedad *</label>
-            <select
-              id="propertyId"
-              formControlName="propertyId">
-              <option value="">Selecciona una propiedad</option>
-              <option *ngFor="let property of availableProperties()" [value]="property.id">
-                {{ property.propertyCode }} - {{ property.address }}
-              </option>
-            </select>
+            <p-select
+              inputId="propertyId"
+              formControlName="propertyId"
+              [options]="propertyOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona una propiedad"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [style]="{'width': '100%'}">
+            </p-select>
             <span class="error-message" *ngIf="contractForm.get('propertyId')?.invalid && contractForm.get('propertyId')?.touched">
               La propiedad es requerida
             </span>
@@ -95,35 +99,50 @@
         <div class="form-row">
           <div class="form-group">
             <label for="startDate">Fecha de Inicio *</label>
-            <input
-              id="startDate"
-              type="date"
+            <p-datepicker
+              inputId="startDate"
               formControlName="startDate"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona una fecha"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             <span class="error-message" *ngIf="contractForm.get('startDate')?.invalid && contractForm.get('startDate')?.touched">
-              La fecha de inicio es requerida
+                La fecha de inicio es requerida
             </span>
           </div>
 
           <div class="form-group">
             <label for="endDate">Fecha de Fin *</label>
-            <input
-              id="endDate"
-              type="date"
+            <p-datepicker
+              inputId="endDate"
               formControlName="endDate"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona una fecha"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             <span class="error-message" *ngIf="contractForm.get('endDate')?.invalid && contractForm.get('endDate')?.touched">
-              La fecha de fin es requerida
+               La fecha de fin es requerida
             </span>
           </div>
 
           <div class="form-group">
             <label for="signedDate">Fecha de Firma</label>
-            <input
-              id="signedDate"
-              type="date"
+            <p-datepicker
+              inputId="signedDate"
               formControlName="signedDate"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona una fecha"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
           </div>
         </div>
 
@@ -220,14 +239,17 @@
         <div class="form-row" *ngIf="!isEditing()">
           <div class="form-group full-width">
             <label for="addTenant">Agregar Inquilino</label>
-            <select
-              id="addTenant"
-              (change)="addTenant($event)">
-              <option value="">Selecciona un inquilino</option>
-              <option *ngFor="let tenant of availableTenants()" [value]="tenant.id">
-                {{ tenant.fullName }} - {{ tenant.phone }}
-              </option>
-            </select>
+            <p-select
+              inputId="addTenant"
+              [options]="tenantOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona un inquilino"
+              styleClass="custom-select"
+              [filter]="true" filterBy="value,label"
+              [style]="{'width': '100%'}"
+              (onChange)="addTenantFromSelect($event.value)">
+            </p-select>
           </div>
         </div>
 
@@ -299,13 +321,18 @@
         <div class="form-row" *ngIf="!contractForm.get('depositPaid')?.value">
           <div class="form-group full-width">
             <label for="depositPaymentDeadline">Fecha Límite para Pago de Depósito *</label>
-            <input
-              id="depositPaymentDeadline"
-              type="date"
+            <p-datepicker
+              inputId="depositPaymentDeadline"
               formControlName="depositPaymentDeadline"
-            />
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona una fecha"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
             <span class="error-message" *ngIf="contractForm.get('depositPaymentDeadline')?.invalid && contractForm.get('depositPaymentDeadline')?.touched">
-              La fecha límite es requerida si el depósito no está pagado
+                La fecha límite es requerida si el depósito no está pagado
             </span>
           </div>
         </div>

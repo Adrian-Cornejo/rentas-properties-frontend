@@ -1,0 +1,672 @@
+/* src/app/features/dashboard/reports/reports.component.css */
+
+.reports-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0;
+  max-width: 100%;
+  overflow: visible;
+}
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+
+.page-header {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title-section h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.plan-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.plan-badge {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-secondary-500));
+  color: white;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.history-limit {
+  padding: 0.5rem 1rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   ALERT
+   ======================================== */
+
+.alert {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid;
+  background: var(--bg-surface);
+}
+
+.alert-warning {
+  border-color: var(--color-warning-500);
+  background: var(--color-warning-500);
+}
+
+.alert-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-content strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+}
+
+.alert-content p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* ========================================
+   PLAN FEATURES BANNER
+   ======================================== */
+
+.plan-features-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-hover);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.feature-item.feature-enabled {
+  border-color: var(--color-success-500);
+  background: var(--color-success-500);
+}
+
+.feature-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background: var(--color-gray-300);
+  color: white;
+  flex-shrink: 0;
+}
+
+.feature-icon.enabled {
+  background: var(--color-success-500);
+}
+
+.feature-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ========================================
+   TABS NAVIGATION
+   ======================================== */
+
+.reports-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: visible;
+}
+
+.tabs-nav {
+  display: flex;
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tabs-nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs-nav::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+.tabs-nav::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+}
+
+.tab-item:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.tab-item.active {
+  color: var(--color-primary-600);
+  background: var(--bg-surface);
+  border-bottom-color: var(--color-primary-500);
+}
+
+.tab-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.tab-label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.tab-description {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tab-item.active .tab-description {
+  color: var(--text-secondary);
+}
+
+.badge-premium {
+  padding: 0.25rem 0.625rem;
+  background: linear-gradient(135deg, var(--color-warning-500), var(--color-secondary-500));
+  color: white;
+  border-radius: 1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tab-item.premium-tab {
+  background: linear-gradient(to right, transparent, var(--color-warning-500));
+}
+
+/* ========================================
+   TAB CONTENT AREA
+   ======================================== */
+
+.tab-content-area {
+  padding: 0;
+  min-height: 400px;
+  overflow: visible;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .reports-container {
+    gap: 1rem;
+  }
+
+  .page-header {
+    padding: 1rem;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .title-section h1 {
+    font-size: 1.5rem;
+  }
+
+  .plan-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .plan-features-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs-nav {
+    flex-direction: column;
+  }
+
+  .tab-item {
+    border-bottom: none;
+    border-left: 3px solid transparent;
+  }
+
+  .tab-item.active {
+    border-bottom: none;
+    border-left-color: var(--color-primary-500);
+  }
+
+  .tab-description {
+    display: none;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reports-container > * {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.reports-container > *:nth-child(1) { animation-delay: 0s; }
+.reports-container > *:nth-child(2) { animation-delay: 0.05s; }
+.reports-container > *:nth-child(3) { animation-delay: 0.1s; }
+
+
+/* ============================================
+   PRIMENG SELECT CUSTOMIZATION
+   ============================================ */
+::ng-deep .p-select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-select:hover {
+  border-color: var(--color-primary-300) !important;
+}
+
+::ng-deep .p-select.p-focus,
+::ng-deep .p-select:focus-within {
+  border-color: var(--color-primary-300) !important;
+  box-shadow: 0 0 0 3px oklch(from var(--color-primary-300) l c h / 0.1);
+}
+
+::ng-deep .p-select .p-select-label {
+  padding: 0 1rem;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  line-height: 44px;
+}
+
+::ng-deep .p-select .p-select-trigger {
+  padding-right: 1rem;
+  color: var(--text-secondary);
+}
+
+::ng-deep .p-select .p-select-dropdown-icon {
+  margin-right: 0.25rem;
+}
+
+/* Panel de opciones */
+::ng-deep .p-select-overlay {
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  margin-top: 4px;
+}
+
+::ng-deep .p-select-overlay .p-select-option {
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  transition: background-color 0.15s ease;
+}
+
+::ng-deep .p-select-overlay .p-select-option:hover {
+  background-color: var(--bg-hover);
+}
+
+::ng-deep .p-select-overlay .p-select-option.p-select-option-selected {
+  background-color: oklch(from var(--color-primary-300) l c h / 0.1);
+  color: var(--color-primary-300);
+}
+
+::ng-deep .p-select-overlay .p-select-option:focus {
+  outline: none;
+  background-color: var(--bg-hover);
+}
+
+/* Estado disabled */
+::ng-deep .p-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-hover);
+}
+
+/* Placeholder */
+::ng-deep .p-select .p-select-label.p-placeholder {
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  ::ng-deep .p-select .p-select-label {
+    font-size: 0.875rem;
+  }
+
+  ::ng-deep .p-select-overlay .p-select-option {
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+/* ============================================
+   PRIMENG DATEPICKER CUSTOMIZATION
+   ============================================ */
+::ng-deep .p-datepicker {
+  width: 100%;
+}
+
+::ng-deep .p-datepicker .p-datepicker-input-icon-container {
+  position: relative;
+}
+
+::ng-deep .p-datepicker input {
+  width: 100%;
+  height: 44px;
+  padding: 0 2.75rem 0 1rem;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-datepicker input::placeholder {
+  color: var(--text-muted);
+}
+
+::ng-deep .p-datepicker input:hover {
+  border-color: var(--color-primary-300);
+}
+
+::ng-deep .p-datepicker input:focus {
+  outline: none;
+  border-color: var(--color-primary-300);
+  box-shadow: 0 0 0 3px oklch(from var(--color-primary-300) l c h / 0.1);
+}
+
+::ng-deep .p-datepicker .p-datepicker-dropdown-button,
+::ng-deep .p-datepicker .p-datepicker-input-icon {
+  position: absolute;
+  right: 0.75rem;
+
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: auto;
+  height: auto;
+}
+
+::ng-deep .p-datepicker .p-datepicker-input-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Panel del calendario */
+::ng-deep .p-datepicker-panel {
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  padding: 0.75rem;
+}
+
+::ng-deep .p-datepicker-header {
+  padding: 0.5rem;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+}
+
+::ng-deep .p-datepicker-title {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+::ng-deep .p-datepicker-prev-button,
+::ng-deep .p-datepicker-next-button {
+  color: var(--text-secondary);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-datepicker-prev-button:hover,
+::ng-deep .p-datepicker-next-button:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+::ng-deep .p-datepicker-calendar {
+  margin: 0;
+}
+
+::ng-deep .p-datepicker-calendar thead tr th {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+::ng-deep .p-datepicker-calendar tbody tr td {
+  padding: 0.25rem;
+}
+
+::ng-deep .p-datepicker-calendar tbody tr td > span {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 6px;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-datepicker-calendar tbody tr td > span:hover {
+  background-color: var(--bg-hover);
+}
+
+::ng-deep .p-datepicker-calendar tbody tr td > span.p-datepicker-today {
+  background-color: oklch(from var(--color-primary-300) l c h / 0.1);
+  color: var(--color-primary-500);
+  font-weight: 600;
+}
+
+::ng-deep .p-datepicker-calendar tbody tr td > span.p-datepicker-day-selected {
+  background-color: var(--color-primary-500);
+  color: white;
+  font-weight: 600;
+}
+
+::ng-deep .p-datepicker-calendar tbody tr td > span.p-datepicker-other-month {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+/* Estado disabled */
+::ng-deep .p-datepicker input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-hover);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  ::ng-deep .p-datepicker input {
+    font-size: 0.875rem;
+  }
+
+  ::ng-deep .p-datepicker-calendar tbody tr td > span {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+/* ============================================
+   PRIMENG SELECT FILTER
+   ============================================ */
+::ng-deep .p-select-overlay .p-select-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-base);
+}
+
+::ng-deep .p-select-overlay .p-select-filter-container {
+  position: relative;
+  width: 100%;
+}
+
+::ng-deep .p-select-overlay .p-select-filter {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-select-overlay .p-select-filter::placeholder {
+  color: var(--text-muted);
+}
+
+::ng-deep .p-select-overlay .p-select-filter:focus {
+  outline: none;
+  border-color: var(--color-primary-300);
+  box-shadow: 0 0 0 2px oklch(from var(--color-primary-300) l c h / 0.1);
+}
+
+::ng-deep .p-select-overlay .p-select-filter-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-top: 0;
+}
+
+::ng-deep .p-select-overlay .p-select-list {
+  padding: 0.5rem 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+/* Scrollbar para la lista */
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::ng-deep .p-select-overlay .p-select-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+::ng-deep .p-select-overlay .p-select-empty-message {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}

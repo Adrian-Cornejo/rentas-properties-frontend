@@ -13,13 +13,17 @@ import { PropertyResponse } from '../../../../core/models/properties/property-re
 import { TenantResponse } from '../../../../core/models/tenents/tenant-response';
 import { CreateContractRequest, TenantAssignment } from '../../../../core/models/contract/contract-request';
 import { UpdateContractRequest } from '../../../../core/models/contract/update-contract';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-contract-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Select,
+    DatePicker
   ],
   templateUrl: './contract-form.html',
   styleUrl: './contract-form.css',
@@ -87,6 +91,26 @@ export class ContractFormComponent implements OnInit {
     const hasOnePrimary = this.assignedTenants().filter(t => t.isPrimary).length === 1;
     return formValid && hasOneTenant && hasOnePrimary && !this.isSaving();
   });
+
+  propertyOptions = computed(() =>
+    this.availableProperties().map(property => ({
+      label: `${property.propertyCode} - ${property.address}`,
+      value: property.id
+    }))
+  );
+
+  tenantOptions = computed(() =>
+    this.availableTenants().map(tenant => ({
+      label: `${tenant.fullName} - ${tenant.phone}`,
+      value: tenant.id
+    }))
+  );
+
+  addTenantFromSelect(tenantId: string | null): void {
+    if (tenantId) {
+      this.addTenant({ target: { value: tenantId } } as any);
+    }
+  }
 
   ngOnInit(): void {
     this.initForm();
@@ -156,9 +180,10 @@ export class ContractFormComponent implements OnInit {
     this.isLoadingTenants.set(true);
     this.tenantService.getAllTenants(false).subscribe({
       next: (data) => {
-        // Filter only active tenants
-        const active = data.filter(t => t.isActive);
-        this.availableTenants.set(active);
+        const available = data.filter(t =>
+          t.isActive && t.activeContractsCount === 0
+        );
+        this.availableTenants.set(available);
         this.isLoadingTenants.set(false);
       },
       error: (error) => {
@@ -167,7 +192,6 @@ export class ContractFormComponent implements OnInit {
       }
     });
   }
-
   private checkEditMode(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -484,9 +508,9 @@ export class ContractFormComponent implements OnInit {
     const request: CreateContractRequest = {
       propertyId: formValue.propertyId,
       tenants: this.assignedTenants(),
-      startDate: formValue.startDate,
-      endDate: formValue.endDate,
-      signedDate: formValue.signedDate || undefined,
+      startDate: this.formatDateToBackend(formValue.startDate),
+      endDate: this.formatDateToBackend(formValue.endDate),
+      signedDate: this.formatDateToBackend(formValue.signedDate) || undefined,
       monthlyRent: formValue.monthlyRent,
       waterFee: formValue.waterFee,
       advancePayment: formValue.advancePayment || 0,
@@ -550,5 +574,13 @@ export class ContractFormComponent implements OnInit {
 
   getPlanName(): string {
     return this.planService.getPlanName();
+  }
+  private formatDateToBackend(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}T00:00:00`; // Agregar la hora
   }
 }

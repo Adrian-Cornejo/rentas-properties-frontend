@@ -1,0 +1,496 @@
+<!-- src/app/features/dashboard/reports/payment-report/payment-report.component.html -->
+
+<div class="payment-report">
+
+  <!-- ========================================
+       SECCIÓN: FORMULARIO DE FILTROS
+       ======================================== -->
+  <div class="card filter-card">
+    <div class="card-header">
+      <div>
+        <h3>Filtros del Reporte</h3>
+        <p class="text-muted">Analiza pagos y morosidad de tus contratos</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="filterForm" (ngSubmit)="generateReport()">
+        <div class="filter-grid">
+
+          <!-- Fecha Inicio -->
+          <div class="form-group">
+            <label for="startDate" class="required">Fecha Inicio</label>
+            <p-datepicker
+              inputId="startDate"
+              formControlName="startDate"
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha inicio"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
+            @if (filterForm.get('startDate')?.invalid && filterForm.get('startDate')?.touched) {
+              <small class="error-message">Fecha de inicio requerida</small>
+            }
+          </div>
+
+          <!-- Fecha Fin -->
+          <div class="form-group">
+            <label for="endDate" class="required">Fecha Fin</label>
+            <p-datepicker
+              inputId="endDate"
+              formControlName="endDate"
+              dateFormat="dd/mm/yy"
+              placeholder="Selecciona fecha fin"
+              styleClass="custom-datepicker"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [style]="{'width': '100%'}">
+            </p-datepicker>
+            @if (filterForm.get('endDate')?.invalid && filterForm.get('endDate')?.touched) {
+              <small class="error-message">Fecha de fin requerida</small>
+            }
+          </div>
+
+          <!-- Estado del Pago -->
+          <div class="form-group">
+            <label for="paymentStatus">Estado del Pago</label>
+            <p-select
+              inputId="paymentStatus"
+              formControlName="paymentStatus"
+              [options]="paymentStatusOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todos los estados"
+              styleClass="custom-select"
+              [style]="{'width': '100%'}">
+            </p-select>
+          </div>
+
+          <!-- Propiedad -->
+          <div class="form-group">
+            <label for="property">Propiedad (opcional)</label>
+            <p-select
+              inputId="property"
+              formControlName="propertyId"
+              [options]="propertyOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todas las propiedades"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [style]="{'width': '100%'}">
+            </p-select>
+          </div>
+
+          <!-- Contrato -->
+          <div class="form-group">
+            <label for="contract">Contrato (opcional)</label>
+            <p-select
+              inputId="contract"
+              formControlName="contractId"
+              [options]="contractOptions()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Todos los contratos"
+              styleClass="custom-select"
+              [filter]="true"
+              filterBy="value,label"
+              [style]="{'width': '100%'}">
+            </p-select>
+          </div>
+
+        </div>
+
+        <!-- Acciones del formulario -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+            <i class="pi pi-times"></i>
+            Limpiar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="filterForm.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="spinner"></span>
+            } @else {
+              <i class="pi pi-wallet"></i>
+            }
+            Generar Reporte
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================
+       SECCIÓN: MENSAJE DE ERROR
+       ======================================== -->
+  @if (dateRangeError()) {
+    <div class="alert alert-error">
+      <span class="alert-icon"><i class="pi pi-exclamation-triangle"></i></span>
+      <div>
+        <strong>Error en rango de fechas</strong>
+        <p>{{ dateRangeError() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================
+       SECCIÓN: LOADING
+       ======================================== -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner-large"></div>
+      <p>Generando reporte de pagos y morosidad...</p>
+    </div>
+  }
+
+  <!-- ========================================
+       SECCIÓN: REPORTE GENERADO
+       ======================================== -->
+  @if (reportData() && !isLoading()) {
+    <div class="report-content">
+
+      <!-- RESUMEN DE PAGOS -->
+      <div class="card summary-card">
+        <div class="card-header">
+          <h3>Resumen de Pagos</h3>
+          <span class="date-range">
+            {{ formatDate(reportData()!.startDate) }} - {{ formatDate(reportData()!.endDate) }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="summary-grid">
+
+            <!-- Total Pagos -->
+            <div class="summary-item">
+              <div class="summary-icon total"><i class="pi pi-list"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Total Pagos</span>
+                <span class="summary-value">{{ reportData()!.summary.totalPayments }}</span>
+              </div>
+            </div>
+
+            <!-- Pagos Pendientes -->
+            <div class="summary-item">
+              <div class="summary-icon pending"><i class="pi pi-clock"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Pendientes</span>
+                <span class="summary-value pending">{{ reportData()!.summary.pendingPayments }}</span>
+                <span class="summary-amount">{{ formatCurrency(reportData()!.summary.pendingAmount) }}</span>
+              </div>
+            </div>
+
+            <!-- Pagos Pagados -->
+            <div class="summary-item">
+              <div class="summary-icon paid"><i class="pi pi-check-circle"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Pagados</span>
+                <span class="summary-value paid">{{ reportData()!.summary.paidPayments }}</span>
+                <span class="summary-amount">{{ formatCurrency(reportData()!.summary.totalCollected) }}</span>
+              </div>
+            </div>
+
+            <!-- Pagos Atrasados -->
+            <div class="summary-item">
+              <div class="summary-icon overdue"><i class="pi pi-exclamation-circle"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Atrasados</span>
+                <span class="summary-value overdue">{{ reportData()!.summary.overduePayments }}</span>
+                <span class="summary-amount">{{ formatCurrency(reportData()!.summary.overdueAmount) }}</span>
+              </div>
+            </div>
+
+            <!-- Tasa de Morosidad -->
+            <div class="summary-item">
+              <div class="summary-icon delinquency"><i class="pi pi-chart-bar"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Tasa de Morosidad</span>
+                <span class="summary-value" [ngClass]="getDelinquencyClass(reportData()!.summary.delinquencyRate)">
+                  {{ formatPercent(reportData()!.summary.delinquencyRate) }}
+                </span>
+                <span class="summary-amount">{{ reportData()!.summary.averageDaysOverdue.toFixed(0) }} días promedio</span>
+              </div>
+            </div>
+
+            <!-- Eficiencia de Cobro -->
+            <div class="summary-item">
+              <div class="summary-icon collection"><i class="pi pi-bullseye"></i></div>
+              <div class="summary-content">
+                <span class="summary-label">Eficiencia de Cobro</span>
+                <span class="summary-value" [ngClass]="getCollectionClass(reportData()!.summary.collectionEfficiency)">
+                  {{ formatPercent(reportData()!.summary.collectionEfficiency) }}
+                </span>
+                <span class="summary-amount">
+                  {{ formatCurrency(reportData()!.summary.totalCollected) }} /
+                  {{ formatCurrency(reportData()!.summary.totalExpected) }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP 5 MOROSOS -->
+      @if (reportData()!.topDelinquents.length > 0) {
+        <div class="card">
+          <div class="card-header">
+            <h3>Top 5 Contratos con Mayor Morosidad</h3>
+            <span class="badge-warning"><i class="pi pi-exclamation-triangle"></i> Requiere atención</span>
+          </div>
+
+          <div class="card-body">
+            <div class="delinquents-list">
+              @for (delinquent of reportData()!.topDelinquents; track delinquent.contractNumber) {
+                <div class="delinquent-item">
+                  <div class="delinquent-info">
+                    <div class="delinquent-header">
+                      <strong>{{ delinquent.contractNumber }}</strong>
+                      <span class="property-code">{{ delinquent.propertyCode }}</span>
+                    </div>
+                    <div class="delinquent-tenant">{{ delinquent.tenantName }}</div>
+                  </div>
+                  <div class="delinquent-stats">
+                    <div class="stat">
+                      <span class="stat-label">Pagos Atrasados</span>
+                      <span class="stat-value overdue">{{ delinquent.overdueCount }}</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-label">Monto Adeudado</span>
+                      <span class="stat-value overdue">{{ formatCurrency(delinquent.overdueAmount) }}</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-label">Días Promedio</span>
+                      <span class="stat-value">{{ delinquent.averageDaysOverdue.toFixed(0) }} días</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- MOROSIDAD MENSUAL -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Tendencia de Morosidad Mensual</h3>
+        </div>
+
+        <div class="card-body">
+          <div class="monthly-chart">
+            @for (month of reportData()!.monthlyDelinquency; track month.month + month.year) {
+              <div class="monthly-item">
+                <div class="month-label">{{ month.month }} {{ month.year }}</div>
+                <div class="delinquency-bar-container">
+                  <div
+                    class="delinquency-bar"
+                    [style.width.%]="month.delinquencyRate"
+                    [ngClass]="getDelinquencyClass(month.delinquencyRate)"
+                  ></div>
+                  <span class="delinquency-value">{{ formatPercent(month.delinquencyRate) }}</span>
+                </div>
+                <div class="monthly-stats">
+                  <span class="stat-item">{{ month.overdueCount }} atrasados</span>
+                  <span class="stat-item">{{ formatCurrency(month.overdueAmount) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA DE DETALLE DE PAGOS -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Detalle de Pagos</h3>
+          <span class="badge">{{ reportData()!.paymentDetails.length }} pagos</span>
+        </div>
+
+        <div class="card-body">
+
+          <!-- Controles de tabla -->
+          <div class="table-controls">
+            <div class="table-info">
+              Mostrando {{ (currentPage() - 1) * pageSize() + 1 }}
+              a {{ Math.min(currentPage() * pageSize(), reportData()!.paymentDetails.length) }}
+              de {{ reportData()!.paymentDetails.length }} registros
+            </div>
+
+            <div class="page-size-selector">
+              <label>Mostrar:</label>
+              <select (change)="changePageSize($event)" [value]="pageSize()">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tabla -->
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Contrato</th>
+                <th>Propiedad</th>
+                <th>Inquilino</th>
+                <th>Periodo</th>
+                <th>Vencimiento</th>
+                <th>Pagado</th>
+                <th class="text-right">Monto</th>
+                <th class="text-center">Estado</th>
+                <th class="text-center">Días Atraso</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (payment of paginatedPayments(); track payment.contractNumber + payment.periodMonth + payment.periodYear) {
+                  <tr>
+                    <td><strong>{{ payment.contractNumber }}</strong></td>
+                    <td>
+                      <div class="property-cell">
+                        <span class="property-code">{{ payment.propertyCode }}</span>
+                        <span class="property-address">{{ payment.propertyAddress }}</span>
+                      </div>
+                    </td>
+                    <td>{{ payment.tenantName }}</td>
+                    <td>{{ getMonthName(payment.periodMonth) }} {{ payment.periodYear }}</td>
+                    <td>{{ formatDate(payment.dueDate) }}</td>
+                    <td>{{ formatDate(payment.paymentDate) }}</td>
+                    <td class="text-right">{{ formatCurrency(payment.amount) }}</td>
+                    <td class="text-center">
+                      <span class="status-badge" [ngClass]="getStatusClass(payment.status)">
+                        {{ getStatusLabel(payment.status) }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      @if (payment.daysOverdue !== null && payment.daysOverdue > 0) {
+                        <span class="days-overdue">{{ payment.daysOverdue }} días</span>
+                      } @else {
+                        <span class="no-overdue">-</span>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="9" class="text-center empty-state">
+                      <div class="empty-icon"><i class="pi pi-inbox"></i></div>
+                      <p>No hay datos disponibles</p>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Paginación -->
+          @if (totalPages() > 1) {
+            <div class="pagination">
+              <button
+                class="pagination-btn"
+                (click)="previousPage()"
+                [disabled]="currentPage() === 1"
+              >
+                ← Anterior
+              </button>
+
+              @for (page of getPageNumbers(); track $index) {
+                @if (page === -1) {
+                  <span class="pagination-ellipsis">...</span>
+                } @else {
+                  <button
+                    class="pagination-btn"
+                    [class.active]="currentPage() === page"
+                    (click)="goToPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              }
+
+              <button
+                class="pagination-btn"
+                (click)="nextPage()"
+                [disabled]="currentPage() === totalPages()"
+              >
+                Siguiente →
+              </button>
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- EXPORTACIÓN -->
+      <div class="card export-card">
+        <div class="card-body">
+          <div class="export-actions">
+            <div class="export-info">
+              <span class="icon"><i class="pi pi-info-circle"></i></span>
+              <span>Exporta el reporte en diferentes formatos</span>
+            </div>
+
+            <div class="export-buttons">
+              @if (canExportCsv()) {
+                <button class="btn btn-secondary" (click)="exportCsv()">
+                  <i class="pi pi-file"></i>
+                  Exportar CSV
+                </button>
+              }
+
+              @if (canExportPdf()) {
+                <button
+                  class="btn btn-danger"
+                  (click)="exportPdf()"
+                  [disabled]="isExporting()"
+                >
+                  @if (isExporting()) {
+                    <span class="spinner"></span>
+                  } @else {
+                    <i class="pi pi-file-pdf"></i>
+                  }
+                  Exportar PDF
+                </button>
+              } @else {
+                <button class="btn btn-danger btn-disabled" disabled title="Actualiza tu plan">
+                  <i class="pi pi-lock"></i>
+                  Exportar PDF
+                </button>
+              }
+
+              @if (canExportExcel()) {
+                <button
+                  class="btn btn-success"
+                  (click)="exportExcel()"
+                  [disabled]="isExporting()"
+                >
+                  @if (isExporting()) {
+                    <span class="spinner"></span>
+                  } @else {
+                    <i class="pi pi-file-excel"></i>
+                  }
+                  Exportar Excel
+                </button>
+              } @else {
+                <button class="btn btn-success btn-disabled" disabled title="Actualiza tu plan">
+                  <i class="pi pi-lock"></i>
+                  Exportar Excel
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>
