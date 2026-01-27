@@ -1,7 +1,7 @@
 <div class="card contract-card">
   <!-- Header with Contract Number -->
   <div class="card-header">
-    <div class="contract-number">{{ contract.contractNumber }}</div>
+    <div class="contract-number">{{ contract.propertyCode }}</div>
     <div class="status-badges">
       <span class="badge" [ngClass]="getStatusClass()">
         {{ getStatusLabel() }}
@@ -17,7 +17,7 @@
   <!-- Property Info -->
   <div class="card-section">
     <div class="property-info">
-      <div class="property-code">{{ contract.propertyCode }}</div>
+      <div class="property-code">{{ contract.contractNumber }}</div>
       <div class="property-address">{{ contract.propertyAddress }}</div>
     </div>
   </div>
@@ -67,6 +67,11 @@
     <button class="btn-secondary btn-sm" (click)="onEdit()">
       Editar
     </button>
+    @if (contract.status === 'ACTIVO') {
+      <button class="btn-warning btn-sm" (click)="onCancel()">
+        Cancelar
+      </button>
+    }
     <button class="btn-danger btn-sm" (click)="onDelete()">
       Eliminar
     </button>

@@ -1,0 +1,209 @@
+<!-- src/app/features/dashboard/contracts/cancel-contract-dialog/cancel-contract-dialog.component.html -->
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div>
+        <h2>Cancelar Contrato</h2>
+        <p class="contract-info">
+          Contrato: <strong>{{ contract.contractNumber }}</strong>
+        </p>
+        <p class="property-info">
+          Propiedad: {{ contract.property.address }}
+        </p>
+      </div>
+      <button type="button" class="btn-close" (click)="onCancel()">
+        ✕
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="cancelForm" (ngSubmit)="onSubmit()">
+
+      <!-- Fecha de cancelación -->
+      <div class="form-field">
+        <label for="cancellationDate">
+          Fecha de cancelación <span class="required">*</span>
+        </label>
+        <input
+          type="date"
+          id="cancellationDate"
+          formControlName="cancellationDate"
+          [max]="getTodayString()"
+          class="input">
+        @if (cancelForm.get('cancellationDate')?.hasError('required') &&
+        cancelForm.get('cancellationDate')?.touched) {
+          <small class="error-message">La fecha es obligatoria</small>
+        }
+      </div>
+
+      <!-- Razón de cancelación -->
+      <div class="form-field">
+        <label for="cancellationReason">
+          Razón de cancelación <span class="required">*</span>
+        </label>
+        <textarea
+          id="cancellationReason"
+          formControlName="cancellationReason"
+          rows="4"
+          placeholder="Explique el motivo de la cancelación..."
+          maxlength="500"
+          class="textarea"></textarea>
+        <div class="field-footer">
+          <small class="char-count">
+            {{ cancelForm.get('cancellationReason')?.value?.length || 0 }}/500
+          </small>
+        </div>
+        @if (cancelForm.get('cancellationReason')?.hasError('required') &&
+        cancelForm.get('cancellationReason')?.touched) {
+          <small class="error-message">La razón es obligatoria</small>
+        }
+      </div>
+
+      <!-- Manejo de pagos pendientes -->
+      <div class="form-field">
+        <div class="checkbox-field">
+          <input
+            type="checkbox"
+            id="cancelPendingPayments"
+            formControlName="cancelPendingPayments"
+            class="checkbox">
+          <label for="cancelPendingPayments">
+            Cancelar pagos pendientes futuros
+          </label>
+        </div>
+        <small class="field-hint">
+          @if (cancelForm.get('cancelPendingPayments')?.value) {
+            Los pagos con fecha posterior a la cancelación serán marcados como CANCELADOS.
+              Los pagos anteriores pendientes se mantendrán como adeudo.
+          } @else {
+            Todos los pagos pendientes se mantendrán como adeudo a liquidar.
+          }
+        </small>
+      </div>
+
+      <!-- Manejo del depósito -->
+      <div class="form-section">
+        <h3>Manejo del Depósito</h3>
+        <p class="section-info">
+          Depósito actual: <strong>{{ formatCurrency(contract.depositAmount) }}</strong>
+        </p>
+
+        <div class="deposit-options">
+          <div class="radio-option">
+            <input
+              type="radio"
+              id="depositFull"
+              name="depositHandling"
+              value="full"
+              [checked]="depositHandling() === 'full'"
+              (change)="onDepositOptionChange('full')"
+              class="radio">
+            <label for="depositFull">Devolver depósito completo</label>
+          </div>
+
+          <div class="radio-option">
+            <input
+              type="radio"
+              id="depositPartial"
+              name="depositHandling"
+              value="partial"
+              [checked]="depositHandling() === 'partial'"
+              (change)="onDepositOptionChange('partial')"
+              class="radio">
+            <label for="depositPartial">Devolver depósito parcial</label>
+          </div>
+
+          <div class="radio-option">
+            <input
+              type="radio"
+              id="depositRetain"
+              name="depositHandling"
+              value="retain"
+              [checked]="depositHandling() === 'retain'"
+              (change)="onDepositOptionChange('retain')"
+              class="radio">
+            <label for="depositRetain">Retener depósito completo</label>
+          </div>
+        </div>
+
+        <!-- Monto parcial -->
+        @if (showPartialAmount()) {
+          <div class="form-field">
+            <label for="depositReturnAmount">
+              Monto a devolver <span class="required">*</span>
+            </label>
+            <input
+              type="number"
+              id="depositReturnAmount"
+              formControlName="depositReturnAmount"
+              [min]="0"
+              [max]="contract.depositAmount"
+              step="0.01"
+              placeholder="0.00"
+              class="input">
+            <small class="field-hint">
+              Máximo: {{ formatCurrency(contract.depositAmount) }}
+            </small>
+          </div>
+        }
+
+        <!-- Razón de deducción/retención -->
+        @if (showDeductionReason()) {
+          <div class="form-field">
+            <label for="depositDeductionReason">
+              Razón de {{ depositHandling() === 'retain' ? 'retención' : 'deducción' }}
+              <span class="required">*</span>
+            </label>
+            <textarea
+              id="depositDeductionReason"
+              formControlName="depositDeductionReason"
+              rows="3"
+              placeholder="Explique por qué se retiene/deduce el depósito..."
+              maxlength="500"
+              class="textarea"></textarea>
+            <div class="field-footer">
+              <small class="char-count">
+                {{ cancelForm.get('depositDeductionReason')?.value?.length || 0 }}/500
+              </small>
+            </div>
+            @if (cancelForm.get('depositDeductionReason')?.hasError('required') &&
+            cancelForm.get('depositDeductionReason')?.touched) {
+              <small class="error-message">La razón es obligatoria</small>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Warning Message -->
+      <div class="warning-message">
+        <svg class="warning-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div class="warning-content">
+          <strong>Atención:</strong> Esta acción marcará el contrato como CANCELADO
+          y liberará la propiedad. Esta operación no se puede deshacer.
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="onCancel()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn-danger"
+          [disabled]="cancelForm.invalid">
+          Confirmar Cancelación
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>

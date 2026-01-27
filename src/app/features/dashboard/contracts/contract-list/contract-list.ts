@@ -5,8 +5,10 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ContractService } from '../../../../core/services/contract.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ContractResponse } from '../../../../core/models/contract/contract-response';
-import {ContractCardComponent} from '../contract-card/contract-card';
-
+import { ContractDetailResponse } from '../../../../core/models/contract/contract-detail-response';
+import { CancelContractRequest } from '../../../../core/models/contract/cancel-contract-request';
+import { ContractCardComponent } from '../contract-card/contract-card';
+import {CancelContractDialogComponent} from '../cancel-contract-dialog/cancel-contract-dialog';
 
 @Component({
   selector: 'app-contract-list',
@@ -14,7 +16,8 @@ import {ContractCardComponent} from '../contract-card/contract-card';
   imports: [
     CommonModule,
     SkeletonModule,
-    ContractCardComponent
+    ContractCardComponent,
+    CancelContractDialogComponent  // ← AGREGAR AL IMPORTS
   ],
   templateUrl: './contract-list.html',
   styleUrl: '../contracts.css',
@@ -27,8 +30,10 @@ export class ContractListComponent implements OnInit {
   // Signals
   isLoading = signal<boolean>(false);
   showDeleteConfirm = signal<boolean>(false);
+  showCancelDialog = signal<boolean>(false);  // ← AGREGAR
   contracts = signal<ContractResponse[]>([]);
   contractToDelete = signal<string | null>(null);
+  contractToCancel = signal<ContractDetailResponse | null>(null);  // ← AGREGAR
   filterStatus = signal<string>('ALL');
   searchTerm = signal<string>('');
 
@@ -103,6 +108,52 @@ export class ContractListComponent implements OnInit {
 
   onEdit(id: string): void {
     this.router.navigate(['/dashboard/contracts/edit', id]);
+  }
+
+  onCancel(id: string): void {
+    this.isLoading.set(true);
+
+    // Cargar el detalle completo del contrato
+    this.contractService.getContractById(id).subscribe({
+      next: (contract) => {
+        this.contractToCancel.set(contract);
+        this.showCancelDialog.set(true);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.notification.error('Error al cargar el contrato');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onCancelDialogClose(): void {
+    this.showCancelDialog.set(false);
+    this.contractToCancel.set(null);
+  }
+
+  onConfirmCancellation(request: CancelContractRequest): void {
+    const contractId = this.contractToCancel()?.id;
+    if (!contractId) return;
+
+    this.isLoading.set(true);
+
+    this.contractService.cancelContract(contractId, request).subscribe({
+      next: (response) => {
+        this.notification.success(
+          `Contrato ${response.contractNumber} cancelado exitosamente`
+        );
+        this.showCancelDialog.set(false);
+        this.contractToCancel.set(null);
+        this.loadContracts(); // Recargar la lista
+      },
+      error: (error) => {
+        this.notification.error(
+          error.error?.message || 'Error al cancelar el contrato'
+        );
+        this.isLoading.set(false);
+      }
+    });
   }
 
   onDelete(id: string): void {

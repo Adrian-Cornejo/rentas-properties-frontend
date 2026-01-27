@@ -2,6 +2,7 @@ export interface PaymentResponse {
   id: string;
   contractId: string;
   contractNumber: string;
+  contractStatus: string;
   propertyCode: string;
   propertyAddress: string;
   paymentType: 'RENTA' | 'AGUA' | 'DEPOSITO' | 'ADELANTO';
@@ -12,7 +13,7 @@ export interface PaymentResponse {
   amount: number;
   lateFee: number;
   totalAmount: number;
-  status: 'PENDIENTE' | 'PAGADO' | 'ATRASADO' | 'PARCIAL';
+  status: 'PENDIENTE' | 'PAGADO' | 'ATRASADO' | 'PARCIAL' | 'CANCELADO';
   paymentMethod?: string;
   paidAt?: string;
   createdAt: string;
