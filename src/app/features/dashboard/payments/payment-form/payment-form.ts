@@ -78,8 +78,7 @@ export class PaymentFormComponent implements OnInit {
   initAddLateFeeForm(): void {
     this.paymentForm = this.fb.group({
       lateFeeAmount: ['', [Validators.required, Validators.min(0.01)]],
-      reason: ['', [Validators.maxLength(500)]],
-      automatic: [false]
+      reason: ['', [Validators.maxLength(500)]]
     });
   }
 
@@ -109,13 +108,12 @@ export class PaymentFormComponent implements OnInit {
     if (this.formType() === 'mark-paid') {
       this.submitMarkAsPaid(paymentId);
     } else {
-      //this.submitAddLateFee(paymentId);
+      this.submitAddLateFee(paymentId);
     }
   }
 
   submitMarkAsPaid(paymentId: string): void {
     const paidAtDate = this.paymentForm.value.paidAt;
-    const paidAtDateTime = paidAtDate ? `${paidAtDate}T00:00:00` : undefined;
 
     const request: MarkAsPaidRequest = {
       paymentMethod: this.paymentForm.value.paymentMethod,
@@ -135,11 +133,11 @@ export class PaymentFormComponent implements OnInit {
       }
     });
   }
+
   submitAddLateFee(paymentId: string): void {
     const request: AddLateFeeRequest = {
       lateFeeAmount: this.paymentForm.value.lateFeeAmount,
-      reason: this.paymentForm.value.reason || undefined,
-      automatic: this.paymentForm.value.automatic
+      reason: this.paymentForm.value.reason || undefined
     };
 
     this.paymentService.addLateFee(paymentId, request).subscribe({
@@ -191,6 +189,6 @@ export class PaymentFormComponent implements OnInit {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}T00:00:00`; // Agregar la hora
+    return `${year}-${month}-${day}T00:00:00`;
   }
 }

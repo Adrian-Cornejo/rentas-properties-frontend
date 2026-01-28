@@ -10,6 +10,7 @@ import { PaymentCardComponent } from '../payment-card/payment-card';
 interface ContractPaymentGroup {
   contractId: string;
   contractNumber: string;
+  contractStatus: string;
   propertyCode: string;
   propertyAddress: string;
   payments: PaymentResponse[];
@@ -17,7 +18,7 @@ interface ContractPaymentGroup {
   pendingAmount: number;
   paidAmount: number;
   overdueAmount: number;
-  cancelledAmount: number;  // ← AGREGAR para pagos cancelados
+  cancelledAmount: number;
 }
 
 @Component({
@@ -40,7 +41,9 @@ export class PaymentListComponent implements OnInit {
   payments = signal<PaymentResponse[]>([]);
   filterStatus = signal<string>('ALL');
   searchTerm = signal<string>('');
-  expandedContracts = signal<Set<string>>(new Set());  // ← CAMBIAR de expandedProperties
+  expandedContracts = signal<Set<string>>(new Set());
+
+  showCancelledContracts = signal<boolean>(false);
 
   groupedPayments = computed(() => {
     let pmts = this.payments();
@@ -48,6 +51,10 @@ export class PaymentListComponent implements OnInit {
     // Apply status filter
     if (this.filterStatus() !== 'ALL') {
       pmts = pmts.filter(p => p.status === this.filterStatus());
+    }
+
+    if (!this.showCancelledContracts()) {
+      pmts = pmts.filter(p => p.contractStatus !== 'CANCELADO');
     }
 
     // Apply search filter
@@ -60,7 +67,7 @@ export class PaymentListComponent implements OnInit {
       );
     }
 
-    // Group by contract (not just property)
+    // Group by contract
     const groups = new Map<string, ContractPaymentGroup>();
 
     pmts.forEach(payment => {
@@ -70,6 +77,7 @@ export class PaymentListComponent implements OnInit {
         groups.set(key, {
           contractId: payment.contractId,
           contractNumber: payment.contractNumber,
+          contractStatus: payment.contractStatus, // ← AGREGAR
           propertyCode: payment.propertyCode,
           propertyAddress: payment.propertyAddress,
           payments: [],
@@ -96,6 +104,7 @@ export class PaymentListComponent implements OnInit {
       }
     });
 
+    // Sort payments within each group by date (most recent first)
     groups.forEach(group => {
       group.payments.sort((a, b) => {
         const dateA = new Date(a.dueDate);
@@ -104,9 +113,17 @@ export class PaymentListComponent implements OnInit {
       });
     });
 
+    // ← NUEVO: Ordenar grupos - Contratos activos primero, luego por propiedad y contrato
     return Array.from(groups.values()).sort((a, b) => {
+      // Primero: Contratos activos al inicio
+      if (a.contractStatus === 'ACTIVO' && b.contractStatus !== 'ACTIVO') return -1;
+      if (a.contractStatus !== 'ACTIVO' && b.contractStatus === 'ACTIVO') return 1;
+
+      // Segundo: Por código de propiedad
       const propCompare = a.propertyCode.localeCompare(b.propertyCode);
       if (propCompare !== 0) return propCompare;
+
+      // Tercero: Por número de contrato (más reciente primero)
       return b.contractNumber.localeCompare(a.contractNumber);
     });
   });
@@ -166,7 +183,11 @@ export class PaymentListComponent implements OnInit {
   collapseAll(): void {
     this.expandedContracts.set(new Set());
   }
-  // Agregar estos métodos al componente
+
+  // ← NUEVO: Toggle para mostrar/ocultar contratos cancelados
+  toggleCancelledContracts(): void {
+    this.showCancelledContracts.update(v => !v);
+  }
 
   getContractStatusLabel(status: string): string {
     switch (status) {

@@ -122,7 +122,7 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class=" btn btn-secondary" (click)="onCancel()" [disabled]="isSaving()">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="isSaving()">
           Cancelar
         </button>
         <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
@@ -146,20 +146,13 @@
               type="number"
               formControlName="lateFeeAmount"
               placeholder="0.00"
-              min="0"
+              min="0.01"
               step="0.01"
             />
             <span class="error-message" *ngIf="paymentForm.get('lateFeeAmount')?.invalid && paymentForm.get('lateFeeAmount')?.touched">
               El monto del recargo es requerido y debe ser mayor a 0
             </span>
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="automatic" />
-              <span>Cálculo Automático</span>
-            </label>
-            <p class="help-text">Marca esta opción si el recargo fue calculado automáticamente por el sistema</p>
+            <p class="help-text">Ingresa el monto del recargo por mora que deseas aplicar a este pago</p>
           </div>
         </div>
 
@@ -170,8 +163,12 @@
               id="reason"
               formControlName="reason"
               rows="4"
-              placeholder="Describe el motivo del recargo..."
+              placeholder="Describe el motivo del recargo (ej: 15 días de atraso, política de 5% mensual)..."
+              maxlength="500"
             ></textarea>
+            <small class="char-count">
+              {{ paymentForm.get('reason')?.value?.length || 0 }}/500
+            </small>
           </div>
         </div>
       </div>

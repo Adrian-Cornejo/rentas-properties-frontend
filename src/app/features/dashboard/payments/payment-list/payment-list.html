@@ -7,6 +7,15 @@
       <p class="page-subtitle">Gestiona los pagos de renta y servicios agrupados por contrato</p>
     </div>
     <div class="header-right">
+      <!-- ← AGREGAR: Toggle para contratos cancelados -->
+      <label class="toggle-switch">
+        <input
+          type="checkbox"
+          [checked]="showCancelledContracts()"
+          (change)="toggleCancelledContracts()">
+        <span class="toggle-label">Mostrar contratos cancelados</span>
+      </label>
+
       <button class="btn-secondary btn-sm" (click)="expandAll()" *ngIf="groupedPayments().length > 0">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="6 9 12 15 18 9"></polyline>
@@ -75,6 +84,21 @@
         <div class="stat-label">Atrasados</div>
       </div>
     </div>
+
+    <!-- ← AGREGAR: Stat card para cancelados -->
+    <div class="stat-card">
+      <div class="stat-icon cancelled">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" x2="9" y1="9" y2="15"/>
+          <line x1="9" x2="15" y1="9" y2="15"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ cancelledCount() }}</div>
+        <div class="stat-label">Cancelados</div>
+      </div>
+    </div>
   </div>
 
   <!-- Filters and Search -->
@@ -104,7 +128,6 @@
         (click)="setFilter('ATRASADO')">
         Atrasados ({{ overdueCount() }})
       </button>
-      <!-- ← AGREGAR: Filtro para cancelados -->
       <button
         class="filter-tab"
         [class.active]="filterStatus() === 'CANCELADO'"
@@ -144,10 +167,10 @@
                 </div>
                 <div class="contract-details">
                   <div class="contract-number-row">
-                    <h3 class="contract-number">{{ group.propertyCode}}</h3>
+                    <h3 class="contract-number">{{ group.propertyCode }}</h3>
                     <span class="property-badge">{{ group.contractNumber }}</span>
-                    <span class="contract-status-badge" [ngClass]="getContractStatusClass(group.payments[0].contractStatus)">
-                          {{ getContractStatusLabel(group.payments[0].contractStatus) }}
+                    <span class="contract-status-badge" [ngClass]="getContractStatusClass(group.contractStatus)">
+                      {{ getContractStatusLabel(group.contractStatus) }}
                     </span>
                   </div>
                   <p class="property-address">{{ group.propertyAddress }}</p>
