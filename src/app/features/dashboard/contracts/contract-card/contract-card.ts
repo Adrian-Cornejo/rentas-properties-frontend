@@ -1,4 +1,6 @@
-import { Component, Input, Output, EventEmitter, computed, signal } from '@angular/core';
+// src/app/features/dashboard/contracts/components/contract-card/contract-card.component.ts
+
+import { Component, Input, Output, EventEmitter, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContractResponse } from '../../../../core/models/contract/contract-response';
 
@@ -12,6 +14,7 @@ import { ContractResponse } from '../../../../core/models/contract/contract-resp
 export class ContractCardComponent {
   @Input({ required: true }) contract!: ContractResponse;
   @Output() edit = new EventEmitter<string>();
+  @Output() cancel = new EventEmitter<string>();  // ← AGREGAR ESTE
   @Output() delete = new EventEmitter<string>();
 
   daysUntilExpiration = computed(() => {
@@ -34,6 +37,10 @@ export class ContractCardComponent {
 
   onEdit(): void {
     this.edit.emit(this.contract.id);
+  }
+
+  onCancel(): void {
+    this.cancel.emit(this.contract.id);
   }
 
   onDelete(): void {

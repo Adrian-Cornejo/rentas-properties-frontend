@@ -115,6 +115,7 @@
         <app-contract-card
           [contract]="contract"
           (edit)="onEdit($event)"
+          (cancel)="onCancel($event)"
           (delete)="onDelete($event)"
         />
       }
@@ -158,5 +159,13 @@
         </div>
       </div>
     </div>
+  }
+
+  @if (showCancelDialog() && contractToCancel()) {
+    <app-cancel-contract-dialog
+      [contract]="contractToCancel()!"
+      (cancel)="onCancelDialogClose()"
+      (confirm)="onConfirmCancellation($event)">
+    </app-cancel-contract-dialog>
   }
 </div>

@@ -40,7 +40,7 @@
 /* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -641,5 +641,397 @@
 
   .expand-button {
     align-self: flex-end;
+  }
+}
+/* ============================================
+   CONTRACT GROUPS (reemplaza property-groups)
+   ============================================ */
+.contract-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contract-group {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.contract-group:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.contract-header {
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.contract-header:hover {
+  background-color: var(--bg-hover);
+}
+
+.contract-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.contract-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.contract-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--bg-hover);
+  border-radius: 8px;
+  color: var(--color-primary-500);
+}
+
+.contract-details {
+  flex: 1;
+}
+
+.contract-number-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.contract-number {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.property-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-600);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.dark .property-badge {
+  background-color: oklch(0.25 0.05 240);
+  color: var(--color-primary-300);
+}
+
+.contract-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-left: 4rem;
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.summary-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.summary-value.warning {
+  color: var(--color-warning-500);
+}
+
+.summary-value.error {
+  color: var(--color-error-500);
+}
+
+.summary-value.success {
+  color: var(--color-success-500);
+}
+
+.summary-value.cancelled {
+  color: var(--color-gray-500);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* ============================================
+   STAT ICON CANCELLED
+   ============================================ */
+.stat-icon.cancelled {
+  background-color: oklch(0.94 0.01 0);
+  color: var(--color-gray-600);
+}
+
+.dark .stat-icon.cancelled {
+  background-color: oklch(0.22 0.01 0);
+  color: var(--color-gray-400);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+  .contract-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .contract-number-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .contract-summary {
+    padding-left: 0;
+    gap: 1rem;
+  }
+
+  .summary-stat {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 120px;
+  }
+}
+/* En payments.css, agregar: */
+
+.contract-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.contract-status-badge.status-active {
+  background-color: oklch(0.95 0.05 145);
+  color: var(--color-success-500);
+}
+
+.dark .contract-status-badge.status-active {
+  background-color: oklch(0.25 0.05 145);
+  color: oklch(0.75 0.15 145);
+}
+
+.contract-status-badge.status-expired {
+  background-color: oklch(0.96 0.03 75);
+  color: var(--color-warning-500);
+}
+
+.dark .contract-status-badge.status-expired {
+  background-color: oklch(0.25 0.03 75);
+  color: oklch(0.75 0.15 75);
+}
+
+.contract-status-badge.status-renewed {
+  background-color: oklch(0.96 0.02 240);
+  color: var(--color-info-500);
+}
+
+.dark .contract-status-badge.status-renewed {
+  background-color: oklch(0.25 0.02 240);
+  color: oklch(0.75 0.15 240);
+}
+
+.contract-status-badge.status-cancelled {
+  background-color: oklch(0.94 0.01 0);
+  color: var(--color-gray-600);
+}
+
+.dark .contract-status-badge.status-cancelled {
+  background-color: oklch(0.22 0.01 0);
+  color: var(--color-gray-400);
+}
+/* ============================================
+   TOGGLE SWITCH
+   ============================================ */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.toggle-switch:hover {
+  background-color: var(--bg-hover);
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  appearance: none;
+  background-color: var(--color-gray-300);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.toggle-switch input[type="checkbox"]:checked {
+  background-color: var(--color-primary-500);
+}
+
+.toggle-switch input[type="checkbox"]::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input[type="checkbox"]:checked::before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.dark .toggle-switch input[type="checkbox"] {
+  background-color: var(--color-gray-700);
+}
+
+/* ============================================
+   CONTRACT STATUS BADGES
+   ============================================ */
+.contract-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.contract-status-badge.status-active {
+  background-color: oklch(0.95 0.05 145);
+  color: var(--color-success-600);
+}
+
+.dark .contract-status-badge.status-active {
+  background-color: oklch(0.25 0.05 145);
+  color: oklch(0.75 0.15 145);
+}
+
+.contract-status-badge.status-expired {
+  background-color: oklch(0.96 0.03 75);
+  color: var(--color-warning-600);
+}
+
+.dark .contract-status-badge.status-expired {
+  background-color: oklch(0.25 0.03 75);
+  color: oklch(0.75 0.15 75);
+}
+
+.contract-status-badge.status-renewed {
+  background-color: oklch(0.96 0.02 240);
+  color: var(--color-primary-600);
+}
+
+.dark .contract-status-badge.status-renewed {
+  background-color: oklch(0.25 0.02 240);
+  color: oklch(0.75 0.15 240);
+}
+
+.contract-status-badge.status-cancelled {
+  background-color: oklch(0.94 0.01 0);
+  color: var(--color-gray-600);
+}
+
+.dark .contract-status-badge.status-cancelled {
+  background-color: oklch(0.22 0.01 0);
+  color: var(--color-gray-400);
+}
+
+/* ============================================
+   STAT ICON CANCELLED
+   ============================================ */
+.stat-icon.cancelled {
+  background-color: oklch(0.94 0.01 0);
+  color: var(--color-gray-600);
+}
+
+.dark .stat-icon.cancelled {
+  background-color: oklch(0.22 0.01 0);
+  color: var(--color-gray-400);
+}
+
+/* ============================================
+   SUMMARY VALUE CANCELLED
+   ============================================ */
+.summary-value.cancelled {
+  color: var(--color-gray-500);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* ============================================
+   HEADER RIGHT LAYOUT
+   ============================================ */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+  .header-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toggle-switch {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .contract-number-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 }

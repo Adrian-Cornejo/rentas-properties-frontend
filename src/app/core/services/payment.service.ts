@@ -55,12 +55,6 @@ export class PaymentService {
     );
   }
 
-  calculateAutomaticLateFees(): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/calculate-late-fees`, {}).pipe(
-      catchError(this.handleError)
-    );
-  }
-
   getPaymentsByContract(contractId: string): Observable<PaymentResponse[]> {
     return this.http.get<PaymentResponse[]>(`${this.apiUrl}/contract/${contractId}`).pipe(
       catchError(this.handleError)

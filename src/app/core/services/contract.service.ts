@@ -9,6 +9,7 @@ import {ContractResponse} from '../models/contract/contract-response';
 import {UpdateContractRequest} from '../models/contract/update-contract';
 import {UpdateDepositStatusRequest} from '../models/contract/update-deposit-status-request';
 import {ContractSummaryResponse} from '../models/contract/contract-sumary-response';
+import {CancelContractRequest} from '../models/contract/cancel-contract-request';
 
 @Injectable({
   providedIn: 'root'
@@ -110,8 +111,8 @@ export class ContractService {
     );
   }
 
-  cancelContract(id: string): Observable<ContractDetailResponse> {
-    return this.http.post<ContractDetailResponse>(`${this.apiUrl}/${id}/cancel`, {}).pipe(
+  cancelContract(id: string, request: CancelContractRequest): Observable<ContractDetailResponse> {
+    return this.http.post<ContractDetailResponse>(`${this.apiUrl}/${id}/cancel`, request).pipe(
       catchError(this.handleError)
     );
   }

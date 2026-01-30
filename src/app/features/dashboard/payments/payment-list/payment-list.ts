@@ -7,7 +7,10 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { PaymentResponse } from '../../../../core/models/payment/payment-response';
 import { PaymentCardComponent } from '../payment-card/payment-card';
 
-interface PropertyPaymentGroup {
+interface ContractPaymentGroup {
+  contractId: string;
+  contractNumber: string;
+  contractStatus: string;
   propertyCode: string;
   propertyAddress: string;
   payments: PaymentResponse[];
@@ -15,6 +18,7 @@ interface PropertyPaymentGroup {
   pendingAmount: number;
   paidAmount: number;
   overdueAmount: number;
+  cancelledAmount: number;
 }
 
 @Component({
@@ -37,7 +41,9 @@ export class PaymentListComponent implements OnInit {
   payments = signal<PaymentResponse[]>([]);
   filterStatus = signal<string>('ALL');
   searchTerm = signal<string>('');
-  expandedProperties = signal<Set<string>>(new Set());
+  expandedContracts = signal<Set<string>>(new Set());
+
+  showCancelledContracts = signal<boolean>(false);
 
   groupedPayments = computed(() => {
     let pmts = this.payments();
@@ -45,6 +51,10 @@ export class PaymentListComponent implements OnInit {
     // Apply status filter
     if (this.filterStatus() !== 'ALL') {
       pmts = pmts.filter(p => p.status === this.filterStatus());
+    }
+
+    if (!this.showCancelledContracts()) {
+      pmts = pmts.filter(p => p.contractStatus !== 'CANCELADO');
     }
 
     // Apply search filter
@@ -57,21 +67,25 @@ export class PaymentListComponent implements OnInit {
       );
     }
 
-    // Group by property
-    const groups = new Map<string, PropertyPaymentGroup>();
+    // Group by contract
+    const groups = new Map<string, ContractPaymentGroup>();
 
     pmts.forEach(payment => {
-      const key = payment.propertyCode;
+      const key = payment.contractId;
 
       if (!groups.has(key)) {
         groups.set(key, {
+          contractId: payment.contractId,
+          contractNumber: payment.contractNumber,
+          contractStatus: payment.contractStatus, // ← AGREGAR
           propertyCode: payment.propertyCode,
           propertyAddress: payment.propertyAddress,
           payments: [],
           totalAmount: 0,
           pendingAmount: 0,
           paidAmount: 0,
-          overdueAmount: 0
+          overdueAmount: 0,
+          cancelledAmount: 0
         });
       }
 
@@ -85,6 +99,8 @@ export class PaymentListComponent implements OnInit {
         group.paidAmount += payment.totalAmount;
       } else if (payment.status === 'ATRASADO') {
         group.overdueAmount += payment.totalAmount;
+      } else if (payment.status === 'CANCELADO') {
+        group.cancelledAmount += payment.totalAmount;
       }
     });
 
@@ -97,15 +113,26 @@ export class PaymentListComponent implements OnInit {
       });
     });
 
-    return Array.from(groups.values()).sort((a, b) =>
-      a.propertyCode.localeCompare(b.propertyCode)
-    );
+    // ← NUEVO: Ordenar grupos - Contratos activos primero, luego por propiedad y contrato
+    return Array.from(groups.values()).sort((a, b) => {
+      // Primero: Contratos activos al inicio
+      if (a.contractStatus === 'ACTIVO' && b.contractStatus !== 'ACTIVO') return -1;
+      if (a.contractStatus !== 'ACTIVO' && b.contractStatus === 'ACTIVO') return 1;
+
+      // Segundo: Por código de propiedad
+      const propCompare = a.propertyCode.localeCompare(b.propertyCode);
+      if (propCompare !== 0) return propCompare;
+
+      // Tercero: Por número de contrato (más reciente primero)
+      return b.contractNumber.localeCompare(a.contractNumber);
+    });
   });
 
   totalPayments = computed(() => this.payments().length);
   pendingCount = computed(() => this.payments().filter(p => p.status === 'PENDIENTE').length);
   paidCount = computed(() => this.payments().filter(p => p.status === 'PAGADO').length);
   overdueCount = computed(() => this.payments().filter(p => p.status === 'ATRASADO').length);
+  cancelledCount = computed(() => this.payments().filter(p => p.status === 'CANCELADO').length);
 
   ngOnInit(): void {
     this.loadPayments();
@@ -134,27 +161,62 @@ export class PaymentListComponent implements OnInit {
     this.searchTerm.set(target.value);
   }
 
-  toggleProperty(propertyCode: string): void {
-    const expanded = new Set(this.expandedProperties());
-    if (expanded.has(propertyCode)) {
-      expanded.delete(propertyCode);
+  toggleContract(contractId: string): void {
+    const expanded = new Set(this.expandedContracts());
+    if (expanded.has(contractId)) {
+      expanded.delete(contractId);
     } else {
-      expanded.add(propertyCode);
+      expanded.add(contractId);
     }
-    this.expandedProperties.set(expanded);
+    this.expandedContracts.set(expanded);
   }
 
-  isPropertyExpanded(propertyCode: string): boolean {
-    return this.expandedProperties().has(propertyCode);
+  isContractExpanded(contractId: string): boolean {
+    return this.expandedContracts().has(contractId);
   }
 
   expandAll(): void {
-    const allProperties = new Set(this.groupedPayments().map(g => g.propertyCode));
-    this.expandedProperties.set(allProperties);
+    const allContracts = new Set(this.groupedPayments().map(g => g.contractId));
+    this.expandedContracts.set(allContracts);
   }
 
   collapseAll(): void {
-    this.expandedProperties.set(new Set());
+    this.expandedContracts.set(new Set());
+  }
+
+  // ← NUEVO: Toggle para mostrar/ocultar contratos cancelados
+  toggleCancelledContracts(): void {
+    this.showCancelledContracts.update(v => !v);
+  }
+
+  getContractStatusLabel(status: string): string {
+    switch (status) {
+      case 'ACTIVO':
+        return 'Activo';
+      case 'VENCIDO':
+        return 'Vencido';
+      case 'RENOVADO':
+        return 'Renovado';
+      case 'CANCELADO':
+        return 'Cancelado';
+      default:
+        return status;
+    }
+  }
+
+  getContractStatusClass(status: string): string {
+    switch (status) {
+      case 'ACTIVO':
+        return 'status-active';
+      case 'VENCIDO':
+        return 'status-expired';
+      case 'RENOVADO':
+        return 'status-renewed';
+      case 'CANCELADO':
+        return 'status-cancelled';
+      default:
+        return '';
+    }
   }
 
   formatCurrency(amount: number): string {
