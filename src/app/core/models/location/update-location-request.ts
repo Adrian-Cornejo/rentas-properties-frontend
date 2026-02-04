@@ -1,13 +1,11 @@
 export interface UpdateLocationRequest {
   name?: string;
-  address?: string;
-  city?: string;
   state?: string;
+  municipality?: string;
+  neighborhood?: string;
   postalCode?: string;
-  country?: string;
+  neighborhoodType?: string;
+  zoneType?: string;
+  streetAddress?: string;
   description?: string;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
 }

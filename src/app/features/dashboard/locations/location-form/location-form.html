@@ -16,67 +16,164 @@
       </div>
     } @else {
       <form [formGroup]="locationForm" (ngSubmit)="onSubmit()">
-        <!-- Basic Information -->
+        <!-- Preview del Nombre Generado -->
         <div class="form-section-group">
-          <h3 class="section-title">Información Básica</h3>
+          <h3 class="section-title">Nombre de la Ubicación</h3>
 
+          <div class="generated-name-preview">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span class="generated-name-text">{{ generatedLocationName() }}</span>
+          </div>
+          <small class="help-text">El nombre se genera automáticamente a partir de: Colonia, Municipio, Estado</small>
+        </div>
+
+        <!-- Location Information (SEPOMEX) -->
+        <div class="form-section-group">
+          <h3 class="section-title">Ubicación</h3>
+
+          <!-- Estado -->
           <div class="form-row">
             <div class="form-group full-width">
-              <label for="name">Nombre de la Ubicación *</label>
-              <input
-                id="name"
-                type="text"
-                formControlName="name"
-                placeholder="Ej: Colonia El Calvario">
-              @if (locationForm.get('name')?.invalid && locationForm.get('name')?.touched) {
-                <span class="error-message">El nombre es requerido</span>
+              <label for="state">Estado *</label>
+              <p-select
+                inputId="state"
+                formControlName="stateCode"
+                [options]="states()"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Selecciona un estado"
+                styleClass="custom-select"
+                [filter]="true"
+                filterBy="name"
+                [loading]="isLoadingStates()"
+                (onChange)="onStateChange($event)"
+                [style]="{'width': '100%'}">
+              </p-select>
+              @if (locationForm.get('state')?.invalid && locationForm.get('state')?.touched) {
+                <span class="error-message">El estado es requerido</span>
               }
             </div>
           </div>
 
+          <!-- Municipio -->
           <div class="form-row">
             <div class="form-group full-width">
-              <label for="address">Dirección</label>
-              <input
-                id="address"
-                type="text"
-                formControlName="address"
-                placeholder="Dirección general del área">
+              <label for="municipality">Municipio / Alcaldía *</label>
+              <p-select
+                inputId="municipality"
+                formControlName="municipalityCode"
+                [options]="municipalities()"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Selecciona un municipio"
+                styleClass="custom-select"
+                [filter]="true"
+                filterBy="name"
+                [loading]="isLoadingMunicipalities()"
+                [disabled]="!locationForm.get('stateCode')?.value"
+                (onChange)="onMunicipalityChange($event)"
+                [style]="{'width': '100%'}">
+              </p-select>
+              @if (locationForm.get('municipality')?.invalid && locationForm.get('municipality')?.touched) {
+                <span class="error-message">El municipio es requerido</span>
+              }
             </div>
           </div>
 
+          <!-- Colonia -->
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="neighborhood">Colonia *</label>
+              <p-select
+                inputId="neighborhood"
+                formControlName="neighborhoodCode"
+                [options]="neighborhoods()"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Selecciona una colonia"
+                styleClass="custom-select"
+                [filter]="true"
+                filterBy="name"
+                [loading]="isLoadingNeighborhoods()"
+                [disabled]="!locationForm.get('municipalityCode')?.value"
+                (onChange)="onNeighborhoodChange($event)"
+                [style]="{'width': '100%'}">
+                <ng-template let-neighborhood pTemplate="item">
+                  <div class="neighborhood-option">
+                    <div class="neighborhood-name">{{ neighborhood.name }}</div>
+                    <div class="neighborhood-meta">
+                      <span class="badge-small">{{ neighborhood.neighborhoodType }}</span>
+                      <span class="postal-code-small">C.P. {{ neighborhood.postalCode }}</span>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-select>
+              @if (locationForm.get('neighborhood')?.invalid && locationForm.get('neighborhood')?.touched) {
+                <span class="error-message">La colonia es requerida</span>
+              }
+            </div>
+          </div>
+
+          <!-- Código Postal y Tipo -->
           <div class="form-row">
             <div class="form-group">
-              <label for="city">Ciudad</label>
-              <input
-                id="city"
-                type="text"
-                formControlName="city"
-                placeholder="Ej: Querétaro">
-            </div>
-
-            <div class="form-group">
-              <label for="state">Estado</label>
-              <input
-                id="state"
-                type="text"
-                formControlName="state"
-                placeholder="Ej: Querétaro">
-            </div>
-
-            <div class="form-group">
-              <label for="postalCode">Código Postal</label>
+              <label for="postalCode">Código Postal *</label>
               <input
                 id="postalCode"
                 type="text"
                 formControlName="postalCode"
-                placeholder="00000"
-                maxlength="5">
+                placeholder="Se autocompleta"
+                class="form-input"
+                readonly>
               @if (locationForm.get('postalCode')?.invalid && locationForm.get('postalCode')?.touched) {
-                <span class="error-message">Código postal inválido (5 dígitos)</span>
+                <span class="error-message">Código postal requerido</span>
               }
             </div>
+
+            <div class="form-group">
+              <label for="neighborhoodType">Tipo de Asentamiento</label>
+              <input
+                id="neighborhoodType"
+                type="text"
+                formControlName="neighborhoodType"
+                placeholder="Se autocompleta"
+                class="form-input"
+                readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="zoneType">Tipo de Zona</label>
+              <input
+                id="zoneType"
+                type="text"
+                formControlName="zoneType"
+                placeholder="Se autocompleta"
+                class="form-input"
+                readonly>
+            </div>
           </div>
+
+          <!-- Dirección Específica -->
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="streetAddress">Dirección Específica (Calle y Número)</label>
+              <input
+                id="streetAddress"
+                type="text"
+                formControlName="streetAddress"
+                placeholder="Ej: Av. Insurgentes Sur 123, Int. 4B"
+                class="form-input">
+              <small class="help-text">Opcional: calle, número exterior e interior</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-section-group">
+          <h3 class="section-title">Información Adicional</h3>
 
           <div class="form-row">
             <div class="form-group full-width">
@@ -85,7 +182,8 @@
                 id="description"
                 formControlName="description"
                 rows="4"
-                placeholder="Información adicional sobre la ubicación..."></textarea>
+                placeholder="Información adicional sobre la ubicación..."
+                class="form-textarea"></textarea>
             </div>
           </div>
         </div>
@@ -99,7 +197,14 @@
             type="submit"
             class="btn btn-primary"
             [disabled]="locationForm.invalid || isSaving()">
-            {{ isSaving() ? 'Guardando...' : (isEditMode() ? 'Actualizar' : 'Crear') }}
+            @if (isSaving()) {
+              <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+              Guardando...
+            } @else {
+              {{ isEditMode() ? 'Actualizar' : 'Crear' }}
+            }
           </button>
         </div>
       </form>

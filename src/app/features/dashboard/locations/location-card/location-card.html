@@ -10,25 +10,41 @@
   </div>
 
   <div class="location-body">
-    @if (location().address) {
+    <!-- Dirección específica (calle y número) -->
+    @if (location().streetAddress) {
       <div class="location-info">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
         </svg>
-        <span>{{ location().address }}</span>
+        <span>{{ location().streetAddress }}</span>
       </div>
     }
 
     <div class="location-details">
-      @if (location().city) {
+      <!-- Colonia -->
+      @if (location().neighborhood) {
         <div class="detail-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/>
           </svg>
-          <span>{{ location().city }}</span>
+          <span>{{ location().neighborhood }}</span>
+          @if (location().neighborhoodType) {
+            <span class="detail-badge">{{ location().neighborhoodType }}</span>
+          }
         </div>
       }
 
+      <!-- Municipio -->
+      @if (location().municipality) {
+        <div class="detail-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/>
+          </svg>
+          <span>{{ location().municipality }}</span>
+        </div>
+      }
+
+      <!-- Estado -->
       @if (location().state) {
         <div class="detail-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -39,13 +55,26 @@
         </div>
       }
 
+      <!-- Código Postal -->
       @if (location().postalCode) {
         <div class="detail-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21.5 12H16l-2.5 3.5L11 12H2"/>
             <path d="M5.5 5.5 11 12M18.5 5.5 13 12"/>
           </svg>
-          <span>{{ location().postalCode }}</span>
+          <span>C.P. {{ location().postalCode }}</span>
+        </div>
+      }
+
+      <!-- Tipo de Zona -->
+      @if (location().zoneType) {
+        <div class="detail-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>{{ location().zoneType }}</span>
         </div>
       }
     </div>

@@ -89,6 +89,7 @@
               type="text"
               formControlName="propertyCode"
               placeholder="Ej: CALV-CASA-01"
+              class="form-input"
               [disabled]="isEditing()">
             @if (propertyForm.get('propertyCode')?.invalid && propertyForm.get('propertyCode')?.touched) {
               <small class="error-message">
@@ -123,33 +124,139 @@
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label for="locationId">Ubicación</label>
+            <label for="locationId">Ubicación *</label>
             <p-select
               inputId="locationId"
               formControlName="locationId"
               [options]="locationOptions()"
               optionLabel="label"
               optionValue="value"
-              placeholder="Sin ubicación"
+              placeholder="Seleccionar ubicación"
               styleClass="custom-select"
               [filter]="true" filterBy="label,value"
               [style]="{'width': '100%'}">
             </p-select>
+            <small class="help-text">Los datos de dirección se autocompletarán desde la ubicación seleccionada</small>
+            @if (propertyForm.get('locationId')?.invalid && propertyForm.get('locationId')?.touched) {
+              <span class="error-message">La ubicación es requerida</span>
+            }
+          </div>
+        </div>
+
+        <!-- CAMPOS SEPOMEX (OBLIGATORIOS) -->
+        <div class="form-section-divider">
+          <h4>Datos de Ubicación SEPOMEX</h4>
+          @if (sepomexFieldsDisabled()) {
+            <small class="help-text" style="color: var(--text-muted); font-style: italic;">
+              Campos autocompletados desde la ubicación seleccionada (no editables)
+            </small>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="state">Estado *</label>
+            <input
+              id="state"
+              type="text"
+              formControlName="state"
+              placeholder="Ej: Hidalgo"
+              class="form-input"
+              [class.disabled]="sepomexFieldsDisabled()">
+            @if (propertyForm.get('state')?.invalid && propertyForm.get('state')?.touched) {
+              <span class="error-message">El estado es requerido</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="municipality">Municipio / Alcaldía *</label>
+            <input
+              id="municipality"
+              type="text"
+              formControlName="municipality"
+              placeholder="Ej: Mixquiahuala de Juárez"
+              class="form-input"
+              [class.disabled]="sepomexFieldsDisabled()">
+            @if (propertyForm.get('municipality')?.invalid && propertyForm.get('municipality')?.touched) {
+              <span class="error-message">El municipio es requerido</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="neighborhood">Colonia *</label>
+            <input
+              id="neighborhood"
+              type="text"
+              formControlName="neighborhood"
+              placeholder="Ej: Centro"
+              class="form-input"
+              [class.disabled]="sepomexFieldsDisabled()">
+            @if (propertyForm.get('neighborhood')?.invalid && propertyForm.get('neighborhood')?.touched) {
+              <span class="error-message">La colonia es requerida</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="postalCode">Código Postal *</label>
+            <input
+              id="postalCode"
+              type="text"
+              formControlName="postalCode"
+              placeholder="00000"
+              maxlength="5"
+              class="form-input"
+              [class.disabled]="sepomexFieldsDisabled()">
+            @if (propertyForm.get('postalCode')?.invalid && propertyForm.get('postalCode')?.touched) {
+              <span class="error-message">C.P. de 5 dígitos requerido</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="neighborhoodType">Tipo de Asentamiento</label>
+            <input
+              id="neighborhoodType"
+              type="text"
+              formControlName="neighborhoodType"
+              placeholder="Ej: Colonia, Fraccionamiento"
+              class="form-input"
+              [class.disabled]="sepomexFieldsDisabled()">
+          </div>
+
+          <div class="form-group">
+            <label for="zoneType">Tipo de Zona</label>
+            <input
+              id="zoneType"
+              type="text"
+              formControlName="zoneType"
+              placeholder="Urbano / Rural"
+              class="form-input"
+              [class.disabled]="sepomexFieldsDisabled()">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group full-width">
-            <label for="address">Dirección *</label>
+            <label for="streetAddress">Dirección Específica (Calle y Número) *</label>
             <input
-              id="address"
+              id="streetAddress"
               type="text"
-              formControlName="address"
-              placeholder="Dirección completa">
-            <span class="error-message" *ngIf="propertyForm.get('address')?.invalid && propertyForm.get('address')?.touched">
-              La dirección es requerida
-            </span>
+              formControlName="streetAddress"
+              placeholder="Ej: Ignacio Zaragoza Norte #4, Int. 2B"
+              class="form-input">
+            <small class="help-text">Calle, número exterior e interior (si aplica). Este campo SÍ es editable</small>
+            @if (propertyForm.get('streetAddress')?.invalid && propertyForm.get('streetAddress')?.touched) {
+              <span class="error-message">La dirección es requerida</span>
+            }
           </div>
+        </div>
+
+        <!-- CARACTERÍSTICAS ECONÓMICAS -->
+        <div class="form-section-divider">
+          <h4>Información Económica</h4>
         </div>
 
         <div class="form-row">
@@ -162,7 +269,8 @@
                 type="number"
                 formControlName="monthlyRent"
                 placeholder="0.00"
-                step="0.01">
+                class="form-input"
+                step="100">
             </div>
           </div>
 
@@ -175,6 +283,7 @@
                 type="number"
                 formControlName="waterFee"
                 placeholder="105.00"
+                class="form-input"
                 step="0.01">
             </div>
           </div>
@@ -506,8 +615,6 @@
             <div class="photos-header">
               <div class="photos-header-info">
                 <h3 class="section-title">Fotografías de la Propiedad</h3>
-                <p class="photos-limit-info">
-                </p>
                 <p class="photos-count">
                   {{ propertyImages().length }} / {{ maxImagesAllowed() === -1 ? '∞' : maxImagesAllowed() }} imágenes usadas
                 </p>

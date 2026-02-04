@@ -1,7 +1,16 @@
 export interface UpdatePropertyRequest {
   locationId?: string;
   propertyType?: 'CASA' | 'DEPARTAMENTO' | 'LOCAL_COMERCIAL';
-  address?: string;
+
+  // CAMPOS SEPOMEX (opcionales en update)
+  state?: string;
+  municipality?: string;
+  neighborhood?: string;
+  postalCode?: string;
+  neighborhoodType?: string;
+  zoneType?: string;
+  streetAddress?: string;
+
   monthlyRent?: number;
   waterFee?: number;
   status?: 'DISPONIBLE' | 'RENTADA' | 'MANTENIMIENTO';

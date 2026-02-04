@@ -131,3 +131,11 @@
 .dark .location-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
+.detail-badge {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
+}

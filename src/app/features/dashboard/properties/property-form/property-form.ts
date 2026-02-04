@@ -49,6 +49,7 @@ export class PropertyFormComponent implements OnInit {
   selectedProperty = signal<PropertyDetailResponse | null>(null);
   activeTab = signal<string>('basic');
   propertyImages = signal<string[]>([]);
+  sepomexFieldsDisabled = signal<boolean>(false);
 
   // Forms
   propertyForm!: FormGroup;
@@ -61,7 +62,7 @@ export class PropertyFormComponent implements OnInit {
     return notes.length;
   });
 
-  // Plan features - Usar PlanService
+  // Plan features
   planAllowsImages = computed(() => {
     const plan = this.planService.currentPlan();
     return plan?.allowsImages === true;
@@ -81,13 +82,12 @@ export class PropertyFormComponent implements OnInit {
     { label: 'Local Comercial', value: 'LOCAL_COMERCIAL' }
   ];
 
-  locationOptions = computed(() => [
-    { label: 'Sin ubicación', value: '' },
-    ...this.locations().map(loc => ({
+  locationOptions = computed(() =>
+    this.locations().map(loc => ({
       label: loc.name,
       value: loc.id
     }))
-  ]);
+  );
 
   canAddMoreImages = computed(() => {
     if (!this.planAllowsImages()) {
@@ -125,10 +125,19 @@ export class PropertyFormComponent implements OnInit {
 
   private initForm(): void {
     this.propertyForm = this.fb.group({
-      locationId: [''],
+      locationId: ['', Validators.required], // AHORA ES OBLIGATORIO
       propertyCode: ['', [Validators.required, Validators.maxLength(50), this.propertyCodeValidator()]],
       propertyType: ['CASA', Validators.required],
-      address: ['', [Validators.required, Validators.maxLength(500)]],
+
+      // CAMPOS SEPOMEX (obligatorios)
+      state: ['', Validators.required],
+      municipality: ['', Validators.required],
+      neighborhood: ['', Validators.required],
+      postalCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+      neighborhoodType: [''],
+      zoneType: [''],
+      streetAddress: ['', [Validators.required, Validators.maxLength(500)]],
+
       monthlyRent: [0, [Validators.required, Validators.min(0)]],
       waterFee: [0, [Validators.min(0)]],
       floors: [1, [Validators.min(1)]],
@@ -147,6 +156,59 @@ export class PropertyFormComponent implements OnInit {
       includesInternet: [false],
       notes: ['', Validators.maxLength(1000)]
     });
+
+    this.setupLocationListener();
+  }
+
+  private setupLocationListener(): void {
+    this.propertyForm.get('locationId')?.valueChanges.subscribe(locationId => {
+      if (locationId) {
+        const selectedLocation = this.locations().find(loc => loc.id === locationId);
+
+        if (selectedLocation) {
+          console.log('Location selected:', selectedLocation);
+
+          // Autocompletar campos SEPOMEX desde Location
+          this.propertyForm.patchValue({
+            state: selectedLocation.state,
+            municipality: selectedLocation.municipality,
+            neighborhood: selectedLocation.neighborhood,
+            postalCode: selectedLocation.postalCode,
+            neighborhoodType: selectedLocation.neighborhoodType || '',
+            zoneType: selectedLocation.zoneType || '',
+            streetAddress: selectedLocation.streetAddress || ''
+          }, { emitEvent: false });
+
+          // DESHABILITAR campos SEPOMEX autocompletados
+          this.disableSepomexFields();
+          this.sepomexFieldsDisabled.set(true);
+
+          this.notification.success('Datos de ubicación autocompletados');
+        }
+      } else {
+        // Si se deselecciona la ubicación, habilitar campos
+        this.enableSepomexFields();
+        this.sepomexFieldsDisabled.set(false);
+      }
+    });
+  }
+
+  private disableSepomexFields(): void {
+    this.propertyForm.get('state')?.disable();
+    this.propertyForm.get('municipality')?.disable();
+    this.propertyForm.get('neighborhood')?.disable();
+    this.propertyForm.get('postalCode')?.disable();
+    this.propertyForm.get('neighborhoodType')?.disable();
+    this.propertyForm.get('zoneType')?.disable();
+  }
+
+  private enableSepomexFields(): void {
+    this.propertyForm.get('state')?.enable();
+    this.propertyForm.get('municipality')?.enable();
+    this.propertyForm.get('neighborhood')?.enable();
+    this.propertyForm.get('postalCode')?.enable();
+    this.propertyForm.get('neighborhoodType')?.enable();
+    this.propertyForm.get('zoneType')?.enable();
   }
 
   private loadLocations(): void {
@@ -163,7 +225,7 @@ export class PropertyFormComponent implements OnInit {
   private propertyCodeValidator() {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) {
-        return null; // No validar si está vacío (lo maneja required)
+        return null;
       }
 
       const regex = /^[A-Z0-9-]+$/;
@@ -178,16 +240,24 @@ export class PropertyFormComponent implements OnInit {
       next: (data) => {
         this.selectedProperty.set(data);
 
-        // Cargar imágenes existentes si las hay (solo si el plan lo permite)
         if (this.planAllowsImages() && data.imageUrls && data.imageUrls.length > 0) {
           this.propertyImages.set([...data.imageUrls]);
         }
 
         this.propertyForm.patchValue({
-          locationId: data.location.id || '',
+          locationId: data.location?.id || '',
           propertyCode: data.propertyCode,
           propertyType: data.propertyType,
-          address: data.address,
+
+          // SEPOMEX fields
+          state: data.state,
+          municipality: data.municipality,
+          neighborhood: data.neighborhood,
+          postalCode: data.postalCode,
+          neighborhoodType: data.neighborhoodType || '',
+          zoneType: data.zoneType || '',
+          streetAddress: data.streetAddress || '',
+
           monthlyRent: data.monthlyRent,
           waterFee: data.waterFee,
           floors: data.floors || 1,
@@ -206,6 +276,12 @@ export class PropertyFormComponent implements OnInit {
           includesInternet: data.includesInternet,
           notes: data.notes || ''
         });
+
+        // Si tiene locationId, deshabilitar campos SEPOMEX
+        if (data.location?.id) {
+          this.disableSepomexFields();
+          this.sepomexFieldsDisabled.set(true);
+        }
       },
       error: (error) => {
         this.notification.error(error.message || 'Error al cargar propiedad');
@@ -221,20 +297,30 @@ export class PropertyFormComponent implements OnInit {
   saveProperty(): void {
     if (this.propertyForm.invalid) {
       this.notification.error('Por favor completa todos los campos requeridos');
+      this.propertyForm.markAllAsTouched();
       return;
     }
 
     this.isSaving.set(true);
 
-    const formValue = this.propertyForm.value;
-
+    // Obtener valores incluyendo los campos deshabilitados
+    const formValue = this.propertyForm.getRawValue();
     const imageUrls = this.planAllowsImages() ? this.propertyImages() : [];
 
     if (this.isEditing()) {
       const request: UpdatePropertyRequest = {
         locationId: formValue.locationId || undefined,
         propertyType: formValue.propertyType,
-        address: formValue.address,
+
+        // SEPOMEX
+        state: formValue.state,
+        municipality: formValue.municipality,
+        neighborhood: formValue.neighborhood,
+        postalCode: formValue.postalCode,
+        neighborhoodType: formValue.neighborhoodType || undefined,
+        zoneType: formValue.zoneType || undefined,
+        streetAddress: formValue.streetAddress,
+
         monthlyRent: formValue.monthlyRent,
         waterFee: formValue.waterFee,
         floors: formValue.floors,
@@ -271,7 +357,16 @@ export class PropertyFormComponent implements OnInit {
         locationId: formValue.locationId || undefined,
         propertyCode: formValue.propertyCode,
         propertyType: formValue.propertyType,
-        address: formValue.address,
+
+        // SEPOMEX
+        state: formValue.state,
+        municipality: formValue.municipality,
+        neighborhood: formValue.neighborhood,
+        postalCode: formValue.postalCode,
+        neighborhoodType: formValue.neighborhoodType || undefined,
+        zoneType: formValue.zoneType || undefined,
+        streetAddress: formValue.streetAddress,
+
         monthlyRent: formValue.monthlyRent,
         waterFee: formValue.waterFee,
         floors: formValue.floors,
@@ -307,7 +402,6 @@ export class PropertyFormComponent implements OnInit {
   }
 
   setActiveTab(tab: string): void {
-    // Validar que si intenta ir a photos, el plan lo permita
     if (tab === 'photos' && !this.planAllowsImages()) {
       this.notification.warning('Tu plan no permite agregar fotografías. Mejora tu plan para acceder a esta característica.');
       return;
@@ -334,36 +428,31 @@ export class PropertyFormComponent implements OnInit {
     }
   }
 
-  // Métodos para manejo de imágenes
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
     const file = input.files[0];
 
-    // Validar que el plan permita imágenes
     if (!this.planAllowsImages()) {
       this.notification.error('Tu plan no permite agregar fotografías. Mejora tu plan para acceder a esta característica.');
       input.value = '';
       return;
     }
 
-    // Validar que sea una imagen
     if (!file.type.startsWith('image/')) {
       this.notification.error('Por favor selecciona un archivo de imagen válido');
       input.value = '';
       return;
     }
 
-    // Validar tamaño máximo (5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       this.notification.error('La imagen no debe superar los 5MB');
       input.value = '';
       return;
     }
 
-    // Validar límite de imágenes según plan
     if (!this.canAddMoreImages()) {
       this.notification.error(`Has alcanzado el límite de ${this.maxImagesAllowed()} imágenes para tu plan`);
       input.value = '';
@@ -371,8 +460,6 @@ export class PropertyFormComponent implements OnInit {
     }
 
     this.uploadImage(file);
-
-    // Limpiar input
     input.value = '';
   }
 

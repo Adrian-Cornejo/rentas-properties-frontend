@@ -31,15 +31,17 @@ export class LocationListComponent implements OnInit {
   showDeleteConfirm = signal<boolean>(false);
   locationToDelete = signal<string | null>(null);
 
-  // Computed
+  // Computed - ACTUALIZADO
   filteredLocations = computed(() => {
     const term = this.searchTerm().toLowerCase();
     if (!term) return this.locations();
 
     return this.locations().filter(loc =>
       loc.name.toLowerCase().includes(term) ||
-      loc.city?.toLowerCase().includes(term) ||
-      loc.state?.toLowerCase().includes(term)
+      loc.state?.toLowerCase().includes(term) ||
+      loc.municipality?.toLowerCase().includes(term) ||
+      loc.neighborhood?.toLowerCase().includes(term) ||
+      loc.postalCode?.toLowerCase().includes(term)
     );
   });
 

@@ -1,6 +1,16 @@
 import {PropertyResponse} from './property-response';
 
 export interface PropertyDetailResponse extends PropertyResponse {
+  // CAMPOS SEPOMEX (agregados desde PropertyResponse base)
+  state: string;
+  municipality: string;
+  neighborhood: string;
+  postalCode: string;
+  neighborhoodType?: string;
+  zoneType?: string;
+  streetAddress: string;
+
+  // CARACTERÍSTICAS FÍSICAS ADICIONALES
   halfBathrooms?: number;
   hasLivingRoom: boolean;
   hasDiningRoom: boolean;

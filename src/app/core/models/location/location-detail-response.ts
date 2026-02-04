@@ -1,7 +1,9 @@
-import {LocationResponse} from './location-response';
+import { LocationResponse } from './location-response';
 
 export interface LocationDetailResponse extends LocationResponse {
-  totalProperties: number;
-  availableProperties: number;
-  rentedProperties: number;
+  organizationId: string;
+  organizationName: string;
+  totalProperties?: number;
+  updatedAt: string;
+  createdBy: string;
 }

@@ -2,7 +2,16 @@ export interface CreatePropertyRequest {
   locationId?: string;
   propertyCode: string;
   propertyType: 'CASA' | 'DEPARTAMENTO' | 'LOCAL_COMERCIAL';
-  address: string;
+
+  // CAMPOS SEPOMEX (obligatorios)
+  state: string;
+  municipality: string;
+  neighborhood: string;
+  postalCode: string;
+  neighborhoodType?: string;
+  zoneType?: string;
+  streetAddress: string;
+
   monthlyRent: number;
   waterFee?: number;
   floors?: number;
